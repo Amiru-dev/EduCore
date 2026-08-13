@@ -1,0 +1,472 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JDialog.java to edit this template
+ */
+package lk.corevision.fruitshop.gui;
+
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Vector;
+import java.util.logging.Level;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import lk.corevision.fruitshop.email.SendEmail;
+import lk.corevision.fruitshop.model.MySQL;
+import lk.corevision.fruitshop.model.SendLogo;
+import lk.corevision.fruitshop.validate.DataValidator;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.data.JRTableModelDataSource;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+import net.sf.jasperreports.pdf.JRPdfExporter;
+import net.sf.jasperreports.view.JasperViewer;
+
+/**
+ *
+ * @author Sheshan Danuksha
+ */
+public class viewReturnsItems extends javax.swing.JDialog {
+
+    public void setReturnItemId(String id) {
+        viewReturnItemsOrderId.setText(id);
+        loadReturns();
+    }
+
+    public viewReturnsItems(java.awt.Frame parent, boolean modal) {
+        super(parent, modal);
+        initComponents();
+
+    }
+
+    private double total;
+
+    private void loadReturns() {
+        try {
+            ResultSet resultSet = MySQL.executeSearch("SELECT `fruit_name`,`packing_type`.`packing_type`,`reason`,"
+                    + "`refund_amount`,`fruit_id`,return_item.`return_id`,employee.`first_name` AS `efname`,`customer`.`first_name` AS `cfname`,\n"
+                    + "return_item.`qty`,packing.`price` AS `unit_price`,`packing_id`,`return_date` \n"
+                    + "FROM `fruit` INNER JOIN  `plantation` ON `fruit`.`fruit_id`=`plantation`.`fruit_fruit_id` \n"
+                    + "INNER JOIN `inventory` ON `inventory`.`plantation_id`=`plantation`.`plantation_id` \n"
+                    + "INNER JOIN `product_quality` ON `product_quality`.`inventory_inventory_id`=`inventory`.`inventory_id`\n"
+                    + "INNER JOIN `packing` ON `packing`.`product_quality_id`=`product_quality`.`product_quality_id` \n"
+                    + "INNER JOIN return_item ON return_item.packing_packing_id=packing.packing_id \n"
+                    + "INNER JOIN product_returns ON product_returns.return_id=return_item.return_id\n"
+                    + "INNER JOIN employee ON employee.NIC=product_returns.employee_NIC \n"
+                    + "INNER JOIN customer ON  customer.customer_nic=product_returns.customer_nic \n"
+                    + "INNER JOIN packing_type ON packing.packing_type_id=packing_type.packing_type_id "
+                    + " WHERE `product_returns`.`return_id`='" + viewReturnItemsOrderId.getText() + "'");
+
+            DefaultTableModel model = (DefaultTableModel) viewReturnItemsTable.getModel();
+            model.setRowCount(0);
+
+            while (resultSet.next()) {
+                Vector<String> vector = new Vector<>();
+                vector.add(resultSet.getString("packing_id"));
+                vector.add(resultSet.getString("fruit_id"));
+                vector.add(resultSet.getString("fruit_name"));
+                vector.add(resultSet.getString("packing_type.packing_type"));
+                vector.add(resultSet.getString("return_date"));
+                vector.add(resultSet.getString("unit_price"));
+                vector.add(resultSet.getString("return_item.qty"));
+                double itemTotal = Double.parseDouble(resultSet.getString("return_item.qty")) * Double.parseDouble(resultSet.getString("unit_price"));
+                total += itemTotal;
+                vector.add(String.valueOf(itemTotal));
+                model.addRow(vector);
+                viewReturnItemsEmployeeName.setText(resultSet.getString("efname"));
+                viewReturnItemsCustomerName.setText(resultSet.getString("cfname"));
+                viewReturnItemsOrderDate.setText(resultSet.getString("return_date"));
+                viewReturnItemsPaymentField.setText(resultSet.getString("refund_amount"));
+                viewReturnItemsReason.setText(resultSet.getString("reason"));
+            }
+
+            viewReturnItemsTotal.setText(String.valueOf(total));
+            total = 0;
+
+        } catch (Exception e) {
+            SignIn.getLoggerObject().log(Level.WARNING, "load return method Exception found!", e);
+        }
+    }
+
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        jPanel1 = new javax.swing.JPanel();
+        jLabel40 = new javax.swing.JLabel();
+        jLabel41 = new javax.swing.JLabel();
+        viewReturnItemsOrderId = new javax.swing.JTextField();
+        jLabel42 = new javax.swing.JLabel();
+        viewReturnItemsEmployeeName = new javax.swing.JTextField();
+        viewReturnItemsCustomerName = new javax.swing.JTextField();
+        jLabel47 = new javax.swing.JLabel();
+        jLabel48 = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        viewReturnItemsReason = new javax.swing.JTextArea();
+        jLabel43 = new javax.swing.JLabel();
+        viewReturnItemsPaymentField = new javax.swing.JFormattedTextField();
+        viewReturnItemsOrderDate = new javax.swing.JTextField();
+        jLabel53 = new javax.swing.JLabel();
+        jPanel3 = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        viewReturnItemsTable = new javax.swing.JTable();
+        jPanel4 = new javax.swing.JPanel();
+        jPanel2 = new javax.swing.JPanel();
+        viewReturnItemsTotal = new javax.swing.JFormattedTextField();
+        jButton8 = new javax.swing.JButton();
+        jPanel5 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel46 = new javax.swing.JLabel();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+
+        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
+
+        jLabel40.setFont(new java.awt.Font("Serif", 1, 24)); // NOI18N
+        jLabel40.setText("View Return Items");
+
+        jLabel41.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        jLabel41.setText("Return Id");
+
+        viewReturnItemsOrderId.setEditable(false);
+        viewReturnItemsOrderId.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+
+        jLabel42.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        jLabel42.setText("Reason");
+
+        viewReturnItemsEmployeeName.setEditable(false);
+        viewReturnItemsEmployeeName.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        viewReturnItemsEmployeeName.setText("Employee Name Here");
+
+        viewReturnItemsCustomerName.setEditable(false);
+        viewReturnItemsCustomerName.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        viewReturnItemsCustomerName.setText("Customer Name Here");
+
+        jLabel47.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        jLabel47.setText("Employee:");
+
+        jLabel48.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        jLabel48.setText("Customer");
+
+        viewReturnItemsReason.setEditable(false);
+        viewReturnItemsReason.setColumns(20);
+        viewReturnItemsReason.setRows(5);
+        jScrollPane2.setViewportView(viewReturnItemsReason);
+
+        jLabel43.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        jLabel43.setText("Refound");
+
+        viewReturnItemsPaymentField.setEditable(false);
+        viewReturnItemsPaymentField.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.00"))));
+        viewReturnItemsPaymentField.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        viewReturnItemsPaymentField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                viewReturnItemsPaymentFieldKeyReleased(evt);
+            }
+        });
+
+        viewReturnItemsOrderDate.setEditable(false);
+        viewReturnItemsOrderDate.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        viewReturnItemsOrderDate.setForeground(new java.awt.Color(51, 51, 51));
+        viewReturnItemsOrderDate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                viewReturnItemsOrderDateActionPerformed(evt);
+            }
+        });
+
+        jLabel53.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        jLabel53.setText("Return Date");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel40)
+                        .addGap(135, 135, 135))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel47)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(viewReturnItemsEmployeeName))
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel41)
+                                    .addComponent(jLabel43))
+                                .addGap(19, 19, 19)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(viewReturnItemsOrderId)
+                                    .addComponent(viewReturnItemsPaymentField, javax.swing.GroupLayout.DEFAULT_SIZE, 261, Short.MAX_VALUE))))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel42)
+                    .addComponent(jLabel48))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(viewReturnItemsCustomerName, javax.swing.GroupLayout.PREFERRED_SIZE, 227, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, Short.MAX_VALUE)
+                        .addComponent(jLabel53)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(viewReturnItemsOrderDate, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jScrollPane2))
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel40)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel47)
+                    .addComponent(viewReturnItemsEmployeeName, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel48)
+                    .addComponent(viewReturnItemsCustomerName, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel53)
+                    .addComponent(viewReturnItemsOrderDate, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(viewReturnItemsOrderId, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel41))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel43)
+                                    .addComponent(viewReturnItemsPaymentField, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                        .addContainerGap(12, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel42)
+                        .addGap(34, 34, 34))))
+        );
+
+        jPanel3.setBackground(new java.awt.Color(255, 255, 255));
+
+        viewReturnItemsTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Packing ID", "Fruit Id", "Fruit Name", "packing type", "MFD", "Selling Price", "Qty", "Total"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        viewReturnItemsTable.getTableHeader().setReorderingAllowed(false);
+        jScrollPane1.setViewportView(viewReturnItemsTable);
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane1)
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 310, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+
+        jPanel4.setBackground(new java.awt.Color(255, 255, 255));
+
+        jPanel2.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel2.setLayout(new java.awt.GridLayout(2, 1, 0, 4));
+
+        viewReturnItemsTotal.setEditable(false);
+        viewReturnItemsTotal.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        jPanel2.add(viewReturnItemsTotal);
+
+        jButton8.setFont(new java.awt.Font("Serif", 1, 12)); // NOI18N
+        jButton8.setIcon(new javax.swing.ImageIcon(getClass().getResource("/lk/corevision/fruitshop/resources/PrintIcon.png"))); // NOI18N
+        jButton8.setText("Print");
+        jButton8.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton8ActionPerformed(evt);
+            }
+        });
+        jPanel2.add(jButton8);
+
+        jPanel5.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel5.setLayout(new java.awt.GridLayout(4, 1, 0, 4));
+
+        jLabel1.setText(" ");
+        jPanel5.add(jLabel1);
+
+        jLabel46.setFont(new java.awt.Font("Serif", 0, 12)); // NOI18N
+        jLabel46.setText("Total");
+        jPanel5.add(jLabel46);
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 212, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+        );
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+
+        pack();
+        setLocationRelativeTo(null);
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void viewReturnItemsPaymentFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_viewReturnItemsPaymentFieldKeyReleased
+
+    }//GEN-LAST:event_viewReturnItemsPaymentFieldKeyReleased
+
+    private void jButton8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton8ActionPerformed
+        try {
+//            String path = "src/lk/corevision/fruitshop/reports/sales/fruitShopAppReturns.jasper";
+            InputStream path = this.getClass().getResourceAsStream("/lk/corevision/fruitshop/reports/sales/fruitShopAppReturns.jasper");
+
+            HashMap<String, Object> params = new HashMap<>();
+            params.put("Parameter1", viewReturnItemsOrderId.getText());
+            params.put("Parameter2", viewReturnItemsEmployeeName.getText());
+            params.put("Parameter3", viewReturnItemsCustomerName.getText());
+            params.put("Parameter4", viewReturnItemsOrderDate.getText());
+            params.put("Parameter5", viewReturnItemsTotal.getText());
+            params.put("Parameter6", viewReturnItemsReason.getText());
+            params.put("Parameter101", SendLogo.getFilePath());
+
+            JRTableModelDataSource dataSource = new JRTableModelDataSource(viewReturnItemsTable.getModel());
+            JasperPrint jasperPrint = JasperFillManager.fillReport(path, params, dataSource);
+            this.dispose();
+            JasperViewer.viewReport(jasperPrint, false);
+        } catch (Exception e) {
+            SignIn.getLoggerObject().log(Level.WARNING, "load jasper report Exception found!", e);
+        }
+    }//GEN-LAST:event_jButton8ActionPerformed
+
+    private void viewReturnItemsOrderDateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewReturnItemsOrderDateActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_viewReturnItemsOrderDateActionPerformed
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(viewReturnsItems.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(viewReturnsItems.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(viewReturnsItems.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(viewReturnsItems.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+        //</editor-fold>
+
+        /* Create and display the dialog */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                viewReturnsItems dialog = new viewReturnsItems(new javax.swing.JFrame(), true);
+                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+                    @Override
+                    public void windowClosing(java.awt.event.WindowEvent e) {
+                        System.exit(0);
+                    }
+                });
+                dialog.setVisible(true);
+            }
+        });
+    }
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButton8;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel40;
+    private javax.swing.JLabel jLabel41;
+    private javax.swing.JLabel jLabel42;
+    private javax.swing.JLabel jLabel43;
+    private javax.swing.JLabel jLabel46;
+    private javax.swing.JLabel jLabel47;
+    private javax.swing.JLabel jLabel48;
+    private javax.swing.JLabel jLabel53;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JTextField viewReturnItemsCustomerName;
+    private javax.swing.JTextField viewReturnItemsEmployeeName;
+    private javax.swing.JTextField viewReturnItemsOrderDate;
+    private javax.swing.JTextField viewReturnItemsOrderId;
+    private javax.swing.JFormattedTextField viewReturnItemsPaymentField;
+    private javax.swing.JTextArea viewReturnItemsReason;
+    private javax.swing.JTable viewReturnItemsTable;
+    private javax.swing.JFormattedTextField viewReturnItemsTotal;
+    // End of variables declaration//GEN-END:variables
+
+}
