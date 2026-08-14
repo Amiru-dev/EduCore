@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" name="FeeCollectionReport" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20">
+	<queryString>
+		SELECT f.receipt_no, f.student_id, s.first_name, s.last_name, ft.fee_type_name, f.amount, f.paid_date
+		FROM fee f
+		JOIN student s ON f.student_id = s.student_id
+		JOIN fee_type ft ON f.fee_type_id = ft.fee_type_id
+		WHERE f.status = 'Paid'
+		ORDER BY f.paid_date DESC
+	</queryString>
+	<field name="receipt_no" class="java.lang.String"/>
+	<field name="student_id" class="java.lang.String"/>
+	<field name="first_name" class="java.lang.String"/>
+	<field name="last_name" class="java.lang.String"/>
+	<field name="fee_type_name" class="java.lang.String"/>
+	<field name="amount" class="java.lang.Double"/>
+	<field name="paid_date" class="java.sql.Date"/>
+	<title>
+		<band height="50">
+			<staticText>
+				<reportElement x="0" y="0" width="535" height="30" textAlignment="Center"/>
+				<font size="16" isBold="true"/>
+				<text><![CDATA[Fee Collection Report]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="25">
+			<staticText><reportElement x="0" y="0" width="80" height="20"/><text><![CDATA[Receipt No]]></text></staticText>
+			<staticText><reportElement x="80" y="0" width="80" height="20"/><text><![CDATA[Student ID]]></text></staticText>
+			<staticText><reportElement x="160" y="0" width="100" height="20"/><text><![CDATA[Name]]></text></staticText>
+			<staticText><reportElement x="260" y="0" width="80" height="20"/><text><![CDATA[Fee Type]]></text></staticText>
+			<staticText><reportElement x="340" y="0" width="80" height="20"/><text><![CDATA[Amount]]></text></staticText>
+			<staticText><reportElement x="420" y="0" width="80" height="20"/><text><![CDATA[Paid Date]]></text></staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="25">
+			<textField><reportElement x="0" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{receipt_no}]]></textFieldExpression></textField>
+			<textField><reportElement x="80" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{student_id}]]></textFieldExpression></textField>
+			<textField><reportElement x="160" y="0" width="100" height="20"/><textFieldExpression><![CDATA[$F{first_name} + " " + $F{last_name}]]></textFieldExpression></textField>
+			<textField><reportElement x="260" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{fee_type_name}]]></textFieldExpression></textField>
+			<textField pattern="Rs. #,##0.00"><reportElement x="340" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{amount}]]></textFieldExpression></textField>
+			<textField pattern="yyyy-MM-dd"><reportElement x="420" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{paid_date}]]></textFieldExpression></textField>
+		</band>
+	</detail>
+</jasperReport>

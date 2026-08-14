@@ -7,8 +7,8 @@
 <!-- the Compile on Save feature is turned off for the project. -->
 <!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
 <!-- in the project's Project Properties dialog box.-->
-<project name="fruitShopApp" default="default" basedir=".">
-    <description>Builds, tests, and runs the project fruitShopApp.</description>
+<project name="EduCore" default="default" basedir=".">
+    <description>Builds, tests, and runs the project EduCore.</description>
     <import file="nbproject/build-impl.xml"/>
     <!--
 
@@ -58,7 +58,7 @@
 
     An example of overriding the target for project execution could look like this:
 
-        <target name="run" depends="fruitShopApp-impl.jar">
+        <target name="run" depends="EduCore-impl.jar">
             <exec dir="bin" executable="launcher.exe">
                 <arg file="${dist.jar}"/>
             </exec>
@@ -77,29 +77,29 @@
         <zipfileset dir="${build.classes.dir}"/>
         <zipfileset dir="${src.dir}" excludes="**/*.java"/>
         <manifest>
-            <attribute name="Main-Class" value="lk.corevision.fruitshop.gui.SignIn"/>
-            <attribute name="Implementation-Title" value="Fruit Farm Management System"/>
+            <attribute name="Main-Class" value="lk.educore.schoolms.gui.SignIn"/>
+            <attribute name="Implementation-Title" value="School Management System"/>
             <attribute name="Implementation-Version" value="1.0.0"/>
-            <attribute name="Implementation-Vendor" value="CoreVision Software"/>
-            <attribute name="Implementation-Vendor-Id" value="CoreVision Software"/>
-            <attribute name="Implementation-URL" value="https://github.com/CoreVision-Software"/>
-            <attribute name="Built-By" value="CoreVision Software Team"/>
+            <attribute name="Implementation-Vendor" value="EduCore Software"/>
+            <attribute name="Implementation-Vendor-Id" value="EduCore Software"/>
+            <attribute name="Implementation-URL" value="https://github.com/EduCore-Software"/>
+            <attribute name="Built-By" value="EduCore Software Team"/>
             <attribute name="Built-Date" value="${TODAY}"/>
-            <attribute name="Specification-Title" value="Fruit Farm Management System"/>
+            <attribute name="Specification-Title" value="School Management System"/>
             <attribute name="Specification-Version" value="1.0"/>
-            <attribute name="Specification-Vendor" value="CoreVision Software"/>
-            
+            <attribute name="Specification-Vendor" value="EduCore Software"/>
+
             <!-- Developer Information -->
             <attribute name="Developer-Team" value="Sheshan Danuksha,Rashintha Jerom,Dulasha Perera,Dulangana Dhamsara,Yomal Kavinda,Amiru Upek"/>
             <attribute name="Lead-Developer" value="Sheshan Danuksha"/>
             <attribute name="Contact-Email" value="sheshandanuksha19@gmail.com"/>
             <attribute name="Support-Email" value="sheshandanuksha19@gmail.com"/>
-            
+
             <!-- Application Details -->
-            <attribute name="Application-Name" value="FruitShop App"/>
-            <attribute name="Application-Category" value="Fruit Farm Management"/>
+            <attribute name="Application-Name" value="EduCore School Management System"/>
+            <attribute name="Application-Category" value="School Management"/>
             <attribute name="License" value="Proprietary"/>
-            <attribute name="Copyright" value="Copyright (C) 2025 CoreVision Software. All rights reserved."/>
+            <attribute name="Copyright" value="Copyright (C) 2025 EduCore Software. All rights reserved."/>
         </manifest>
     </jar>
 </target>

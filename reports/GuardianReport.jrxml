@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" name="GuardianReport" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20">
+	<queryString>
+		SELECT g.guardian_id, g.first_name, g.last_name, g.nic, g.relationship, g.phone, g.email, g.address
+		FROM guardian g
+		ORDER BY g.first_name, g.last_name
+	</queryString>
+	<field name="guardian_id" class="java.lang.Integer"/>
+	<field name="first_name" class="java.lang.String"/>
+	<field name="last_name" class="java.lang.String"/>
+	<field name="nic" class="java.lang.String"/>
+	<field name="relationship" class="java.lang.String"/>
+	<field name="phone" class="java.lang.String"/>
+	<field name="email" class="java.lang.String"/>
+	<field name="address" class="java.lang.String"/>
+	<title>
+		<band height="50">
+			<staticText>
+				<reportElement x="0" y="0" width="535" height="30" textAlignment="Center"/>
+				<font size="16" isBold="true"/>
+				<text><![CDATA[Guardian Report]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="25">
+			<staticText><reportElement x="0" y="0" width="80" height="20"/><text><![CDATA[Guardian ID]]></text></staticText>
+			<staticText><reportElement x="80" y="0" width="100" height="20"/><text><![CDATA[Name]]></text></staticText>
+			<staticText><reportElement x="180" y="0" width="80" height="20"/><text><![CDATA[NIC]]></text></staticText>
+			<staticText><reportElement x="260" y="0" width="80" height="20"/><text><![CDATA[Relationship]]></text></staticText>
+			<staticText><reportElement x="340" y="0" width="80" height="20"/><text><![CDATA[Phone]]></text></staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="25">
+			<textField><reportElement x="0" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{guardian_id}]]></textFieldExpression></textField>
+			<textField><reportElement x="80" y="0" width="100" height="20"/><textFieldExpression><![CDATA[$F{first_name} + " " + $F{last_name}]]></textFieldExpression></textField>
+			<textField><reportElement x="180" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{nic}]]></textFieldExpression></textField>
+			<textField><reportElement x="260" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{relationship}]]></textFieldExpression></textField>
+			<textField><reportElement x="340" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{phone}]]></textFieldExpression></textField>
+		</band>
+	</detail>
+</jasperReport>

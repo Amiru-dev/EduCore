@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" name="BookIssueReport" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20">
+	<queryString>
+		SELECT bi.borrow_id, b.ISBN, b.title, s.student_id, s.first_name, s.last_name, bi.issue_date, bi.due_date, bi.return_date
+		FROM book_issue bi
+		JOIN book b ON bi.ISBN = b.ISBN
+		JOIN student s ON bi.student_id = s.student_id
+		ORDER BY bi.issue_date DESC
+	</queryString>
+	<field name="borrow_id" class="java.lang.Integer"/>
+	<field name="ISBN" class="java.lang.String"/>
+	<field name="title" class="java.lang.String"/>
+	<field name="student_id" class="java.lang.String"/>
+	<field name="first_name" class="java.lang.String"/>
+	<field name="last_name" class="java.lang.String"/>
+	<field name="issue_date" class="java.sql.Date"/>
+	<field name="due_date" class="java.sql.Date"/>
+	<field name="return_date" class="java.sql.Date"/>
+	<title>
+		<band height="50">
+			<staticText>
+				<reportElement x="0" y="0" width="535" height="30" textAlignment="Center"/>
+				<font size="16" isBold="true"/>
+				<text><![CDATA[Book Issue Report]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="25">
+			<staticText><reportElement x="0" y="0" width="60" height="20"/><text><![CDATA[ISBN]]></text></staticText>
+			<staticText><reportElement x="60" y="0" width="100" height="20"/><text><![CDATA[Book Title]]></text></staticText>
+			<staticText><reportElement x="160" y="0" width="80" height="20"/><text><![CDATA[Student ID]]></text></staticText>
+			<staticText><reportElement x="240" y="0" width="80" height="20"/><text><![CDATA[Issue Date]]></text></staticText>
+			<staticText><reportElement x="320" y="0" width="80" height="20"/><text><![CDATA[Due Date]]></text></staticText>
+			<staticText><reportElement x="400" y="0" width="80" height="20"/><text><![CDATA[Return Date]]></text></staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="25">
+			<textField><reportElement x="0" y="0" width="60" height="20"/><textFieldExpression><![CDATA[$F{ISBN}]]></textFieldExpression></textField>
+			<textField><reportElement x="60" y="0" width="100" height="20"/><textFieldExpression><![CDATA[$F{title}]]></textFieldExpression></textField>
+			<textField><reportElement x="160" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{student_id}]]></textFieldExpression></textField>
+			<textField pattern="yyyy-MM-dd"><reportElement x="240" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{issue_date}]]></textFieldExpression></textField>
+			<textField pattern="yyyy-MM-dd"><reportElement x="320" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{due_date}]]></textFieldExpression></textField>
+			<textField pattern="yyyy-MM-dd"><reportElement x="400" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{return_date}]]></textFieldExpression></textField>
+		</band>
+	</detail>
+</jasperReport>

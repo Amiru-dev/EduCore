@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" name="TransportReport" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20">
+	<queryString>
+		SELECT v.plate_no, vt.type_name, v.capacity, v.driver_name, v.driver_phone, vs.status_name
+		FROM vehicle v
+		JOIN vehicle_type vt ON v.vehicle_type_id = vt.vehicle_type_id
+		JOIN vehicle_status vs ON v.vehicle_status_id = vs.vehicle_status_id
+		ORDER BY v.plate_no
+	</queryString>
+	<field name="plate_no" class="java.lang.String"/>
+	<field name="type_name" class="java.lang.String"/>
+	<field name="capacity" class="java.lang.Integer"/>
+	<field name="driver_name" class="java.lang.String"/>
+	<field name="driver_phone" class="java.lang.String"/>
+	<field name="status_name" class="java.lang.String"/>
+	<title>
+		<band height="50">
+			<staticText>
+				<reportElement x="0" y="0" width="535" height="30" textAlignment="Center"/>
+				<font size="16" isBold="true"/>
+				<text><![CDATA[Transport Report]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="25">
+			<staticText><reportElement x="0" y="0" width="80" height="20"/><text><![CDATA[Plate No]]></text></staticText>
+			<staticText><reportElement x="80" y="0" width="80" height="20"/><text><![CDATA[Type]]></text></staticText>
+			<staticText><reportElement x="160" y="0" width="60" height="20"/><text><![CDATA[Capacity]]></text></staticText>
+			<staticText><reportElement x="220" y="0" width="100" height="20"/><text><![CDATA[Driver]]></text></staticText>
+			<staticText><reportElement x="320" y="0" width="80" height="20"/><text><![CDATA[Phone]]></text></staticText>
+			<staticText><reportElement x="400" y="0" width="80" height="20"/><text><![CDATA[Status]]></text></staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="25">
+			<textField><reportElement x="0" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{plate_no}]]></textFieldExpression></textField>
+			<textField><reportElement x="80" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{type_name}]]></textFieldExpression></textField>
+			<textField><reportElement x="160" y="0" width="60" height="20"/><textFieldExpression><![CDATA[$F{capacity}]]></textFieldExpression></textField>
+			<textField><reportElement x="220" y="0" width="100" height="20"/><textFieldExpression><![CDATA[$F{driver_name}]]></textFieldExpression></textField>
+			<textField><reportElement x="320" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{driver_phone}]]></textFieldExpression></textField>
+			<textField><reportElement x="400" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{status_name}]]></textFieldExpression></textField>
+		</band>
+	</detail>
+</jasperReport>
