@@ -11,8 +11,8 @@ import java.nio.file.*;
 import javax.imageio.ImageIO;
 
 /**
- * Barcode Generator
- * Generates barcodes for library books using Barcode4J library
+ * Barcode Generator Generates barcodes for library books using Barcode4J
+ * library
  */
 public class BarcodeGenerator {
 
@@ -20,6 +20,7 @@ public class BarcodeGenerator {
 
     /**
      * Generate Code 128 barcode for library book
+     *
      * @param bookId Book ID or ISBN
      * @return Path to generated barcode image
      */
@@ -44,7 +45,7 @@ public class BarcodeGenerator {
             File outputFile = new File(fileName);
 
             BitmapCanvasProvider canvas = new BitmapCanvasProvider(
-                outputFile, "image/x-png", 300, BufferedImage.TYPE_BYTE_BINARY, false, 0
+                    outputFile, "image/x-png", 300, BufferedImage.TYPE_BYTE_BINARY, false, 0
             );
 
             barcodeBean.generateBarcode(canvas, bookId);
@@ -59,6 +60,7 @@ public class BarcodeGenerator {
 
     /**
      * Generate Code 39 barcode
+     *
      * @param data Data to encode
      * @param fileName Output file name
      * @return Path to generated barcode image
@@ -84,7 +86,7 @@ public class BarcodeGenerator {
             File outputFile = new File(filePath);
 
             BitmapCanvasProvider canvas = new BitmapCanvasProvider(
-                outputFile, "image/x-png", 300, BufferedImage.TYPE_BYTE_BINARY, false, 0
+                    outputFile, "image/x-png", 300, BufferedImage.TYPE_BYTE_BINARY, false, 0
             );
 
             barcodeBean.generateBarcode(canvas, data);
@@ -99,6 +101,7 @@ public class BarcodeGenerator {
 
     /**
      * Generate EAN-13 barcode
+     *
      * @param data 12 or 13 digit data
      * @param fileName Output file name
      * @return Path to generated barcode image
@@ -123,7 +126,7 @@ public class BarcodeGenerator {
             File outputFile = new File(filePath);
 
             BitmapCanvasProvider canvas = new BitmapCanvasProvider(
-                outputFile, "image/x-png", 300, BufferedImage.TYPE_BYTE_BINARY, false, 0
+                    outputFile, "image/x-png", 300, BufferedImage.TYPE_BYTE_BINARY, false, 0
             );
 
             barcodeBean.generateBarcode(canvas, data);
@@ -138,6 +141,7 @@ public class BarcodeGenerator {
 
     /**
      * Delete barcode file
+     *
      * @param fileName Barcode file name
      */
     public static void deleteBarcode(String fileName) {
@@ -153,6 +157,7 @@ public class BarcodeGenerator {
 
     /**
      * Check if barcode exists
+     *
      * @param fileName Barcode file name
      * @return true if exists, false otherwise
      */
@@ -163,6 +168,7 @@ public class BarcodeGenerator {
 
     /**
      * Generate barcode with custom dimensions
+     *
      * @param data Data to encode
      * @param fileName Output file name
      * @param height Barcode height
@@ -190,7 +196,7 @@ public class BarcodeGenerator {
             File outputFile = new File(filePath);
 
             BitmapCanvasProvider canvas = new BitmapCanvasProvider(
-                outputFile, "image/x-png", 300, BufferedImage.TYPE_BYTE_BINARY, false, 0
+                    outputFile, "image/x-png", 300, BufferedImage.TYPE_BYTE_BINARY, false, 0
             );
 
             barcodeBean.generateBarcode(canvas, data);

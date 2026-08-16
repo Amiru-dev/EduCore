@@ -9,14 +9,13 @@ import java.security.*;
 import java.util.Base64;
 
 /**
- * MySQL Database Connection Manager
- * Handles encrypted database configuration and connection management
- * for the EduCore School Management System
+ * MySQL Database Connection Manager Handles encrypted database configuration
+ * and connection management for the EduCore School Management System
  */
 public class MySQL {
 
     private static final String CONFIG_FILE = "dbinfor.ser";
-    private static final String ENCRYPTION_KEY = "EduCoreSchool2025"; // 16 bytes for AES-128
+    private static final String ENCRYPTION_KEY = "EduCoreSchool2026"; // 16 bytes for AES-128
     private static Connection connection;
     private static String dbHost;
     private static String dbPort;
@@ -155,12 +154,29 @@ public class MySQL {
     /**
      * Get configuration values
      */
-    public static String getDbHost() { return dbHost; }
-    public static String getDbPort() { return dbPort; }
-    public static String getDbName() { return dbName; }
-    public static String getDbUser() { return dbUser; }
-    public static String getDumpPath() { return dumpPath; }
-    public static String getBackupPath() { return backupPath; }
+    public static String getDbHost() {
+        return dbHost;
+    }
+
+    public static String getDbPort() {
+        return dbPort;
+    }
+
+    public static String getDbName() {
+        return dbName;
+    }
+
+    public static String getDbUser() {
+        return dbUser;
+    }
+
+    public static String getDumpPath() {
+        return dumpPath;
+    }
+
+    public static String getBackupPath() {
+        return backupPath;
+    }
 
     /**
      * Check if configuration exists

@@ -1,8 +1,7 @@
 package lk.educore.schoolms.exceptions;
 
 /**
- * Business Exception
- * Custom exception for business logic errors
+ * Business Exception Custom exception for business logic errors
  */
 public class BusinessException extends Exception {
 

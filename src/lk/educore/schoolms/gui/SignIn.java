@@ -11,8 +11,8 @@ import java.awt.event.*;
 import java.sql.*;
 
 /**
- * Sign In Screen
- * Login screen with role-based authentication for EduCore School Management System
+ * Sign In Screen Login screen with role-based authentication for EduCore School
+ * Management System
  */
 public class SignIn extends JFrame {
 
@@ -102,11 +102,11 @@ public class SignIn extends JFrame {
 
         // Button panel
         buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        
+
         btnSignIn = new JButton("Sign In");
         btnSignIn.setPreferredSize(new Dimension(100, 30));
         btnSignIn.addActionListener(e -> handleSignIn());
-        
+
         btnSetup = new JButton("Setup Database");
         btnSetup.setPreferredSize(new Dimension(120, 30));
         btnSetup.addActionListener(e -> openSetupDialog());
@@ -124,10 +124,10 @@ public class SignIn extends JFrame {
             MySQL.getConnection();
         } catch (Exception e) {
             int result = JOptionPane.showConfirmDialog(this,
-                "Database not configured. Would you like to set it up now?",
-                "Database Configuration Required",
-                JOptionPane.YES_NO_OPTION);
-            
+                    "Database not configured. Would you like to set it up now?",
+                    "Database Configuration Required",
+                    JOptionPane.YES_NO_OPTION);
+
             if (result == JOptionPane.YES_OPTION) {
                 openSetupDialog();
             }
@@ -148,10 +148,10 @@ public class SignIn extends JFrame {
             DataValidator.isRequired(password);
 
             Connection conn = MySQL.getConnection();
-            String query = "SELECT u.user_id, u.password, r.role_name FROM user u " +
-                          "JOIN role r ON u.role_id = r.role_id " +
-                          "WHERE u.username = ? AND r.role_name = ?";
-            
+            String query = "SELECT u.user_id, u.password, r.role_name FROM user u "
+                    + "JOIN role r ON u.role_id = r.role_id "
+                    + "WHERE u.username = ? AND r.role_name = ?";
+
             PreparedStatement stmt = conn.prepareStatement(query);
             stmt.setString(1, username);
             stmt.setString(2, role);
@@ -159,10 +159,10 @@ public class SignIn extends JFrame {
 
             if (rs.next()) {
                 String storedPassword = rs.getString("password");
-                
+
                 if (password.equals(storedPassword)) {
                     JOptionIcon.showSuccessDialog(this, "Login successful!");
-                    
+
                     // Route to appropriate dashboard based on role
                     dispose();
                     if ("Student".equals(role)) {
