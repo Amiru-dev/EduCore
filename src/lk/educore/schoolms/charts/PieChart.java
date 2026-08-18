@@ -4,7 +4,6 @@ import org.jfree.chart.*;
 import org.jfree.chart.plot.*;
 import org.jfree.data.general.*;
 import org.jfree.data.category.*;
-import org.jfree.data.xy.*;
 import java.awt.*;
 import javax.swing.*;
 
@@ -20,6 +19,7 @@ public class PieChart {
      * @param data Category dataset
      * @return JPanel containing the pie chart
      */
+    @SuppressWarnings("unchecked")
     public static JPanel createPieChart(String title, CategoryDataset data) {
         try {
             // Create pie chart from category dataset
@@ -32,7 +32,7 @@ public class PieChart {
             );
 
             // Customize chart appearance
-            PiePlot plot = (PiePlot) chart.getPlot();
+            PiePlot<String> plot = (PiePlot<String>) chart.getPlot();
             plot.setLabelFont(new Font("SansSerif", Font.PLAIN, 12));
             plot.setLabelGap(0.02);
             plot.setOutlineStroke(new BasicStroke(1.0f));
@@ -57,7 +57,8 @@ public class PieChart {
      * @param data Pie dataset
      * @return JPanel containing the pie chart
      */
-    public static JPanel createPieChart(String title, PieDataset data) {
+    @SuppressWarnings("unchecked")
+    public static JPanel createPieChart(String title, PieDataset<String> data) {
         try {
             // Create pie chart
             JFreeChart chart = ChartFactory.createPieChart(
@@ -69,7 +70,7 @@ public class PieChart {
             );
 
             // Customize chart appearance
-            PiePlot plot = (PiePlot) chart.getPlot();
+            PiePlot<String> plot = (PiePlot<String>) chart.getPlot();
             plot.setLabelFont(new Font("SansSerif", Font.PLAIN, 12));
             plot.setLabelGap(0.02);
             plot.setOutlineStroke(new BasicStroke(1.0f));
@@ -95,7 +96,8 @@ public class PieChart {
      * @param colors Array of colors for pie sections
      * @return JPanel containing the pie chart
      */
-    public static JPanel createPieChartWithColors(String title, PieDataset data, Color[] colors) {
+    @SuppressWarnings("unchecked")
+    public static JPanel createPieChartWithColors(String title, PieDataset<String> data, Color[] colors) {
         try {
             // Create pie chart
             JFreeChart chart = ChartFactory.createPieChart(
@@ -107,7 +109,7 @@ public class PieChart {
             );
 
             // Customize chart appearance
-            PiePlot plot = (PiePlot) chart.getPlot();
+            PiePlot<String> plot = (PiePlot<String>) chart.getPlot();
             plot.setLabelFont(new Font("SansSerif", Font.PLAIN, 12));
             plot.setLabelGap(0.02);
             plot.setOutlineStroke(new BasicStroke(1.0f));
@@ -137,7 +139,8 @@ public class PieChart {
      * @param data Pie dataset
      * @return JPanel containing the 3D pie chart
      */
-    public static JPanel create3DPieChart(String title, PieDataset data) {
+    @SuppressWarnings({"unchecked", "deprecation"})
+    public static JPanel create3DPieChart(String title, PieDataset<String> data) {
         try {
             // Create 3D pie chart
             JFreeChart chart = ChartFactory.createPieChart3D(
@@ -149,7 +152,7 @@ public class PieChart {
             );
 
             // Customize chart appearance
-            PiePlot plot = (PiePlot) chart.getPlot();
+            PiePlot<String> plot = (PiePlot<String>) chart.getPlot();
             plot.setLabelFont(new Font("SansSerif", Font.PLAIN, 12));
             plot.setLabelGap(0.02);
             plot.setOutlineStroke(new BasicStroke(1.0f));
@@ -176,7 +179,8 @@ public class PieChart {
      * @param innerRadius Inner radius as percentage (0.0 to 1.0)
      * @return JPanel containing the donut chart
      */
-    public static JPanel createDonutChart(String title, PieDataset data, double innerRadius) {
+    @SuppressWarnings("unchecked")
+    public static JPanel createDonutChart(String title, PieDataset<String> data, double innerRadius) {
         try {
             // Create pie chart
             JFreeChart chart = ChartFactory.createPieChart(
@@ -188,7 +192,7 @@ public class PieChart {
             );
 
             // Customize chart appearance as donut
-            PiePlot plot = (PiePlot) chart.getPlot();
+            PiePlot<String> plot = (PiePlot<String>) chart.getPlot();
             plot.setLabelFont(new Font("SansSerif", Font.PLAIN, 12));
             plot.setLabelGap(0.02);
             plot.setOutlineStroke(new BasicStroke(1.0f));
@@ -215,10 +219,11 @@ public class PieChart {
      * @param overdueAmount Amount overdue
      * @return JPanel containing the fee pie chart
      */
+    @SuppressWarnings("unchecked")
     public static JPanel createFeePieChart(double paidAmount, double pendingAmount, double overdueAmount) {
         try {
             // Create dataset
-            DefaultPieDataset dataset = new DefaultPieDataset();
+            DefaultPieDataset<String> dataset = new DefaultPieDataset<>();
             dataset.setValue("Paid", paidAmount);
             dataset.setValue("Pending", pendingAmount);
             dataset.setValue("Overdue", overdueAmount);
@@ -233,7 +238,7 @@ public class PieChart {
             );
 
             // Customize chart appearance
-            PiePlot plot = (PiePlot) chart.getPlot();
+            PiePlot<String> plot = (PiePlot<String>) chart.getPlot();
             plot.setLabelFont(new Font("SansSerif", Font.PLAIN, 12));
             plot.setLabelGap(0.02);
             plot.setOutlineStroke(new BasicStroke(1.0f));
@@ -265,10 +270,11 @@ public class PieChart {
      * @param otherCount Number of other grades
      * @return JPanel containing the performance pie chart
      */
+    @SuppressWarnings("unchecked")
     public static JPanel createPerformancePieChart(int aCount, int bCount, int cCount, int otherCount) {
         try {
             // Create dataset
-            DefaultPieDataset dataset = new DefaultPieDataset();
+            DefaultPieDataset<String> dataset = new DefaultPieDataset<>();
             dataset.setValue("A Grade", aCount);
             dataset.setValue("B Grade", bCount);
             dataset.setValue("C Grade", cCount);
@@ -284,7 +290,7 @@ public class PieChart {
             );
 
             // Customize chart appearance
-            PiePlot plot = (PiePlot) chart.getPlot();
+            PiePlot<String> plot = (PiePlot<String>) chart.getPlot();
             plot.setLabelFont(new Font("SansSerif", Font.PLAIN, 12));
             plot.setLabelGap(0.02);
             plot.setOutlineStroke(new BasicStroke(1.0f));
@@ -315,10 +321,11 @@ public class PieChart {
      * @param expense Total expense
      * @return JPanel containing the finance pie chart
      */
+    @SuppressWarnings("unchecked")
     public static JPanel createFinancePieChart(double income, double expense) {
         try {
             // Create dataset
-            DefaultPieDataset dataset = new DefaultPieDataset();
+            DefaultPieDataset<String> dataset = new DefaultPieDataset<>();
             dataset.setValue("Income", income);
             dataset.setValue("Expense", expense);
 
@@ -332,7 +339,7 @@ public class PieChart {
             );
 
             // Customize chart appearance
-            PiePlot plot = (PiePlot) chart.getPlot();
+            PiePlot<String> plot = (PiePlot<String>) chart.getPlot();
             plot.setLabelFont(new Font("SansSerif", Font.PLAIN, 12));
             plot.setLabelGap(0.02);
             plot.setOutlineStroke(new BasicStroke(1.0f));

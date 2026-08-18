@@ -2,6 +2,8 @@ package lk.educore.schoolms.charts;
 
 import org.jfree.chart.*;
 import org.jfree.chart.plot.*;
+import org.jfree.chart.renderer.category.*;
+import org.jfree.chart.renderer.xy.*;
 import org.jfree.data.category.*;
 import org.jfree.data.xy.*;
 import java.awt.*;
@@ -165,10 +167,11 @@ public class CurveLineChart {
      * @param data Category dataset
      * @return JPanel containing the 3D line chart
      */
+    @SuppressWarnings("deprecation")
     public static JPanel create3DLineChart(String title, String xAxisLabel, String yAxisLabel, CategoryDataset data) {
         try {
             // Create 3D line chart
-            JFreeChart chart = ChartFactory.createLineChart3D(
+            JFreeChart chart = ChartFactory.createLineChart(
                 title,
                 xAxisLabel,
                 yAxisLabel,

@@ -135,7 +135,8 @@ public class SignIn extends JFrame {
     }
 
     private void openSetupDialog() {
-        new SetupConnection(this).setVisible(true);
+        dispose(); // Close SignIn window
+        new SetupConnection().setVisible(true);
     }
 
     private void handleSignIn() {

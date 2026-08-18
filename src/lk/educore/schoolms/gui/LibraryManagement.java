@@ -2,8 +2,6 @@ package lk.educore.schoolms.gui;
 
 import lk.educore.schoolms.model.MySQL;
 import lk.educore.schoolms.validate.JOptionIcon;
-import lk.educore.schoolms.validate.DataValidator;
-import lk.educore.schoolms.exceptions.ValidationException;
 
 import javax.swing.*;
 import javax.swing.table.*;
@@ -20,7 +18,7 @@ public class LibraryManagement extends JPanel {
     private JTable bookTable;
     private DefaultTableModel tableModel;
     private JTextField txtSearch;
-    private JButton btnAddBook, btnIssueBook, btnReturnBook, btnRefresh, btnGenerateBarcode;
+    private JButton btnAddBook, btnRefresh, btnGenerateBarcode;
     private JTabbedPane tabbedPane;
 
     public LibraryManagement() {
@@ -187,12 +185,12 @@ public class LibraryManagement extends JPanel {
             JOptionIcon.showWarningDialog(this, "Please select a book to generate barcode.");
             return;
         }
-        
+
         String isbn = tableModel.getValueAt(selectedRow, 0).toString();
         String title = tableModel.getValueAt(selectedRow, 1).toString();
-        
+
         try {
-            lk.educore.schoolms.model.BarcodeGenerator.generateBookBarcode(isbn, title);
+            lk.educore.schoolms.model.BarcodeGenerator.generateBookBarcode(isbn);
             JOptionIcon.showSuccessDialog(this, "Barcode generated successfully for " + title);
         } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error generating barcode: " + e.getMessage());

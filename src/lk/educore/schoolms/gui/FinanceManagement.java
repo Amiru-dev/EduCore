@@ -2,7 +2,6 @@ package lk.educore.schoolms.gui;
 
 import lk.educore.schoolms.model.MySQL;
 import lk.educore.schoolms.validate.JOptionIcon;
-import lk.educore.schoolms.charts.PieChart;
 
 import javax.swing.*;
 import javax.swing.table.*;

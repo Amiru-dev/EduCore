@@ -7,7 +7,6 @@ import org.krysalis.barcode4j.output.bitmap.BitmapCanvasProvider;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.nio.file.*;
 import javax.imageio.ImageIO;
 
 /**
@@ -36,7 +35,6 @@ public class BarcodeGenerator {
             Code128Bean barcodeBean = new Code128Bean();
             barcodeBean.setHeight(15f);
             barcodeBean.setModuleWidth(0.3);
-            barcodeBean.setWideFactor(3);
             barcodeBean.doQuietZone(true);
             barcodeBean.setQuietZone(10);
 
@@ -44,12 +42,14 @@ public class BarcodeGenerator {
             String fileName = BARCODE_OUTPUT_DIR + bookId + ".png";
             File outputFile = new File(fileName);
 
+            FileOutputStream outputStream = new FileOutputStream(outputFile);
             BitmapCanvasProvider canvas = new BitmapCanvasProvider(
-                    outputFile, "image/x-png", 300, BufferedImage.TYPE_BYTE_BINARY, false, 0
+                    outputStream, "image/x-png", 300, BufferedImage.TYPE_BYTE_BINARY, false, 0
             );
 
             barcodeBean.generateBarcode(canvas, bookId);
             canvas.finish();
+            outputStream.close();
 
             return fileName;
         } catch (Exception e) {
@@ -77,7 +77,6 @@ public class BarcodeGenerator {
             Code39Bean barcodeBean = new Code39Bean();
             barcodeBean.setHeight(15f);
             barcodeBean.setModuleWidth(0.3);
-            barcodeBean.setWideFactor(3);
             barcodeBean.doQuietZone(true);
             barcodeBean.setQuietZone(10);
 
@@ -85,12 +84,14 @@ public class BarcodeGenerator {
             String filePath = BARCODE_OUTPUT_DIR + fileName;
             File outputFile = new File(filePath);
 
+            FileOutputStream outputStream = new FileOutputStream(outputFile);
             BitmapCanvasProvider canvas = new BitmapCanvasProvider(
-                    outputFile, "image/x-png", 300, BufferedImage.TYPE_BYTE_BINARY, false, 0
+                    outputStream, "image/x-png", 300, BufferedImage.TYPE_BYTE_BINARY, false, 0
             );
 
             barcodeBean.generateBarcode(canvas, data);
             canvas.finish();
+            outputStream.close();
 
             return filePath;
         } catch (Exception e) {
@@ -125,12 +126,14 @@ public class BarcodeGenerator {
             String filePath = BARCODE_OUTPUT_DIR + fileName;
             File outputFile = new File(filePath);
 
+            FileOutputStream outputStream = new FileOutputStream(outputFile);
             BitmapCanvasProvider canvas = new BitmapCanvasProvider(
-                    outputFile, "image/x-png", 300, BufferedImage.TYPE_BYTE_BINARY, false, 0
+                    outputStream, "image/x-png", 300, BufferedImage.TYPE_BYTE_BINARY, false, 0
             );
 
             barcodeBean.generateBarcode(canvas, data);
             canvas.finish();
+            outputStream.close();
 
             return filePath;
         } catch (Exception e) {
@@ -187,7 +190,6 @@ public class BarcodeGenerator {
             Code128Bean barcodeBean = new Code128Bean();
             barcodeBean.setHeight(height);
             barcodeBean.setModuleWidth(moduleWidth);
-            barcodeBean.setWideFactor(3);
             barcodeBean.doQuietZone(true);
             barcodeBean.setQuietZone(10);
 
@@ -195,12 +197,14 @@ public class BarcodeGenerator {
             String filePath = BARCODE_OUTPUT_DIR + fileName;
             File outputFile = new File(filePath);
 
+            FileOutputStream outputStream = new FileOutputStream(outputFile);
             BitmapCanvasProvider canvas = new BitmapCanvasProvider(
-                    outputFile, "image/x-png", 300, BufferedImage.TYPE_BYTE_BINARY, false, 0
+                    outputStream, "image/x-png", 300, BufferedImage.TYPE_BYTE_BINARY, false, 0
             );
 
             barcodeBean.generateBarcode(canvas, data);
             canvas.finish();
+            outputStream.close();
 
             return filePath;
         } catch (Exception e) {

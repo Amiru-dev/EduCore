@@ -1,4 +1,4 @@
-package lk.corevision.fruitshop.email;
+package lk.educore.schoolms.email;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -12,7 +12,7 @@ import static org.junit.Assert.*;
  * avoid actual email sending. Tests cover parameter validation, exception
  * handling, and content processing.
  *
- * @author CoreVision Software Team
+ * @author EduCore Software Team
  * @version 1.0.0
  * @see SendEmail
  * @see SendFileEmail
@@ -85,20 +85,19 @@ public class EmailServiceTest {
 
         // Test with null parameters
         try {
-            SendFileEmail.sendEmail(null, "Subject", "Content", null, "FileName");
+            SendFileEmail.sendEmailWithAttachment(null, "Subject", "Content", null);
             fail("Should throw exception for null email address");
         } catch (Exception e) {
             // Expected exception
             assertNotNull(e.getMessage());
         }
 
-        // Test with null JasperPrint (should handle gracefully)
+        // Test with null file path (should handle gracefully)
         try {
-            boolean result = SendFileEmail.sendEmail("test@example.com", "Subject", "Content", null, "FileName");
-            // This might fail with null JasperPrint, which is expected
-            assertFalse(result);
+            SendFileEmail.sendEmailWithAttachment("test@example.com", "Subject", "Content", null);
+            fail("Should throw exception for null file path");
         } catch (Exception e) {
-            // Expected exception for null JasperPrint
+            // Expected exception for null file path
             assertNotNull(e.getMessage());
         }
     }
@@ -110,31 +109,31 @@ public class EmailServiceTest {
     public void testSendQREmailParameters() {
         System.out.println("sendQREmail parameters test");
 
-        // Test with null parameters
+        // Test with null parameters for sendStudentIDCard
         try {
-            SendQREmail.sendEmail(null, "Subject", "Content", "123456789V");
+            SendQREmail.sendStudentIDCard(null, "STU-001", "Test Student", "Grade 10");
             fail("Should throw exception for null email address");
         } catch (Exception e) {
             // Expected exception
             assertNotNull(e.getMessage());
         }
 
-        // Test with null NIC
+        // Test with null student ID
         try {
-            SendQREmail.sendEmail("test@example.com", "Subject", "Content", null);
-            fail("Should throw exception for null NIC");
+            SendQREmail.sendStudentIDCard("test@example.com", null, "Test Student", "Grade 10");
+            fail("Should throw exception for null student ID");
         } catch (Exception e) {
             // Expected exception
             assertNotNull(e.getMessage());
         }
 
-        // Test with non-existent file (hardcoded path in SendQREmail)
+        // Test with null student name
         try {
-            SendQREmail.sendEmail("test@example.com", "Subject", "Content", "000000000V");
-            fail("Should throw exception for non-existent QR file");
+            SendQREmail.sendStudentIDCard("test@example.com", "STU-001", null, "Grade 10");
+            fail("Should throw exception for null student name");
         } catch (Exception e) {
-            // Expected exception for non-existent file
-            assertTrue(e.getMessage().contains("not found") || e.getMessage().contains("Attachment"));
+            // Expected exception
+            assertNotNull(e.getMessage());
         }
     }
 

@@ -7,7 +7,6 @@ import lk.educore.schoolms.exceptions.ValidationException;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.sql.*;
 
 /**
@@ -34,7 +33,7 @@ public class GuardianAddressView extends JPanel {
         JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JLabel titleLabel = new JLabel("Guardian Address");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        titlePanel.add(titlePanel);
+        titlePanel.add(titleLabel);
         add(titlePanel, BorderLayout.NORTH);
 
         // Address panel

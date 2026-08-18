@@ -4,7 +4,6 @@ import lk.educore.schoolms.validate.JOptionIcon;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 
 /**
  * Settings Dialog

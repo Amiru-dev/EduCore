@@ -1,7 +1,5 @@
 package lk.educore.schoolms.gui;
 
-import lk.educore.schoolms.validate.JOptionIcon;
-
 import javax.swing.*;
 import java.awt.*;
 

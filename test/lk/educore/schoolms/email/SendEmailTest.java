@@ -1,4 +1,4 @@
-package lk.corevision.fruitshop.email;
+package lk.educore.schoolms.email;
 
 import org.junit.After;
 import org.junit.AfterClass;

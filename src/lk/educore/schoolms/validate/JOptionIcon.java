@@ -82,26 +82,28 @@ public class JOptionIcon {
      * Show input dialog with custom icon
      */
     public static String showInputDialog(Component parent, String message) {
-        return JOptionPane.showInputDialog(parent, 
-            message, 
-            "Input", 
-            JOptionPane.QUESTION_MESSAGE, 
-            SendLogo.getInfoIcon(), 
-            null, 
+        Object result = JOptionPane.showInputDialog(parent,
+            message,
+            "Input",
+            JOptionPane.QUESTION_MESSAGE,
+            SendLogo.getInfoIcon(),
+            null,
             null);
+        return result != null ? result.toString() : null;
     }
 
     /**
      * Show input dialog with custom icon and initial value
      */
     public static String showInputDialog(Component parent, String message, String initialValue) {
-        return JOptionPane.showInputDialog(parent, 
-            message, 
-            "Input", 
-            JOptionPane.QUESTION_MESSAGE, 
-            SendLogo.getInfoIcon(), 
-            null, 
+        Object result = JOptionPane.showInputDialog(parent,
+            message,
+            "Input",
+            JOptionPane.QUESTION_MESSAGE,
+            SendLogo.getInfoIcon(),
+            null,
             initialValue);
+        return result != null ? result.toString() : null;
     }
 
     /**
