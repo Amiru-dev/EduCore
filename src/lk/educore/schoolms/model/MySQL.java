@@ -15,7 +15,7 @@ import java.util.Base64;
 public class MySQL {
 
     private static final String CONFIG_FILE = "dbinfor.ser";
-    private static final String ENCRYPTION_KEY = "EduCoreSchool2026"; // 16 bytes for AES-128
+    private static final String ENCRYPTION_KEY = "EduCoreSchool2026"; // 16 bytes for AES-128 (must be 16, 24, or 32 bytes)
     private static Connection connection;
     private static String dbHost;
     private static String dbPort;
@@ -39,16 +39,22 @@ public class MySQL {
 
                 String encryptedData = props.getProperty("dbconfig");
                 if (encryptedData != null) {
-                    String decryptedData = decrypt(encryptedData);
-                    String[] parts = decryptedData.split("\\|");
-                    if (parts.length >= 7) {
-                        dbHost = parts[0];
-                        dbPort = parts[1];
-                        dbName = parts[2];
-                        dbUser = parts[3];
-                        dbPassword = parts[4];
-                        dumpPath = parts[5];
-                        backupPath = parts[6];
+                    try {
+                        String decryptedData = decrypt(encryptedData);
+                        String[] parts = decryptedData.split("\\|");
+                        if (parts.length >= 7) {
+                            dbHost = parts[0];
+                            dbPort = parts[1];
+                            dbName = parts[2];
+                            dbUser = parts[3];
+                            dbPassword = parts[4];
+                            dumpPath = parts[5];
+                            backupPath = parts[6];
+                        }
+                    } catch (Exception e) {
+                        // If decryption fails, the config file might be corrupted or use old key
+                        System.err.println("Failed to decrypt config file. It may be corrupted or use an old encryption key.");
+                        deleteConfig(); // Delete the corrupted config file
                     }
                 }
             }
@@ -89,7 +95,12 @@ public class MySQL {
      * Encrypt string using AES
      */
     private static String encrypt(String data) throws Exception {
-        SecretKeySpec secretKey = new SecretKeySpec(ENCRYPTION_KEY.getBytes(), "AES");
+        // Ensure key is exactly 16 bytes for AES-128
+        byte[] keyBytes = new byte[16];
+        byte[] originalKey = ENCRYPTION_KEY.getBytes();
+        System.arraycopy(originalKey, 0, keyBytes, 0, Math.min(originalKey.length, 16));
+        
+        SecretKeySpec secretKey = new SecretKeySpec(keyBytes, "AES");
         Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
         cipher.init(Cipher.ENCRYPT_MODE, secretKey);
         byte[] encryptedBytes = cipher.doFinal(data.getBytes());
@@ -100,7 +111,12 @@ public class MySQL {
      * Decrypt string using AES
      */
     private static String decrypt(String encryptedData) throws Exception {
-        SecretKeySpec secretKey = new SecretKeySpec(ENCRYPTION_KEY.getBytes(), "AES");
+        // Ensure key is exactly 16 bytes for AES-128
+        byte[] keyBytes = new byte[16];
+        byte[] originalKey = ENCRYPTION_KEY.getBytes();
+        System.arraycopy(originalKey, 0, keyBytes, 0, Math.min(originalKey.length, 16));
+        
+        SecretKeySpec secretKey = new SecretKeySpec(keyBytes, "AES");
         Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
         cipher.init(Cipher.DECRYPT_MODE, secretKey);
         byte[] decodedBytes = Base64.getDecoder().decode(encryptedData);

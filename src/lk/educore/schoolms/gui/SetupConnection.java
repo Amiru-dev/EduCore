@@ -118,12 +118,12 @@ public class SetupConnection extends JFrame {
         gbc.gridx = 0;
         gbc.gridy = 5;
         gbc.weightx = 0.0;
-        formPanel.add(new JLabel("Dump Path:"), gbc);
+        formPanel.add(new JLabel("mysqldump.exe Path:"), gbc);
 
         gbc.gridx = 1;
         gbc.weightx = 1.0;
         JPanel dumpPanel = new JPanel(new BorderLayout(5, 0));
-        txtDumpPath = new JTextField(15);
+        txtDumpPath = new JTextField("C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysqldump.exe", 15);
         JButton btnBrowseDump = new JButton("Browse");
         btnBrowseDump.addActionListener(e -> browseDumpPath());
         dumpPanel.add(txtDumpPath, BorderLayout.CENTER);
@@ -176,14 +176,21 @@ public class SetupConnection extends JFrame {
             txtPort.setText(MySQL.getDbPort());
             txtDBName.setText(MySQL.getDbName());
             txtUsername.setText(MySQL.getDbUser());
-            txtDumpPath.setText(MySQL.getDumpPath());
-            txtBackupPath.setText(MySQL.getBackupPath());
+            String dumpPath = MySQL.getDumpPath();
+            if (dumpPath != null && !dumpPath.isEmpty()) {
+                txtDumpPath.setText(dumpPath);
+            }
+            String backupPath = MySQL.getBackupPath();
+            if (backupPath != null && !backupPath.isEmpty()) {
+                txtBackupPath.setText(backupPath);
+            }
         }
     }
 
     private void browseDumpPath() {
         JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Executable files (*.exe)", "exe"));
         int result = fileChooser.showOpenDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {
             txtDumpPath.setText(fileChooser.getSelectedFile().getAbsolutePath());
@@ -201,7 +208,7 @@ public class SetupConnection extends JFrame {
 
     private void testConnection() {
         try {
-            // Validate inputs
+            // Validate inputs (dump path not required for connection test)
             DataValidator.isRequired(txtHost.getText().trim());
             DataValidator.isRequired(txtPort.getText().trim());
             DataValidator.isRequired(txtDBName.getText().trim());
@@ -235,7 +242,6 @@ public class SetupConnection extends JFrame {
             DataValidator.isRequired(txtDBName.getText().trim());
             DataValidator.isRequired(txtUsername.getText().trim());
             DataValidator.isRequired(new String(txtPassword.getPassword()).trim());
-            DataValidator.isRequired(txtDumpPath.getText().trim());
             DataValidator.isRequired(txtBackupPath.getText().trim());
 
             String host = txtHost.getText().trim();
@@ -247,10 +253,13 @@ public class SetupConnection extends JFrame {
             String backupPath = txtBackupPath.getText().trim();
 
             // Validate paths
-            File dumpDir = new File(dumpPath);
-            if (!dumpDir.exists() || !dumpDir.isDirectory()) {
-                JOptionIcon.showErrorDialog(this, "Dump path does not exist or is not a directory.");
-                return;
+            // Only validate dump path if it's provided and not the default
+            if (!dumpPath.isEmpty() && !dumpPath.equals("C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysqldump.exe")) {
+                File dumpFile = new File(dumpPath);
+                if (!dumpFile.exists() || !dumpFile.isFile()) {
+                    JOptionIcon.showErrorDialog(this, "Dump path does not exist or is not a file.");
+                    return;
+                }
             }
 
             File backupDir = new File(backupPath);
