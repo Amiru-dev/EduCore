@@ -170,7 +170,7 @@ public class FeeReceiptDialog extends JDialog {
             stmt.setInt(1, feeId);
             ResultSet rs = stmt.executeQuery();
             
-            DecimalFormat df = new DecimalFormat("Rs. #,##0.00");
+            DecimalFormat df = new DecimalFormat("'Rs.' #,##0.00");
             
             if (rs.next()) {
                 lblReceiptNo.setText(rs.getString("receipt_no"));

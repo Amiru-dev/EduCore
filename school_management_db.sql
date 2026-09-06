@@ -656,6 +656,17 @@ INSERT IGNORE INTO exam (exam_name, exam_type_id, subject_id, grade_id, exam_dat
 INSERT IGNORE INTO fee (student_id, fee_type_id, amount, due_date, status) VALUES 
 ('STU-0001', 1, 5000.00, CURDATE() + INTERVAL 30 DAY, 'Pending');
 
+-- Insert sample books
+INSERT IGNORE INTO book (title, author, isbn, category_id, quantity, available_qty, publisher, publication_year, price, location, barcode) VALUES 
+('Introduction to Java Programming', 'Daniel Liang', '978-0134694024', 3, 10, 8, 'Pearson', 2017, 1500.00, 'A-12', 'BK001'),
+('Data Structures and Algorithms', 'Mark Allen Weiss', '978-0132846373', 3, 8, 6, 'Pearson', 2016, 1800.00, 'A-13', 'BK002'),
+('Advanced Mathematics', 'James Stewart', '978-1305271780', 2, 12, 10, 'Cengage Learning', 2015, 2200.00, 'B-01', 'BK003'),
+('Physics for Scientists', 'Raymond Serway', '978-1305112448', 2, 15, 12, 'Cengage Learning', 2018, 2500.00, 'B-02', 'BK004'),
+('World History', 'William Duiker', '978-1305089108', 5, 6, 5, 'Cengage Learning', 2015, 1200.00, 'C-01', 'BK005'),
+('Steve Jobs Biography', 'Walter Isaacson', '978-1451648539', 1, 5, 4, 'Simon & Schuster', 2011, 800.00, 'C-02', 'BK006'),
+('Clean Code', 'Robert Martin', '978-0132350884', 6, 8, 7, 'Prentice Hall', 2008, 1700.00, 'A-14', 'BK007'),
+('The Pragmatic Programmer', 'Andrew Hunt', '978-0201616224', 6, 7, 6, 'Addison-Wesley', 1999, 1600.00, 'A-15', 'BK008');
+
 -- ============================================
 -- END OF DATABASE SCHEMA
 -- ============================================

@@ -143,21 +143,21 @@ public class LibraryManagement extends JPanel {
             tableModel.setRowCount(0);
             
             Connection conn = MySQL.getConnection();
-            String query = "SELECT b.ISBN, b.title, b.author, c.category_name, b.available_copies, b.total_copies " +
+            String query = "SELECT b.isbn, b.title, b.author, c.category_name, b.available_qty, b.quantity " +
                           "FROM book b " +
-                          "JOIN category c ON b.category_id = c.category_id " +
+                          "JOIN book_category c ON b.category_id = c.category_id " +
                           "ORDER BY b.title";
             
             PreparedStatement stmt = conn.prepareStatement(query);
             ResultSet rs = stmt.executeQuery();
             
             while (rs.next()) {
-                String isbn = rs.getString("ISBN");
+                String isbn = rs.getString("isbn");
                 String title = rs.getString("title");
                 String author = rs.getString("author");
                 String category = rs.getString("category_name");
-                int available = rs.getInt("available_copies");
-                int total = rs.getInt("total_copies");
+                int available = rs.getInt("available_qty");
+                int total = rs.getInt("quantity");
                 
                 tableModel.addRow(new Object[]{isbn, title, author, category, available, total});
             }

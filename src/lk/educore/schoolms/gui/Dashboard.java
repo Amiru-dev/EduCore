@@ -68,7 +68,7 @@ public class Dashboard extends JFrame {
         logoPanel.setBackground(new Color(44, 62, 80));
         logoPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
         
-        JLabel logoLabel = new JLabel("🏫 EduCore");
+        JLabel logoLabel = new JLabel("EduCore");
         logoLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
         logoLabel.setForeground(Color.WHITE);
         logoPanel.add(logoLabel);

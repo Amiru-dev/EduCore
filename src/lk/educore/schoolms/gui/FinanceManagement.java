@@ -104,7 +104,7 @@ public class FinanceManagement extends JPanel {
             PreparedStatement stmt = conn.prepareStatement(query);
             ResultSet rs = stmt.executeQuery();
             
-            DecimalFormat df = new DecimalFormat("Rs. #,##0.00");
+            DecimalFormat df = new DecimalFormat("'Rs.' #,##0.00");
             
             while (rs.next()) {
                 int financeId = rs.getInt("finance_id");

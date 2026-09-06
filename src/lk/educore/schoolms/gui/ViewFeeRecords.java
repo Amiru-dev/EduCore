@@ -129,7 +129,7 @@ public class ViewFeeRecords extends JPanel {
             PreparedStatement stmt = conn.prepareStatement(query);
             ResultSet rs = stmt.executeQuery();
             
-            DecimalFormat df = new DecimalFormat("Rs. #,##0.00");
+            DecimalFormat df = new DecimalFormat("'Rs.' #,##0.00");
             
             while (rs.next()) {
                 String receiptNo = rs.getString("receipt_no");
@@ -210,7 +210,7 @@ public class ViewFeeRecords extends JPanel {
             
             ResultSet rs = stmt.executeQuery();
             
-            DecimalFormat df = new DecimalFormat("Rs. #,##0.00");
+            DecimalFormat df = new DecimalFormat("'Rs.' #,##0.00");
             
             while (rs.next()) {
                 String receiptNo = rs.getString("receipt_no");
