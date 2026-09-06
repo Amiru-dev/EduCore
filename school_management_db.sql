@@ -7,11 +7,50 @@ CREATE DATABASE IF NOT EXISTS school_management_db;
 USE school_management_db;
 
 -- ============================================
+-- DROP EXISTING TABLES (in correct order to respect foreign keys)
+-- ============================================
+
+-- Drop tables with foreign keys first (children before parents)
+DROP TABLE IF EXISTS book_issue;
+DROP TABLE IF EXISTS book;
+DROP TABLE IF EXISTS finance;
+DROP TABLE IF EXISTS event;
+DROP TABLE IF EXISTS student_transport;
+DROP TABLE IF EXISTS transport_route;
+DROP TABLE IF EXISTS vehicle;
+DROP TABLE IF EXISTS fee;
+DROP TABLE IF EXISTS result;
+DROP TABLE IF EXISTS exam;
+DROP TABLE IF EXISTS subject;
+DROP TABLE IF EXISTS teacher_leave;
+DROP TABLE IF EXISTS teacher_attendance;
+DROP TABLE IF EXISTS teacher;
+DROP TABLE IF EXISTS student_attendance;
+DROP TABLE IF EXISTS student;
+DROP TABLE IF EXISTS guardian;
+
+-- Drop lookup tables
+DROP TABLE IF EXISTS vehicle_status;
+DROP TABLE IF EXISTS vehicle_type;
+DROP TABLE IF EXISTS event_status;
+DROP TABLE IF EXISTS transaction_type;
+DROP TABLE IF EXISTS payment_method;
+DROP TABLE IF EXISTS fee_type;
+DROP TABLE IF EXISTS leave_type;
+DROP TABLE IF EXISTS exam_type;
+DROP TABLE IF EXISTS teacher_status;
+DROP TABLE IF EXISTS teacher_type;
+DROP TABLE IF EXISTS grade;
+DROP TABLE IF EXISTS book_category;
+DROP TABLE IF EXISTS user;
+DROP TABLE IF EXISTS user_type;
+
+-- ============================================
 -- USER MANAGEMENT TABLES
 -- ============================================
 
 -- User Type Lookup Table
-CREATE TABLE user_type (
+CREATE TABLE IF NOT EXISTS user_type (
     user_type_id INT PRIMARY KEY AUTO_INCREMENT,
     type_name VARCHAR(50) NOT NULL UNIQUE,
     description VARCHAR(255),
@@ -19,13 +58,13 @@ CREATE TABLE user_type (
 );
 
 -- Insert default user types
-INSERT INTO user_type (type_name, description) VALUES 
+INSERT IGNORE INTO user_type (type_name, description) VALUES 
 ('Admin', 'System Administrator with full access'),
 ('Teacher', 'Teacher with limited access'),
 ('Student', 'Student with view-only access');
 
 -- User Authentication Table
-CREATE TABLE user (
+CREATE TABLE IF NOT EXISTS user (
     user_id INT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
@@ -42,16 +81,17 @@ CREATE TABLE user (
 -- ============================================
 
 -- Grade/Class Lookup Table
-CREATE TABLE grade (
+CREATE TABLE IF NOT EXISTS grade (
     grade_id INT PRIMARY KEY AUTO_INCREMENT,
-    grade_name VARCHAR(50) NOT NULL UNIQUE,
+    grade_name VARCHAR(50) NOT NULL,
     section VARCHAR(10),
     description VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_grade_section (grade_name, section)
 );
 
 -- Insert default grades
-INSERT INTO grade (grade_name, section) VALUES 
+INSERT IGNORE INTO grade (grade_name, section) VALUES 
 ('Grade 6', 'A'), ('Grade 6', 'B'), ('Grade 6', 'C'),
 ('Grade 7', 'A'), ('Grade 7', 'B'), ('Grade 7', 'C'),
 ('Grade 8', 'A'), ('Grade 8', 'B'), ('Grade 8', 'C'),
@@ -62,7 +102,7 @@ INSERT INTO grade (grade_name, section) VALUES
 ('Grade 13', 'A'), ('Grade 13', 'B'), ('Grade 13', 'C');
 
 -- Guardian/Parent Table
-CREATE TABLE guardian (
+CREATE TABLE IF NOT EXISTS guardian (
     guardian_id INT PRIMARY KEY AUTO_INCREMENT,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
@@ -76,7 +116,7 @@ CREATE TABLE guardian (
 );
 
 -- Student Table
-CREATE TABLE student (
+CREATE TABLE IF NOT EXISTS student (
     student_id VARCHAR(20) PRIMARY KEY,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
@@ -99,17 +139,18 @@ CREATE TABLE student (
 );
 
 -- Student Attendance Table
-CREATE TABLE student_attendance (
+CREATE TABLE IF NOT EXISTS student_attendance (
     attendance_id INT PRIMARY KEY AUTO_INCREMENT,
     student_id VARCHAR(20) NOT NULL,
     date_time DATETIME NOT NULL,
+    attendance_date DATE NOT NULL,
     status ENUM('Present', 'Absent', 'Late') NOT NULL,
     check_in_time TIME,
     check_out_time TIME,
     remarks TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE,
-    UNIQUE KEY unique_attendance (student_id, DATE(date_time))
+    UNIQUE KEY unique_attendance (student_id, attendance_date)
 );
 
 -- ============================================
@@ -117,7 +158,7 @@ CREATE TABLE student_attendance (
 -- ============================================
 
 -- Teacher Type Lookup Table
-CREATE TABLE teacher_type (
+CREATE TABLE IF NOT EXISTS teacher_type (
     teacher_type_id INT PRIMARY KEY AUTO_INCREMENT,
     type_name VARCHAR(50) NOT NULL UNIQUE,
     description VARCHAR(255),
@@ -125,14 +166,14 @@ CREATE TABLE teacher_type (
 );
 
 -- Insert default teacher types
-INSERT INTO teacher_type (type_name, description) VALUES 
+INSERT IGNORE INTO teacher_type (type_name, description) VALUES 
 ('Teacher', 'Regular Teacher'),
 ('Principal', 'School Principal'),
 ('Office Staff', 'Administrative Staff'),
 ('Support Staff', 'Support Staff');
 
 -- Teacher Status Lookup Table
-CREATE TABLE teacher_status (
+CREATE TABLE IF NOT EXISTS teacher_status (
     status_id INT PRIMARY KEY AUTO_INCREMENT,
     status_name VARCHAR(50) NOT NULL UNIQUE,
     description VARCHAR(255),
@@ -140,14 +181,14 @@ CREATE TABLE teacher_status (
 );
 
 -- Insert default teacher statuses
-INSERT INTO teacher_status (status_name, description) VALUES 
+INSERT IGNORE INTO teacher_status (status_name, description) VALUES 
 ('Active', 'Currently employed'),
 ('Inactive', 'Not currently employed'),
 ('On Leave', 'On leave of absence'),
 ('Retired', 'Retired from service');
 
 -- Teacher/Staff Table
-CREATE TABLE teacher (
+CREATE TABLE IF NOT EXISTS teacher (
     teacher_id INT PRIMARY KEY AUTO_INCREMENT,
     NIC VARCHAR(20) NOT NULL UNIQUE,
     first_name VARCHAR(100) NOT NULL,
@@ -172,20 +213,21 @@ CREATE TABLE teacher (
 );
 
 -- Teacher Attendance Table (QR Scanning)
-CREATE TABLE teacher_attendance (
+CREATE TABLE IF NOT EXISTS teacher_attendance (
     attendance_id INT PRIMARY KEY AUTO_INCREMENT,
     teacher_NIC VARCHAR(20) NOT NULL,
     date_time DATETIME NOT NULL,
+    attendance_date DATE NOT NULL,
     check_in TIME NOT NULL,
     check_out TIME,
     duration INT COMMENT 'Duration in minutes',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (teacher_NIC) REFERENCES teacher(NIC) ON DELETE CASCADE,
-    UNIQUE KEY unique_teacher_attendance (teacher_NIC, DATE(date_time))
+    UNIQUE KEY unique_teacher_attendance (teacher_NIC, attendance_date)
 );
 
 -- Leave Type Lookup Table
-CREATE TABLE leave_type (
+CREATE TABLE IF NOT EXISTS leave_type (
     leave_type_id INT PRIMARY KEY AUTO_INCREMENT,
     leave_type_name VARCHAR(50) NOT NULL UNIQUE,
     description VARCHAR(255),
@@ -194,7 +236,7 @@ CREATE TABLE leave_type (
 );
 
 -- Insert default leave types
-INSERT INTO leave_type (leave_type_name, description, max_days) VALUES 
+INSERT IGNORE INTO leave_type (leave_type_name, description, max_days) VALUES 
 ('Sick Leave', 'Medical leave', 14),
 ('Casual Leave', 'Personal leave', 7),
 ('Annual Leave', 'Yearly vacation', 30),
@@ -202,7 +244,7 @@ INSERT INTO leave_type (leave_type_name, description, max_days) VALUES
 ('Paternity Leave', 'Paternity leave', 7);
 
 -- Teacher Leave Table
-CREATE TABLE teacher_leave (
+CREATE TABLE IF NOT EXISTS teacher_leave (
     leave_id INT PRIMARY KEY AUTO_INCREMENT,
     teacher_NIC VARCHAR(20) NOT NULL,
     leave_type_id INT NOT NULL,
@@ -222,7 +264,7 @@ CREATE TABLE teacher_leave (
 -- ============================================
 
 -- Subject Table
-CREATE TABLE subject (
+CREATE TABLE IF NOT EXISTS subject (
     subject_id INT PRIMARY KEY AUTO_INCREMENT,
     subject_name VARCHAR(100) NOT NULL UNIQUE,
     grade_id INT NOT NULL,
@@ -232,7 +274,7 @@ CREATE TABLE subject (
 );
 
 -- Exam Type Lookup Table
-CREATE TABLE exam_type (
+CREATE TABLE IF NOT EXISTS exam_type (
     exam_type_id INT PRIMARY KEY AUTO_INCREMENT,
     exam_type_name VARCHAR(50) NOT NULL UNIQUE,
     description VARCHAR(255),
@@ -240,14 +282,14 @@ CREATE TABLE exam_type (
 );
 
 -- Insert default exam types
-INSERT INTO exam_type (exam_type_name, description) VALUES 
+INSERT IGNORE INTO exam_type (exam_type_name, description) VALUES 
 ('Term Test', 'Monthly term examination'),
 ('Mid Term', 'Mid-year examination'),
 ('Final Exam', 'Final year examination'),
 ('Practical', 'Practical examination');
 
 -- Exam Table
-CREATE TABLE exam (
+CREATE TABLE IF NOT EXISTS exam (
     exam_id INT PRIMARY KEY AUTO_INCREMENT,
     exam_name VARCHAR(100) NOT NULL,
     exam_type_id INT NOT NULL,
@@ -264,7 +306,7 @@ CREATE TABLE exam (
 );
 
 -- Result Table
-CREATE TABLE result (
+CREATE TABLE IF NOT EXISTS result (
     result_id INT PRIMARY KEY AUTO_INCREMENT,
     student_id VARCHAR(20) NOT NULL,
     exam_id INT NOT NULL,
@@ -284,7 +326,7 @@ CREATE TABLE result (
 -- ============================================
 
 -- Fee Type Lookup Table
-CREATE TABLE fee_type (
+CREATE TABLE IF NOT EXISTS fee_type (
     fee_type_id INT PRIMARY KEY AUTO_INCREMENT,
     fee_type_name VARCHAR(50) NOT NULL UNIQUE,
     description VARCHAR(255),
@@ -293,7 +335,7 @@ CREATE TABLE fee_type (
 );
 
 -- Insert default fee types
-INSERT INTO fee_type (fee_type_name, description, default_amount) VALUES 
+INSERT IGNORE INTO fee_type (fee_type_name, description, default_amount) VALUES 
 ('Tuition Fee', 'Monthly tuition fee', 5000.00),
 ('Lab Fee', 'Laboratory fee', 1000.00),
 ('Library Fee', 'Library membership fee', 500.00),
@@ -302,7 +344,7 @@ INSERT INTO fee_type (fee_type_name, description, default_amount) VALUES
 ('Exam Fee', 'Examination fee', 1500.00);
 
 -- Payment Method Lookup Table
-CREATE TABLE payment_method (
+CREATE TABLE IF NOT EXISTS payment_method (
     payment_method_id INT PRIMARY KEY AUTO_INCREMENT,
     method_name VARCHAR(50) NOT NULL UNIQUE,
     description VARCHAR(255),
@@ -310,14 +352,14 @@ CREATE TABLE payment_method (
 );
 
 -- Insert default payment methods
-INSERT INTO payment_method (method_name, description) VALUES 
+INSERT IGNORE INTO payment_method (method_name, description) VALUES 
 ('Cash', 'Cash payment'),
 ('Card', 'Credit/Debit card'),
 ('Bank Transfer', 'Bank transfer'),
 ('Check', 'Check payment');
 
 -- Fee Table
-CREATE TABLE fee (
+CREATE TABLE IF NOT EXISTS fee (
     fee_id INT PRIMARY KEY AUTO_INCREMENT,
     student_id VARCHAR(20) NOT NULL,
     fee_type_id INT NOT NULL,
@@ -339,7 +381,7 @@ CREATE TABLE fee (
 -- ============================================
 
 -- Vehicle Type Lookup Table
-CREATE TABLE vehicle_type (
+CREATE TABLE IF NOT EXISTS vehicle_type (
     vehicle_type_id INT PRIMARY KEY AUTO_INCREMENT,
     type_name VARCHAR(50) NOT NULL UNIQUE,
     description VARCHAR(255),
@@ -347,13 +389,13 @@ CREATE TABLE vehicle_type (
 );
 
 -- Insert default vehicle types
-INSERT INTO vehicle_type (type_name, description) VALUES 
+INSERT IGNORE INTO vehicle_type (type_name, description) VALUES 
 ('Bus', 'School bus'),
 ('Van', 'School van'),
 ('Mini Bus', 'Mini school bus');
 
 -- Vehicle Status Lookup Table
-CREATE TABLE vehicle_status (
+CREATE TABLE IF NOT EXISTS vehicle_status (
     vehicle_status_id INT PRIMARY KEY AUTO_INCREMENT,
     status_name VARCHAR(50) NOT NULL UNIQUE,
     description VARCHAR(255),
@@ -361,14 +403,14 @@ CREATE TABLE vehicle_status (
 );
 
 -- Insert default vehicle statuses
-INSERT INTO vehicle_status (status_name, description) VALUES 
+INSERT IGNORE INTO vehicle_status (status_name, description) VALUES 
 ('Active', 'In service'),
 ('Maintenance', 'Under maintenance'),
 ('Retired', 'Retired from service'),
 ('Out of Service', 'Temporarily out of service');
 
 -- Vehicle Table
-CREATE TABLE vehicle (
+CREATE TABLE IF NOT EXISTS vehicle (
     vehicle_id INT PRIMARY KEY AUTO_INCREMENT,
     plate_no VARCHAR(20) NOT NULL UNIQUE,
     vehicle_type_id INT NOT NULL,
@@ -386,7 +428,7 @@ CREATE TABLE vehicle (
 );
 
 -- Transport Route Table
-CREATE TABLE transport_route (
+CREATE TABLE IF NOT EXISTS transport_route (
     route_id INT PRIMARY KEY AUTO_INCREMENT,
     route_name VARCHAR(100) NOT NULL UNIQUE,
     start_point VARCHAR(255) NOT NULL,
@@ -402,7 +444,7 @@ CREATE TABLE transport_route (
 );
 
 -- Student Transport Assignment Table
-CREATE TABLE student_transport (
+CREATE TABLE IF NOT EXISTS student_transport (
     id INT PRIMARY KEY AUTO_INCREMENT,
     student_id VARCHAR(20) NOT NULL,
     route_id INT NOT NULL,
@@ -421,7 +463,7 @@ CREATE TABLE student_transport (
 -- ============================================
 
 -- Event Status Lookup Table
-CREATE TABLE event_status (
+CREATE TABLE IF NOT EXISTS event_status (
     event_status_id INT PRIMARY KEY AUTO_INCREMENT,
     status_name VARCHAR(50) NOT NULL UNIQUE,
     description VARCHAR(255),
@@ -429,14 +471,14 @@ CREATE TABLE event_status (
 );
 
 -- Insert default event statuses
-INSERT INTO event_status (status_name, description) VALUES 
+INSERT IGNORE INTO event_status (status_name, description) VALUES 
 ('Active', 'Upcoming event'),
 ('Completed', 'Event completed'),
 ('Cancelled', 'Event cancelled'),
 ('Postponed', 'Event postponed');
 
 -- Event Table
-CREATE TABLE event (
+CREATE TABLE IF NOT EXISTS event (
     event_id INT PRIMARY KEY AUTO_INCREMENT,
     event_name VARCHAR(200) NOT NULL,
     description TEXT,
@@ -454,7 +496,7 @@ CREATE TABLE event (
 -- ============================================
 
 -- Transaction Type Lookup Table
-CREATE TABLE transaction_type (
+CREATE TABLE IF NOT EXISTS transaction_type (
     transaction_type_id INT PRIMARY KEY AUTO_INCREMENT,
     type_name VARCHAR(50) NOT NULL UNIQUE,
     description VARCHAR(255),
@@ -462,12 +504,12 @@ CREATE TABLE transaction_type (
 );
 
 -- Insert default transaction types
-INSERT INTO transaction_type (type_name, description) VALUES 
+INSERT IGNORE INTO transaction_type (type_name, description) VALUES 
 ('Income', 'Income transaction'),
 ('Expense', 'Expense transaction');
 
 -- Finance Table
-CREATE TABLE finance (
+CREATE TABLE IF NOT EXISTS finance (
     finance_id INT PRIMARY KEY AUTO_INCREMENT,
     description TEXT NOT NULL,
     amount DECIMAL(12, 2) NOT NULL,
@@ -487,7 +529,7 @@ CREATE TABLE finance (
 -- ============================================
 
 -- Book Category Lookup Table
-CREATE TABLE book_category (
+CREATE TABLE IF NOT EXISTS book_category (
     category_id INT PRIMARY KEY AUTO_INCREMENT,
     category_name VARCHAR(100) NOT NULL UNIQUE,
     description TEXT,
@@ -495,7 +537,7 @@ CREATE TABLE book_category (
 );
 
 -- Insert default book categories
-INSERT INTO book_category (category_name, description) VALUES 
+INSERT IGNORE INTO book_category (category_name, description) VALUES 
 ('Fiction', 'Fiction books'),
 ('Science', 'Science books'),
 ('Textbook', 'Textbooks'),
@@ -505,7 +547,7 @@ INSERT INTO book_category (category_name, description) VALUES
 ('Technology', 'Technology books');
 
 -- Book Table
-CREATE TABLE book (
+CREATE TABLE IF NOT EXISTS book (
     book_id INT PRIMARY KEY AUTO_INCREMENT,
     title VARCHAR(200) NOT NULL,
     author VARCHAR(100) NOT NULL,
@@ -523,7 +565,7 @@ CREATE TABLE book (
 );
 
 -- Book Issue Table
-CREATE TABLE book_issue (
+CREATE TABLE IF NOT EXISTS book_issue (
     issue_id INT PRIMARY KEY AUTO_INCREMENT,
     book_id INT NOT NULL,
     student_id VARCHAR(20) NOT NULL,
@@ -550,7 +592,6 @@ CREATE INDEX idx_student_active ON student(is_active);
 -- Teacher indexes
 CREATE INDEX idx_teacher_type ON teacher(teacher_type_id);
 CREATE INDEX idx_teacher_status ON teacher(status_id);
-CREATE INDEX idx_teacher_active ON teacher(status_id);
 
 -- Exam indexes
 CREATE INDEX idx_exam_subject ON exam(subject_id);
@@ -564,55 +605,55 @@ CREATE INDEX idx_result_exam ON result(exam_id);
 -- Fee indexes
 CREATE INDEX idx_fee_student ON fee(student_id);
 CREATE INDEX idx_fee_type ON fee(fee_type_id);
-CREATE INDEX idx_fee_status ON fee(status_id);
+CREATE INDEX idx_fee_status ON fee(status);
 CREATE INDEX idx_fee_date ON fee(due_date);
 
 -- Attendance indexes
 CREATE INDEX idx_student_attendance_student ON student_attendance(student_id);
-CREATE INDEX idx_student_attendance_date ON student_attendance(date_time);
+CREATE INDEX idx_student_attendance_date ON student_attendance(attendance_date);
 CREATE INDEX idx_teacher_attendance_teacher ON teacher_attendance(teacher_NIC);
-CREATE INDEX idx_teacher_attendance_date ON teacher_attendance(date_time);
+CREATE INDEX idx_teacher_attendance_date ON teacher_attendance(attendance_date);
 
 -- ============================================
 -- SAMPLE DATA FOR TESTING
 -- ============================================
 
 -- Insert sample admin user
-INSERT INTO user (username, password, email, user_type_id) VALUES 
+INSERT IGNORE INTO user (username, password, email, user_type_id) VALUES 
 ('admin', 'admin123', 'admin@educore.com', 1);
 
 -- Insert sample teacher user
-INSERT INTO user (username, password, email, user_type_id) VALUES 
+INSERT IGNORE INTO user (username, password, email, user_type_id) VALUES 
 ('teacher1', 'teacher123', 'teacher1@educore.com', 2);
 
 -- Insert sample student user
-INSERT INTO user (username, password, email, user_type_id) VALUES 
+INSERT IGNORE INTO user (username, password, email, user_type_id) VALUES 
 ('student1', 'student123', 'student1@educore.com', 3);
 
 -- Insert sample guardian
-INSERT INTO guardian (first_name, last_name, nic, relationship, phone, email, address, occupation) VALUES 
+INSERT IGNORE INTO guardian (first_name, last_name, nic, relationship, phone, email, address, occupation) VALUES 
 ('John', 'Doe', '901234567V', 'Father', '+94771234567', 'john.doe@email.com', '123 Main Street, Anuradhapura', 'Engineer');
 
 -- Insert sample student
-INSERT INTO student (student_id, first_name, last_name, dob, gender, nic, email, phone, address, grade_id, guardian_id, user_id, registration_date) VALUES 
+INSERT IGNORE INTO student (student_id, first_name, last_name, dob, gender, nic, email, phone, address, grade_id, guardian_id, user_id, registration_date) VALUES 
 ('STU-0001', 'Jane', 'Doe', '2008-05-15', 'Female', '081234567V', 'jane.doe@email.com', '+94771234568', '123 Main Street, Anuradhapura', 1, 1, 3, CURDATE());
 
 -- Insert sample teacher
-INSERT INTO teacher (NIC, first_name, last_name, dob, gender, email, phone, address, teacher_type_id, username, password, salary, hire_date, status_id, user_id) VALUES 
+INSERT IGNORE INTO teacher (NIC, first_name, last_name, dob, gender, email, phone, address, teacher_type_id, username, password, salary, hire_date, status_id, user_id) VALUES 
 ('801234567V', 'Dr. Sarah', 'Smith', '1985-03-20', 'Female', 'sarah.smith@educore.com', '+94771234569', '456 School Road, Anuradhapura', 1, 'teacher1', 'teacher123', 75000.00, '2020-01-15', 1, 2);
 
 -- Insert sample subject
-INSERT INTO subject (subject_name, grade_id, description) VALUES 
+INSERT IGNORE INTO subject (subject_name, grade_id, description) VALUES 
 ('Mathematics', 1, 'Mathematics for Grade 6'),
 ('Science', 1, 'Science for Grade 6'),
 ('English', 1, 'English Language for Grade 6');
 
 -- Insert sample exam
-INSERT INTO exam (exam_name, exam_type_id, subject_id, grade_id, exam_date, max_marks, duration_minutes, description) VALUES 
+INSERT IGNORE INTO exam (exam_name, exam_type_id, subject_id, grade_id, exam_date, max_marks, duration_minutes, description) VALUES 
 ('Term Test 1 - Mathematics', 1, 1, 1, CURDATE() + INTERVAL 7 DAY, 100.00, 90, 'First term test for Mathematics');
 
 -- Insert sample fee
-INSERT INTO fee (student_id, fee_type_id, amount, due_date, status) VALUES 
+INSERT IGNORE INTO fee (student_id, fee_type_id, amount, due_date, status) VALUES 
 ('STU-0001', 1, 5000.00, CURDATE() + INTERVAL 30 DAY, 'Pending');
 
 -- ============================================
