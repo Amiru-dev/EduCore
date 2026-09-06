@@ -53,7 +53,7 @@ public class SignIn extends JFrame {
         headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
 
-        JLabel logoLabel = new JLabel("🏫 EduCore", SwingConstants.CENTER);
+        JLabel logoLabel = new JLabel("EduCore", SwingConstants.CENTER);
         logoLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
         headerPanel.add(logoLabel, BorderLayout.CENTER);
 
