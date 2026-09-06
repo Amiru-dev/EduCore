@@ -27,8 +27,20 @@ public class SignIn extends JFrame {
     private JPanel buttonPanel;
 
     public SignIn() {
+        theme();
+        if (!checkDatabaseConfig()) {
+            return; // Don't initialize components if database needs setup
+        }
         initComponents();
-        checkDatabaseConfig();
+    }
+
+    private void theme() {
+        // Apply FlatLaf theme
+        try {
+            UIManager.setLookAndFeel("com.formdev.flatlaf.FlatLightLaf");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void initComponents() {
@@ -37,13 +49,6 @@ public class SignIn extends JFrame {
         setSize(450, 350);
         setLocationRelativeTo(null);
         setResizable(false);
-
-        // Apply FlatLaf theme
-        try {
-            UIManager.setLookAndFeel("com.formdev.flatlaf.FlatLightLaf");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         // Main panel
         mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -119,23 +124,29 @@ public class SignIn extends JFrame {
         add(mainPanel);
     }
 
-    private void checkDatabaseConfig() {
+    private boolean checkDatabaseConfig() {
         try {
             MySQL.getConnection();
+            return true; 
+            
         } catch (Exception e) {
-            int result = JOptionPane.showConfirmDialog(this,
+            int result = JOptionPane.showConfirmDialog(null,
                     "Database not configured. Would you like to set it up now?",
                     "Database Configuration Required",
                     JOptionPane.YES_NO_OPTION);
 
             if (result == JOptionPane.YES_OPTION) {
                 openSetupDialog();
+                return false; 
+            } else {
+                // User declined to setup database, exit application
+                System.exit(0);
+                return false;
             }
         }
     }
 
     private void openSetupDialog() {
-        dispose(); // Close SignIn window
         new SetupConnection().setVisible(true);
     }
 
@@ -149,9 +160,9 @@ public class SignIn extends JFrame {
             DataValidator.isRequired(password);
 
             Connection conn = MySQL.getConnection();
-            String query = "SELECT u.user_id, u.password, r.role_name FROM user u "
-                    + "JOIN role r ON u.role_id = r.role_id "
-                    + "WHERE u.username = ? AND r.role_name = ?";
+            String query = "SELECT u.user_id, u.password, ut.type_name FROM user u "
+                    + "JOIN user_type ut ON u.user_type_id = ut.user_type_id "
+                    + "WHERE u.username = ? AND ut.type_name = ?";
 
             PreparedStatement stmt = conn.prepareStatement(query);
             stmt.setString(1, username);
@@ -160,17 +171,18 @@ public class SignIn extends JFrame {
 
             if (rs.next()) {
                 String storedPassword = rs.getString("password");
+                String actualRole = rs.getString("type_name");
 
                 if (password.equals(storedPassword)) {
                     JOptionIcon.showSuccessDialog(this, "Login successful!");
 
                     // Route to appropriate dashboard based on role
                     dispose();
-                    if ("Student".equals(role)) {
+                    if ("Student".equals(actualRole)) {
                         new StudentDashboard(username).setVisible(true);
                     } else {
                         // Admin and Teacher go to main Dashboard
-                        new Dashboard(username, role).setVisible(true);
+                        new Dashboard(username, actualRole).setVisible(true);
                     }
                 } else {
                     JOptionIcon.showErrorDialog(this, "Invalid password!");
@@ -192,7 +204,11 @@ public class SignIn extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            new SignIn().setVisible(true);
+            SignIn signIn = new SignIn();
+            // Only show the sign-in window if database is configured
+            if (signIn.mainPanel != null) {
+                signIn.setVisible(true);
+            }
         });
     }
 }
