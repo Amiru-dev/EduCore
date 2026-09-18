@@ -175,7 +175,7 @@ public class AttendanceFrame extends JFrame {
                 rs.close();
                 
             } catch (ValidationException e) {
-                JOptionIcon.showErrorDialog(this, e.getUserFriendlyMessage());
+                JOptionIcon.showWarningDialog(this, e.getUserFriendlyMessage());
             } catch (Exception e) {
                 JOptionIcon.showErrorDialog(this, "Error marking attendance: " + e.getMessage());
             }

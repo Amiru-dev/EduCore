@@ -167,7 +167,7 @@ public class BasicSalaryOptions extends JDialog {
             JOptionIcon.showSuccessDialog(this, "Salary configuration saved for " + teacherType);
             
         } catch (ValidationException e) {
-            JOptionIcon.showErrorDialog(this, e.getUserFriendlyMessage());
+            JOptionIcon.showWarningDialog(this, e.getUserFriendlyMessage());
         } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error saving configuration: " + e.getMessage());
         }

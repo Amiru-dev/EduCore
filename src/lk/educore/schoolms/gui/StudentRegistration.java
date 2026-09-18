@@ -487,7 +487,7 @@ public class StudentRegistration extends JDialog {
             }
 
         } catch (ValidationException e) {
-            JOptionIcon.showErrorDialog(this, e.getUserFriendlyMessage());
+            JOptionIcon.showWarningDialog(this, e.getUserFriendlyMessage());
         } catch (SQLException e) {
             JOptionIcon.showErrorDialog(this, "Error registering student: " + e.getMessage());
         } catch (Exception e) {

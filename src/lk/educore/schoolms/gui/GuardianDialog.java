@@ -202,7 +202,7 @@ public class GuardianDialog extends JDialog {
             dispose();
             
         } catch (ValidationException e) {
-            JOptionIcon.showErrorDialog(this, e.getUserFriendlyMessage());
+            JOptionIcon.showWarningDialog(this, e.getUserFriendlyMessage());
         } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error saving guardian details: " + e.getMessage());
         }
