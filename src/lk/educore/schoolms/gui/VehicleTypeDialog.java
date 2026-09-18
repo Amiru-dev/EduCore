@@ -81,21 +81,15 @@ public class VehicleTypeDialog extends JDialog {
             
             DataValidator.isRequired(typeName);
             
-            Connection conn = MySQL.getConnection();
-            String query = "INSERT INTO vehicle_type (type_name, description) VALUES (?, ?)";
-            PreparedStatement stmt = conn.prepareStatement(query);
-            stmt.setString(1, typeName);
-            stmt.setString(2, description.isEmpty() ? null : description);
-            stmt.executeUpdate();
-            stmt.close();
-            conn.close();
+            String descValue = description.isEmpty() ? "NULL" : "'" + description + "'";
+            MySQL.executeIUD("INSERT INTO vehicle_type (type_name, description) VALUES ('" + typeName + "', " + descValue + ")");
             
             JOptionIcon.showSuccessDialog(this, "Vehicle type added successfully!");
             dispose();
             
         } catch (ValidationException e) {
             JOptionIcon.showErrorDialog(this, e.getUserFriendlyMessage());
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error saving vehicle type: " + e.getMessage());
         }
     }

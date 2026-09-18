@@ -84,14 +84,10 @@ public class EventManagement extends JPanel {
         try {
             tableModel.setRowCount(0);
             
-            Connection conn = MySQL.getConnection();
-            String query = "SELECT e.event_id, e.event_name, e.start_date, e.end_date, es.status_name " +
+            ResultSet rs = MySQL.executeSearch("SELECT e.event_id, e.event_name, e.start_date, e.end_date, es.status_name " +
                           "FROM event e " +
                           "JOIN event_status es ON e.event_status_id = es.event_status_id " +
-                          "ORDER BY e.start_date DESC";
-            
-            PreparedStatement stmt = conn.prepareStatement(query);
-            ResultSet rs = stmt.executeQuery();
+                          "ORDER BY e.start_date DESC");
             
             while (rs.next()) {
                 int eventId = rs.getInt("event_id");
@@ -104,10 +100,8 @@ public class EventManagement extends JPanel {
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error loading event data: " + e.getMessage());
         }
     }

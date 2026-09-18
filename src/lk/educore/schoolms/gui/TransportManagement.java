@@ -141,15 +141,11 @@ public class TransportManagement extends JPanel {
         try {
             tableModel.setRowCount(0);
             
-            Connection conn = MySQL.getConnection();
-            String query = "SELECT v.plate_no, vt.type_name, v.capacity, v.driver_name, v.driver_phone, vs.status_name " +
+            ResultSet rs = MySQL.executeSearch("SELECT v.plate_no, vt.type_name, v.capacity, v.driver_name, v.driver_phone, vs.status_name " +
                           "FROM vehicle v " +
                           "JOIN vehicle_type vt ON v.vehicle_type_id = vt.vehicle_type_id " +
                           "JOIN vehicle_status vs ON v.vehicle_status_id = vs.vehicle_status_id " +
-                          "ORDER BY v.plate_no";
-            
-            PreparedStatement stmt = conn.prepareStatement(query);
-            ResultSet rs = stmt.executeQuery();
+                          "ORDER BY v.plate_no");
             
             while (rs.next()) {
                 String plateNo = rs.getString("plate_no");
@@ -163,10 +159,8 @@ public class TransportManagement extends JPanel {
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error loading transport data: " + e.getMessage());
         }
     }

@@ -171,14 +171,10 @@ public class StudentManagement extends JPanel {
         try {
             tableModel.setRowCount(0);
             
-            Connection conn = MySQL.getConnection();
-            String query = "SELECT s.student_id, s.first_name, s.last_name, g.grade_name, s.nic, s.phone, s.email, s.is_active " +
+            ResultSet rs = MySQL.executeSearch("SELECT s.student_id, s.first_name, s.last_name, g.grade_name, s.nic, s.phone, s.email, s.is_active " +
                           "FROM student s " +
                           "JOIN grade g ON s.grade_id = g.grade_id " +
-                          "ORDER BY s.student_id";
-            
-            PreparedStatement stmt = conn.prepareStatement(query);
-            ResultSet rs = stmt.executeQuery();
+                          "ORDER BY s.student_id");
             
             while (rs.next()) {
                 String studentId = rs.getString("student_id");
@@ -193,10 +189,8 @@ public class StudentManagement extends JPanel {
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error loading student data: " + e.getMessage());
         }
     }
@@ -213,7 +207,6 @@ public class StudentManagement extends JPanel {
             
             tableModel.setRowCount(0);
             
-            Connection conn = MySQL.getConnection();
             String query;
             
             switch (searchBy) {
@@ -221,28 +214,28 @@ public class StudentManagement extends JPanel {
                     query = "SELECT s.student_id, s.first_name, s.last_name, g.grade_name, s.nic, s.phone, s.email, s.is_active " +
                             "FROM student s " +
                             "JOIN grade g ON s.grade_id = g.grade_id " +
-                            "WHERE s.student_id LIKE ? " +
+                            "WHERE s.student_id LIKE '%" + searchTerm + "%' " +
                             "ORDER BY s.student_id";
                     break;
                 case "Name":
                     query = "SELECT s.student_id, s.first_name, s.last_name, g.grade_name, s.nic, s.phone, s.email, s.is_active " +
                             "FROM student s " +
                             "JOIN grade g ON s.grade_id = g.grade_id " +
-                            "WHERE s.first_name LIKE ? OR s.last_name LIKE ? " +
+                            "WHERE s.first_name LIKE '%" + searchTerm + "%' OR s.last_name LIKE '%" + searchTerm + "%' " +
                             "ORDER BY s.student_id";
                     break;
                 case "NIC":
                     query = "SELECT s.student_id, s.first_name, s.last_name, g.grade_name, s.nic, s.phone, s.email, s.is_active " +
                             "FROM student s " +
                             "JOIN grade g ON s.grade_id = g.grade_id " +
-                            "WHERE s.nic LIKE ? " +
+                            "WHERE s.nic LIKE '%" + searchTerm + "%' " +
                             "ORDER BY s.student_id";
                     break;
                 case "Grade":
                     query = "SELECT s.student_id, s.first_name, s.last_name, g.grade_name, s.nic, s.phone, s.email, s.is_active " +
                             "FROM student s " +
                             "JOIN grade g ON s.grade_id = g.grade_id " +
-                            "WHERE g.grade_name LIKE ? " +
+                            "WHERE g.grade_name LIKE '%" + searchTerm + "%' " +
                             "ORDER BY s.student_id";
                     break;
                 default:
@@ -252,16 +245,7 @@ public class StudentManagement extends JPanel {
                             "ORDER BY s.student_id";
             }
             
-            PreparedStatement stmt = conn.prepareStatement(query);
-            
-            if (searchBy.equals("Name")) {
-                stmt.setString(1, "%" + searchTerm + "%");
-                stmt.setString(2, "%" + searchTerm + "%");
-            } else {
-                stmt.setString(1, "%" + searchTerm + "%");
-            }
-            
-            ResultSet rs = stmt.executeQuery();
+            ResultSet rs = MySQL.executeSearch(query);
             
             while (rs.next()) {
                 String studentId = rs.getString("student_id");
@@ -276,10 +260,8 @@ public class StudentManagement extends JPanel {
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error searching students: " + e.getMessage());
         }
     }
@@ -317,18 +299,13 @@ public class StudentManagement extends JPanel {
         
         if (confirm == JOptionPane.YES_OPTION) {
             try {
-                Connection conn = MySQL.getConnection();
-                String query = "UPDATE student SET is_active = 0 WHERE student_id = ?";
-                PreparedStatement stmt = conn.prepareStatement(query);
-                stmt.setString(1, studentId);
-                stmt.executeUpdate();
-                stmt.close();
-                conn.close();
+                String query = "UPDATE student SET is_active = 0 WHERE student_id = '" + studentId + "'";
+                MySQL.executeIUD(query);
                 
                 JOptionIcon.showSuccessDialog(this, "Student deleted successfully.");
                 loadStudentData();
                 
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 JOptionIcon.showErrorDialog(this, "Error deleting student: " + e.getMessage());
             }
         }

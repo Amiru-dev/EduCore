@@ -84,12 +84,8 @@ public class GuardianManagement extends JPanel {
         try {
             tableModel.setRowCount(0);
             
-            Connection conn = MySQL.getConnection();
-            String query = "SELECT guardian_id, first_name, last_name, nic, relationship, phone, email " +
-                          "FROM guardian ORDER BY first_name, last_name";
-            
-            PreparedStatement stmt = conn.prepareStatement(query);
-            ResultSet rs = stmt.executeQuery();
+            ResultSet rs = MySQL.executeSearch("SELECT guardian_id, first_name, last_name, nic, relationship, phone, email " +
+                          "FROM guardian ORDER BY first_name, last_name");
             
             while (rs.next()) {
                 int guardianId = rs.getInt("guardian_id");
@@ -103,10 +99,8 @@ public class GuardianManagement extends JPanel {
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error loading guardian data: " + e.getMessage());
         }
     }

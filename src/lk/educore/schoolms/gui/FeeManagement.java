@@ -168,17 +168,13 @@ public class FeeManagement extends JPanel {
         try {
             tableModel.setRowCount(0);
             
-            Connection conn = MySQL.getConnection();
-            String query = "SELECT f.fee_id, f.student_id, s.first_name, s.last_name, ft.fee_type_name, " +
+            ResultSet rs = MySQL.executeSearch("SELECT f.fee_id, f.student_id, s.first_name, s.last_name, ft.fee_type_name, " +
                           "f.amount, f.due_date, f.status, f.receipt_no " +
                           "FROM fee f " +
                           "JOIN student s ON f.student_id = s.student_id " +
                           "JOIN fee_type ft ON f.fee_type_id = ft.fee_type_id " +
                           "WHERE f.status != 'Cancelled' " +
-                          "ORDER BY f.due_date DESC";
-            
-            PreparedStatement stmt = conn.prepareStatement(query);
-            ResultSet rs = stmt.executeQuery();
+                          "ORDER BY f.due_date DESC");
             
             DecimalFormat df = new DecimalFormat("'Rs.' #,##0.00");
             
@@ -197,10 +193,8 @@ public class FeeManagement extends JPanel {
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error loading fee data: " + e.getMessage());
         }
     }
@@ -217,7 +211,6 @@ public class FeeManagement extends JPanel {
             
             tableModel.setRowCount(0);
             
-            Connection conn = MySQL.getConnection();
             String query;
             
             switch (searchBy) {
@@ -227,7 +220,7 @@ public class FeeManagement extends JPanel {
                             "FROM fee f " +
                             "JOIN student s ON f.student_id = s.student_id " +
                             "JOIN fee_type ft ON f.fee_type_id = ft.fee_type_id " +
-                            "WHERE f.student_id LIKE ? AND f.status != 'Cancelled' " +
+                            "WHERE f.student_id LIKE '%" + searchTerm + "%' AND f.status != 'Cancelled' " +
                             "ORDER BY f.due_date DESC";
                     break;
                 case "Student Name":
@@ -236,7 +229,7 @@ public class FeeManagement extends JPanel {
                             "FROM fee f " +
                             "JOIN student s ON f.student_id = s.student_id " +
                             "JOIN fee_type ft ON f.fee_type_id = ft.fee_type_id " +
-                            "WHERE (s.first_name LIKE ? OR s.last_name LIKE ?) AND f.status != 'Cancelled' " +
+                            "WHERE (s.first_name LIKE '%" + searchTerm + "%' OR s.last_name LIKE '%" + searchTerm + "%') AND f.status != 'Cancelled' " +
                             "ORDER BY f.due_date DESC";
                     break;
                 case "Fee Type":
@@ -245,7 +238,7 @@ public class FeeManagement extends JPanel {
                             "FROM fee f " +
                             "JOIN student s ON f.student_id = s.student_id " +
                             "JOIN fee_type ft ON f.fee_type_id = ft.fee_type_id " +
-                            "WHERE ft.fee_type_name LIKE ? AND f.status != 'Cancelled' " +
+                            "WHERE ft.fee_type_name LIKE '%" + searchTerm + "%' AND f.status != 'Cancelled' " +
                             "ORDER BY f.due_date DESC";
                     break;
                 case "Status":
@@ -254,7 +247,7 @@ public class FeeManagement extends JPanel {
                             "FROM fee f " +
                             "JOIN student s ON f.student_id = s.student_id " +
                             "JOIN fee_type ft ON f.fee_type_id = ft.fee_type_id " +
-                            "WHERE f.status LIKE ? AND f.status != 'Cancelled' " +
+                            "WHERE f.status LIKE '%" + searchTerm + "%' AND f.status != 'Cancelled' " +
                             "ORDER BY f.due_date DESC";
                     break;
                 default:
@@ -267,16 +260,7 @@ public class FeeManagement extends JPanel {
                             "ORDER BY f.due_date DESC";
             }
             
-            PreparedStatement stmt = conn.prepareStatement(query);
-            
-            if (searchBy.equals("Student Name")) {
-                stmt.setString(1, "%" + searchTerm + "%");
-                stmt.setString(2, "%" + searchTerm + "%");
-            } else {
-                stmt.setString(1, "%" + searchTerm + "%");
-            }
-            
-            ResultSet rs = stmt.executeQuery();
+            ResultSet rs = MySQL.executeSearch(query);
             
             DecimalFormat df = new DecimalFormat("'Rs.' #,##0.00");
             
@@ -295,10 +279,8 @@ public class FeeManagement extends JPanel {
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error searching fees: " + e.getMessage());
         }
     }
@@ -326,23 +308,16 @@ public class FeeManagement extends JPanel {
         
         if (confirm == JOptionPane.YES_OPTION) {
             try {
-                Connection conn = MySQL.getConnection();
-                
                 // Generate receipt number
                 String receiptNo = "RCP-" + System.currentTimeMillis();
                 
-                String query = "UPDATE fee SET status = 'Paid', paid_date = CURDATE(), receipt_no = ? WHERE fee_id = ?";
-                PreparedStatement stmt = conn.prepareStatement(query);
-                stmt.setString(1, receiptNo);
-                stmt.setInt(2, feeId);
-                stmt.executeUpdate();
-                stmt.close();
-                conn.close();
+                String query = "UPDATE fee SET status = 'Paid', paid_date = CURDATE(), receipt_no = '" + receiptNo + "' WHERE fee_id = '" + feeId + "'";
+                MySQL.executeIUD(query);
                 
                 JOptionIcon.showSuccessDialog(this, "Fee marked as paid. Receipt No: " + receiptNo);
                 loadFeeData();
                 
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 JOptionIcon.showErrorDialog(this, "Error marking fee as paid: " + e.getMessage());
             }
         }

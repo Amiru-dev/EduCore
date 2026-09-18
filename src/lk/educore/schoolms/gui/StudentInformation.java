@@ -169,18 +169,13 @@ public class StudentInformation extends JPanel {
 
     private void loadStudentInfo() {
         try {
-            Connection conn = MySQL.getConnection();
-            String query = "SELECT s.student_id, s.first_name, s.last_name, s.nic, s.email, s.phone, s.address, " +
+            ResultSet rs = MySQL.executeSearch("SELECT s.student_id, s.first_name, s.last_name, s.nic, s.email, s.phone, s.address, " +
                           "g.grade_name, gu.first_name as guardian_first, gu.last_name as guardian_last, " +
                           "gu.phone as guardian_phone, s.registration_date " +
                           "FROM student s " +
                           "JOIN grade g ON s.grade_id = g.grade_id " +
                           "JOIN guardian gu ON s.guardian_id = gu.guardian_id " +
-                          "WHERE s.student_id = ?";
-            
-            PreparedStatement stmt = conn.prepareStatement(query);
-            stmt.setString(1, studentId);
-            ResultSet rs = stmt.executeQuery();
+                          "WHERE s.student_id = '" + studentId + "'");
             
             if (rs.next()) {
                 lblStudentId.setText(rs.getString("student_id"));
@@ -198,10 +193,8 @@ public class StudentInformation extends JPanel {
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error loading student information: " + e.getMessage());
         }
     }

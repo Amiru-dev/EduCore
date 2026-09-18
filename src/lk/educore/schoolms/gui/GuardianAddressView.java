@@ -69,21 +69,15 @@ public class GuardianAddressView extends JPanel {
 
     private void loadAddress() {
         try {
-            Connection conn = MySQL.getConnection();
-            String query = "SELECT address FROM guardian WHERE guardian_id = ?";
-            PreparedStatement stmt = conn.prepareStatement(query);
-            stmt.setInt(1, guardianId);
-            ResultSet rs = stmt.executeQuery();
+            ResultSet rs = MySQL.executeSearch("SELECT address FROM guardian WHERE guardian_id = '" + guardianId + "'");
             
             if (rs.next()) {
                 txtAddress.setText(rs.getString("address"));
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error loading address: " + e.getMessage());
         }
     }
@@ -93,20 +87,13 @@ public class GuardianAddressView extends JPanel {
             String address = txtAddress.getText().trim();
             DataValidator.isRequired(address);
             
-            Connection conn = MySQL.getConnection();
-            String query = "UPDATE guardian SET address = ? WHERE guardian_id = ?";
-            PreparedStatement stmt = conn.prepareStatement(query);
-            stmt.setString(1, address);
-            stmt.setInt(2, guardianId);
-            stmt.executeUpdate();
-            stmt.close();
-            conn.close();
+            MySQL.executeIUD("UPDATE guardian SET address = '" + address + "' WHERE guardian_id = '" + guardianId + "'");
             
             JOptionIcon.showSuccessDialog(this, "Address updated successfully!");
             
         } catch (ValidationException e) {
             JOptionIcon.showErrorDialog(this, e.getUserFriendlyMessage());
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error saving address: " + e.getMessage());
         }
     }

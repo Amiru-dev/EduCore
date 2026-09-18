@@ -159,15 +159,9 @@ public class SignIn extends JFrame {
             DataValidator.isRequired(username);
             DataValidator.isRequired(password);
 
-            Connection conn = MySQL.getConnection();
-            String query = "SELECT u.user_id, u.password, ut.type_name FROM user u "
+            ResultSet rs = MySQL.executeSearch("SELECT u.user_id, u.password, ut.type_name FROM user u "
                     + "JOIN user_type ut ON u.user_type_id = ut.user_type_id "
-                    + "WHERE u.username = ? AND ut.type_name = ?";
-
-            PreparedStatement stmt = conn.prepareStatement(query);
-            stmt.setString(1, username);
-            stmt.setString(2, role);
-            ResultSet rs = stmt.executeQuery();
+                    + "WHERE u.username = '" + username + "' AND ut.type_name = '" + role + "'");
 
             if (rs.next()) {
                 String storedPassword = rs.getString("password");
@@ -192,12 +186,10 @@ public class SignIn extends JFrame {
             }
 
             rs.close();
-            stmt.close();
-            conn.close();
 
         } catch (ValidationException e) {
             JOptionIcon.showErrorDialog(this, e.getUserFriendlyMessage());
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Database error: " + e.getMessage());
         }
     }

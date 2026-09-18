@@ -83,15 +83,10 @@ public class StudentView extends JDialog {
         gbc.anchor = GridBagConstraints.WEST;
 
         try {
-            Connection conn = MySQL.getConnection();
-            String query = "SELECT g.grade_name, s.registration_date " +
+            ResultSet rs = MySQL.executeSearch("SELECT g.grade_name, s.registration_date " +
                           "FROM student s " +
                           "JOIN grade g ON s.grade_id = g.grade_id " +
-                          "WHERE s.student_id = ?";
-            
-            PreparedStatement stmt = conn.prepareStatement(query);
-            stmt.setString(1, studentId);
-            ResultSet rs = stmt.executeQuery();
+                          "WHERE s.student_id = '" + studentId + "'");
             
             if (rs.next()) {
                 gbc.gridx = 0;
@@ -113,10 +108,8 @@ public class StudentView extends JDialog {
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             contentPanel.add(new JLabel("Error loading academic information"), gbc);
         }
         
@@ -189,18 +182,12 @@ public class StudentView extends JDialog {
         int confirm = JOptionIcon.showConfirmDialog(this, "Are you sure you want to delete this student?");
         if (confirm == JOptionPane.YES_OPTION) {
             try {
-                Connection conn = MySQL.getConnection();
-                String query = "UPDATE student SET is_active = 0 WHERE student_id = ?";
-                PreparedStatement stmt = conn.prepareStatement(query);
-                stmt.setString(1, studentId);
-                stmt.executeUpdate();
-                stmt.close();
-                conn.close();
+                MySQL.executeIUD("UPDATE student SET is_active = 0 WHERE student_id = '" + studentId + "'");
                 
                 JOptionIcon.showSuccessDialog(this, "Student deleted successfully.");
                 dispose();
                 
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 JOptionIcon.showErrorDialog(this, "Error deleting student: " + e.getMessage());
             }
         }
@@ -208,11 +195,7 @@ public class StudentView extends JDialog {
 
     private void sendEmail() {
         try {
-            Connection conn = MySQL.getConnection();
-            String query = "SELECT email, first_name, last_name FROM student WHERE student_id = ?";
-            PreparedStatement stmt = conn.prepareStatement(query);
-            stmt.setString(1, studentId);
-            ResultSet rs = stmt.executeQuery();
+            ResultSet rs = MySQL.executeSearch("SELECT email, first_name, last_name FROM student WHERE student_id = '" + studentId + "'");
             
             if (rs.next()) {
                 String email = rs.getString("email");
@@ -222,21 +205,15 @@ public class StudentView extends JDialog {
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error loading student email: " + e.getMessage());
         }
     }
 
     private void generateQRCode() {
         try {
-            Connection conn = MySQL.getConnection();
-            String query = "SELECT first_name, last_name FROM student WHERE student_id = ?";
-            PreparedStatement stmt = conn.prepareStatement(query);
-            stmt.setString(1, studentId);
-            ResultSet rs = stmt.executeQuery();
+            ResultSet rs = MySQL.executeSearch("SELECT first_name, last_name FROM student WHERE student_id = '" + studentId + "'");
             
             if (rs.next()) {
                 String name = rs.getString("first_name") + " " + rs.getString("last_name");
@@ -245,10 +222,8 @@ public class StudentView extends JDialog {
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error generating QR code: " + e.getMessage());
         }
     }

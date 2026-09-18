@@ -163,56 +163,40 @@ public class DashboardPanel extends JPanel {
 
     private void loadStatistics() {
         try {
-            Connection conn = MySQL.getConnection();
-
             // Total Students
-            String studentQuery = "SELECT COUNT(*) FROM student WHERE is_active = 1";
-            PreparedStatement studentStmt = conn.prepareStatement(studentQuery);
-            ResultSet studentRs = studentStmt.executeQuery();
+            ResultSet studentRs = MySQL.executeSearch("SELECT COUNT(*) FROM student WHERE is_active = 1");
             if (studentRs.next()) {
                 lblTotalStudents.setText(String.valueOf(studentRs.getInt(1)));
             }
             studentRs.close();
-            studentStmt.close();
 
             // Total Teachers
-            String teacherQuery = "SELECT COUNT(*) FROM teacher WHERE status_id = 1";
-            PreparedStatement teacherStmt = conn.prepareStatement(teacherQuery);
-            ResultSet teacherRs = teacherStmt.executeQuery();
+            ResultSet teacherRs = MySQL.executeSearch("SELECT COUNT(*) FROM teacher WHERE status_id = 1");
             if (teacherRs.next()) {
                 lblTotalTeachers.setText(String.valueOf(teacherRs.getInt(1)));
             }
             teacherRs.close();
-            teacherStmt.close();
 
             // Attendance Rate (last 30 days)
-            String attendanceQuery = "SELECT " +
+            ResultSet attendanceRs = MySQL.executeSearch("SELECT " +
                 "ROUND((SELECT COUNT(*) FROM student_attendance " +
                 "WHERE status = 'Present' AND date_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)) * 100.0 / " +
                 "(SELECT COUNT(*) FROM student_attendance " +
-                "WHERE date_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)), 1)";
-            PreparedStatement attendanceStmt = conn.prepareStatement(attendanceQuery);
-            ResultSet attendanceRs = attendanceStmt.executeQuery();
+                "WHERE date_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)), 1)");
             if (attendanceRs.next()) {
                 lblAttendanceRate.setText(attendanceRs.getString(1) + "%");
             }
             attendanceRs.close();
-            attendanceStmt.close();
 
             // Fee Collection (current month)
-            String feeQuery = "SELECT COALESCE(SUM(amount), 0) FROM fee " +
-                "WHERE status = 'Paid' AND paid_date >= DATE_FORMAT(CURDATE(), '%Y-%m-01')";
-            PreparedStatement feeStmt = conn.prepareStatement(feeQuery);
-            ResultSet feeRs = feeStmt.executeQuery();
+            ResultSet feeRs = MySQL.executeSearch("SELECT COALESCE(SUM(amount), 0) FROM fee " +
+                "WHERE status = 'Paid' AND paid_date >= DATE_FORMAT(CURDATE(), '%Y-%m-01')");
             if (feeRs.next()) {
                 lblFeeCollection.setText("Rs. " + String.format("%,.2f", feeRs.getDouble(1)));
             }
             feeRs.close();
-            feeStmt.close();
 
-            conn.close();
-
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             // Set default values on error
             lblTotalStudents.setText("0");

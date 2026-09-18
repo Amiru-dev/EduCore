@@ -94,15 +94,11 @@ public class FinanceManagement extends JPanel {
         try {
             tableModel.setRowCount(0);
             
-            Connection conn = MySQL.getConnection();
-            String query = "SELECT f.finance_id, f.description, tt.type_name, f.amount, f.transaction_date, pm.method_name " +
+            ResultSet rs = MySQL.executeSearch("SELECT f.finance_id, f.description, tt.type_name, f.amount, f.transaction_date, pm.method_name " +
                           "FROM finance f " +
                           "JOIN transaction_type tt ON f.transaction_type_id = tt.transaction_type_id " +
                           "LEFT JOIN payment_method pm ON f.payment_method_id = pm.payment_method_id " +
-                          "ORDER BY f.transaction_date DESC";
-            
-            PreparedStatement stmt = conn.prepareStatement(query);
-            ResultSet rs = stmt.executeQuery();
+                          "ORDER BY f.transaction_date DESC");
             
             DecimalFormat df = new DecimalFormat("'Rs.' #,##0.00");
             
@@ -118,10 +114,8 @@ public class FinanceManagement extends JPanel {
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error loading finance data: " + e.getMessage());
         }
     }

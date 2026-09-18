@@ -142,14 +142,10 @@ public class LibraryManagement extends JPanel {
         try {
             tableModel.setRowCount(0);
             
-            Connection conn = MySQL.getConnection();
-            String query = "SELECT b.isbn, b.title, b.author, c.category_name, b.available_qty, b.quantity " +
+            ResultSet rs = MySQL.executeSearch("SELECT b.isbn, b.title, b.author, c.category_name, b.available_qty, b.quantity " +
                           "FROM book b " +
                           "JOIN book_category c ON b.category_id = c.category_id " +
-                          "ORDER BY b.title";
-            
-            PreparedStatement stmt = conn.prepareStatement(query);
-            ResultSet rs = stmt.executeQuery();
+                          "ORDER BY b.title");
             
             while (rs.next()) {
                 String isbn = rs.getString("isbn");
@@ -163,10 +159,8 @@ public class LibraryManagement extends JPanel {
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error loading book data: " + e.getMessage());
         }
     }

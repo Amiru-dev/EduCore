@@ -125,6 +125,22 @@ public class MySQL {
     }
 
     /**
+     * Execute SELECT query
+     */
+    public static ResultSet executeSearch(String query) throws Exception {
+        Statement statement = getConnection().createStatement();
+        return statement.executeQuery(query);
+    }
+
+    /**
+     * Execute INSERT, UPDATE, DELETE queries
+     */
+    public static int executeIUD(String query) throws Exception {
+        Statement statement = getConnection().createStatement();
+        return statement.executeUpdate(query);
+    }
+
+    /**
      * Get database connection
      */
     public static Connection getConnection() throws SQLException {

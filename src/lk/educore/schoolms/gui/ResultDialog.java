@@ -146,19 +146,14 @@ public class ResultDialog extends JDialog {
 
     private void loadResultDetails() {
         try {
-            Connection conn = MySQL.getConnection();
-            String query = "SELECT r.student_id, s.first_name, s.last_name, e.exam_name, sub.subject_name, " +
+            ResultSet rs = MySQL.executeSearch("SELECT r.student_id, s.first_name, s.last_name, e.exam_name, sub.subject_name, " +
                           "r.marks_obtained, r.grade_letter, t.first_name as teacher_first, t.last_name as teacher_last, r.remarks " +
                           "FROM result r " +
                           "JOIN student s ON r.student_id = s.student_id " +
                           "JOIN exam e ON r.exam_id = e.exam_id " +
                           "JOIN subject sub ON e.subject_id = sub.subject_id " +
                           "LEFT JOIN teacher t ON r.teacher_NIC = t.NIC " +
-                          "WHERE r.result_id = ?";
-            
-            PreparedStatement stmt = conn.prepareStatement(query);
-            stmt.setInt(1, resultId);
-            ResultSet rs = stmt.executeQuery();
+                          "WHERE r.result_id = '" + resultId + "'");
             
             if (rs.next()) {
                 lblStudentId.setText(rs.getString("student_id"));
@@ -172,10 +167,8 @@ public class ResultDialog extends JDialog {
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error loading result details: " + e.getMessage());
         }
     }

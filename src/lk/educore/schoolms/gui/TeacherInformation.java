@@ -158,17 +158,12 @@ public class TeacherInformation extends JPanel {
 
     private void loadTeacherInfo() {
         try {
-            Connection conn = MySQL.getConnection();
-            String query = "SELECT t.NIC, t.first_name, t.last_name, t.email, t.phone, t.address, " +
+            ResultSet rs = MySQL.executeSearch("SELECT t.NIC, t.first_name, t.last_name, t.email, t.phone, t.address, " +
                           "tt.type_name, t.salary, ts.status_name, t.hire_date " +
                           "FROM teacher t " +
                           "JOIN teacher_type tt ON t.teacher_type_id = tt.teacher_type_id " +
                           "JOIN teacher_status ts ON t.status_id = ts.status_id " +
-                          "WHERE t.NIC = ?";
-            
-            PreparedStatement stmt = conn.prepareStatement(query);
-            stmt.setString(1, teacherNIC);
-            ResultSet rs = stmt.executeQuery();
+                          "WHERE t.NIC = '" + teacherNIC + "'");
             
             if (rs.next()) {
                 lblNIC.setText(rs.getString("NIC"));
@@ -185,10 +180,8 @@ public class TeacherInformation extends JPanel {
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error loading teacher information: " + e.getMessage());
         }
     }

@@ -151,11 +151,7 @@ public class AttendanceFrame extends JFrame {
                 DataValidator.isValidNIC(nic.trim());
                 
                 // Load teacher information
-                Connection conn = MySQL.getConnection();
-                String query = "SELECT first_name, last_name FROM teacher WHERE NIC = ? AND status_id = 1";
-                PreparedStatement stmt = conn.prepareStatement(query);
-                stmt.setString(1, nic.trim());
-                ResultSet rs = stmt.executeQuery();
+                ResultSet rs = MySQL.executeSearch("SELECT first_name, last_name FROM teacher WHERE NIC = '" + nic.trim() + "' AND status_id = 1");
                 
                 if (rs.next()) {
                     String name = rs.getString("first_name") + " " + rs.getString("last_name");
@@ -177,12 +173,10 @@ public class AttendanceFrame extends JFrame {
                 }
                 
                 rs.close();
-                stmt.close();
-                conn.close();
                 
             } catch (ValidationException e) {
                 JOptionIcon.showErrorDialog(this, e.getUserFriendlyMessage());
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 JOptionIcon.showErrorDialog(this, "Error marking attendance: " + e.getMessage());
             }
         }
@@ -190,34 +184,21 @@ public class AttendanceFrame extends JFrame {
 
     private void recordAttendance(String nic) {
         try {
-            Connection conn = MySQL.getConnection();
-            
             // Check if attendance already marked today
-            String checkQuery = "SELECT COUNT(*) FROM teacher_attendance WHERE teacher_NIC = ? AND DATE(date_time) = CURDATE()";
-            PreparedStatement checkStmt = conn.prepareStatement(checkQuery);
-            checkStmt.setString(1, nic);
-            ResultSet checkRs = checkStmt.executeQuery();
+            ResultSet checkRs = MySQL.executeSearch("SELECT COUNT(*) FROM teacher_attendance WHERE teacher_NIC = '" + nic + "' AND DATE(date_time) = CURDATE()");
             
             if (checkRs.next() && checkRs.getInt(1) > 0) {
                 JOptionIcon.showWarningDialog(this, "Attendance already marked for today.");
                 checkRs.close();
-                checkStmt.close();
-                conn.close();
                 return;
             }
             
             checkRs.close();
-            checkStmt.close();
             
             // Insert attendance record
-            String query = "INSERT INTO teacher_attendance (teacher_NIC, date_time, check_in) VALUES (?, NOW(), CURTIME())";
-            PreparedStatement stmt = conn.prepareStatement(query);
-            stmt.setString(1, nic);
-            stmt.executeUpdate();
-            stmt.close();
-            conn.close();
+            MySQL.executeIUD("INSERT INTO teacher_attendance (teacher_NIC, date_time, check_in) VALUES ('" + nic + "', NOW(), CURTIME())");
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error recording attendance: " + e.getMessage());
         }
     }

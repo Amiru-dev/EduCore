@@ -116,18 +116,14 @@ public class ViewFeeRecords extends JPanel {
         try {
             tableModel.setRowCount(0);
             
-            Connection conn = MySQL.getConnection();
-            String query = "SELECT f.receipt_no, f.student_id, s.first_name, s.last_name, ft.fee_type_name, " +
+            ResultSet rs = MySQL.executeSearch("SELECT f.receipt_no, f.student_id, s.first_name, s.last_name, ft.fee_type_name, " +
                           "f.amount, f.paid_date, pm.method_name " +
                           "FROM fee f " +
                           "JOIN student s ON f.student_id = s.student_id " +
                           "JOIN fee_type ft ON f.fee_type_id = ft.fee_type_id " +
                           "LEFT JOIN payment_method pm ON f.payment_method_id = pm.payment_method_id " +
                           "WHERE f.status = 'Paid' " +
-                          "ORDER BY f.paid_date DESC";
-            
-            PreparedStatement stmt = conn.prepareStatement(query);
-            ResultSet rs = stmt.executeQuery();
+                          "ORDER BY f.paid_date DESC");
             
             DecimalFormat df = new DecimalFormat("'Rs.' #,##0.00");
             
@@ -145,10 +141,8 @@ public class ViewFeeRecords extends JPanel {
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error loading fee records: " + e.getMessage());
         }
     }
@@ -161,7 +155,6 @@ public class ViewFeeRecords extends JPanel {
             
             tableModel.setRowCount(0);
             
-            Connection conn = MySQL.getConnection();
             StringBuilder queryBuilder = new StringBuilder(
                 "SELECT f.receipt_no, f.student_id, s.first_name, s.last_name, ft.fee_type_name, " +
                 "f.amount, f.paid_date, pm.method_name " +
@@ -175,40 +168,24 @@ public class ViewFeeRecords extends JPanel {
             if (!searchTerm.isEmpty()) {
                 switch (filterBy) {
                     case "Student ID":
-                        queryBuilder.append("AND f.student_id LIKE ? ");
+                        queryBuilder.append("AND f.student_id LIKE '%" + searchTerm + "%' ");
                         break;
                     case "Student Name":
-                        queryBuilder.append("AND (s.first_name LIKE ? OR s.last_name LIKE ?) ");
+                        queryBuilder.append("AND (s.first_name LIKE '%" + searchTerm + "%' OR s.last_name LIKE '%" + searchTerm + "%') ");
                         break;
                     case "Receipt No":
-                        queryBuilder.append("AND f.receipt_no LIKE ? ");
+                        queryBuilder.append("AND f.receipt_no LIKE '%" + searchTerm + "%' ");
                         break;
                 }
             }
             
             if (!"All".equals(statusFilter)) {
-                queryBuilder.append("AND f.status = ? ");
+                queryBuilder.append("AND f.status = '" + statusFilter + "' ");
             }
             
             queryBuilder.append("ORDER BY f.paid_date DESC");
             
-            PreparedStatement stmt = conn.prepareStatement(queryBuilder.toString());
-            
-            int paramIndex = 1;
-            if (!searchTerm.isEmpty()) {
-                if (filterBy.equals("Student Name")) {
-                    stmt.setString(paramIndex++, "%" + searchTerm + "%");
-                    stmt.setString(paramIndex++, "%" + searchTerm + "%");
-                } else {
-                    stmt.setString(paramIndex++, "%" + searchTerm + "%");
-                }
-            }
-            
-            if (!"All".equals(statusFilter)) {
-                stmt.setString(paramIndex++, statusFilter);
-            }
-            
-            ResultSet rs = stmt.executeQuery();
+            ResultSet rs = MySQL.executeSearch(queryBuilder.toString());
             
             DecimalFormat df = new DecimalFormat("'Rs.' #,##0.00");
             
@@ -226,10 +203,8 @@ public class ViewFeeRecords extends JPanel {
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error searching fee records: " + e.getMessage());
         }
     }

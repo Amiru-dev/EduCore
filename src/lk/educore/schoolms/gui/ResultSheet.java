@@ -94,18 +94,13 @@ public class ResultSheet extends JDialog {
         try {
             tableModel.setRowCount(0);
             
-            Connection conn = MySQL.getConnection();
-            String query = "SELECT r.student_id, s.first_name, s.last_name, r.marks_obtained, r.grade_letter, " +
+            ResultSet rs = MySQL.executeSearch("SELECT r.student_id, s.first_name, s.last_name, r.marks_obtained, r.grade_letter, " +
                           "t.first_name as teacher_first, t.last_name as teacher_last " +
                           "FROM result r " +
                           "JOIN student s ON r.student_id = s.student_id " +
                           "LEFT JOIN teacher t ON r.teacher_NIC = t.NIC " +
-                          "WHERE r.exam_id = ? " +
-                          "ORDER BY r.marks_obtained DESC";
-            
-            PreparedStatement stmt = conn.prepareStatement(query);
-            stmt.setInt(1, examId);
-            ResultSet rs = stmt.executeQuery();
+                          "WHERE r.exam_id = '" + examId + "' " +
+                          "ORDER BY r.marks_obtained DESC");
             
             while (rs.next()) {
                 String studentId = rs.getString("student_id");
@@ -118,10 +113,8 @@ public class ResultSheet extends JDialog {
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error loading results: " + e.getMessage());
         }
     }
@@ -156,19 +149,12 @@ public class ResultSheet extends JDialog {
         
         if (confirm == JOptionPane.YES_OPTION) {
             try {
-                Connection conn = MySQL.getConnection();
-                String query = "DELETE FROM result WHERE exam_id = ? AND student_id = ?";
-                PreparedStatement stmt = conn.prepareStatement(query);
-                stmt.setInt(1, examId);
-                stmt.setString(2, studentId);
-                stmt.executeUpdate();
-                stmt.close();
-                conn.close();
+                MySQL.executeIUD("DELETE FROM result WHERE exam_id = '" + examId + "' AND student_id = '" + studentId + "'");
                 
                 JOptionIcon.showSuccessDialog(this, "Result deleted successfully.");
                 loadResults();
                 
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 JOptionIcon.showErrorDialog(this, "Error deleting result: " + e.getMessage());
             }
         }
@@ -176,44 +162,30 @@ public class ResultSheet extends JDialog {
 
     private void calculateGrades() {
         try {
-            Connection conn = MySQL.getConnection();
-            
             // Get max marks for this exam
-            String maxMarksQuery = "SELECT max_marks FROM exam WHERE exam_id = ?";
-            PreparedStatement maxStmt = conn.prepareStatement(maxMarksQuery);
-            maxStmt.setInt(1, examId);
-            ResultSet maxRs = maxStmt.executeQuery();
+            ResultSet maxRs = MySQL.executeSearch("SELECT max_marks FROM exam WHERE exam_id = '" + examId + "'");
             
             if (maxRs.next()) {
                 double maxMarks = maxRs.getDouble("max_marks");
                 
                 // Update grades based on marks
                 String updateQuery = "UPDATE result SET grade_letter = CASE " +
-                                   "WHEN marks_obtained >= ? * 0.9 THEN 'A' " +
-                                   "WHEN marks_obtained >= ? * 0.8 THEN 'B' " +
-                                   "WHEN marks_obtained >= ? * 0.7 THEN 'C' " +
-                                   "WHEN marks_obtained >= ? * 0.6 THEN 'D' " +
+                                   "WHEN marks_obtained >= " + maxMarks + " * 0.9 THEN 'A' " +
+                                   "WHEN marks_obtained >= " + maxMarks + " * 0.8 THEN 'B' " +
+                                   "WHEN marks_obtained >= " + maxMarks + " * 0.7 THEN 'C' " +
+                                   "WHEN marks_obtained >= " + maxMarks + " * 0.6 THEN 'D' " +
                                    "ELSE 'F' " +
-                                   "END WHERE exam_id = ?";
+                                   "END WHERE exam_id = '" + examId + "'";
                 
-                PreparedStatement updateStmt = conn.prepareStatement(updateQuery);
-                updateStmt.setDouble(1, maxMarks);
-                updateStmt.setDouble(2, maxMarks);
-                updateStmt.setDouble(3, maxMarks);
-                updateStmt.setDouble(4, maxMarks);
-                updateStmt.setInt(5, examId);
-                updateStmt.executeUpdate();
-                updateStmt.close();
+                MySQL.executeIUD(updateQuery);
                 
                 JOptionIcon.showSuccessDialog(this, "Grades calculated successfully.");
                 loadResults();
             }
             
             maxRs.close();
-            maxStmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error calculating grades: " + e.getMessage());
         }
     }

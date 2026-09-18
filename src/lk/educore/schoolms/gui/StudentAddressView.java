@@ -69,21 +69,15 @@ public class StudentAddressView extends JPanel {
 
     private void loadAddress() {
         try {
-            Connection conn = MySQL.getConnection();
-            String query = "SELECT address FROM student WHERE student_id = ?";
-            PreparedStatement stmt = conn.prepareStatement(query);
-            stmt.setString(1, studentId);
-            ResultSet rs = stmt.executeQuery();
+            ResultSet rs = MySQL.executeSearch("SELECT address FROM student WHERE student_id = '" + studentId + "'");
             
             if (rs.next()) {
                 txtAddress.setText(rs.getString("address"));
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error loading address: " + e.getMessage());
         }
     }
@@ -93,20 +87,13 @@ public class StudentAddressView extends JPanel {
             String address = txtAddress.getText().trim();
             DataValidator.isRequired(address);
             
-            Connection conn = MySQL.getConnection();
-            String query = "UPDATE student SET address = ? WHERE student_id = ?";
-            PreparedStatement stmt = conn.prepareStatement(query);
-            stmt.setString(1, address);
-            stmt.setString(2, studentId);
-            stmt.executeUpdate();
-            stmt.close();
-            conn.close();
+            MySQL.executeIUD("UPDATE student SET address = '" + address + "' WHERE student_id = '" + studentId + "'");
             
             JOptionIcon.showSuccessDialog(this, "Address updated successfully!");
             
         } catch (ValidationException e) {
             JOptionIcon.showErrorDialog(this, e.getUserFriendlyMessage());
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error saving address: " + e.getMessage());
         }
     }

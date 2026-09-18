@@ -82,40 +82,30 @@ public class AcademicPerformance extends JPanel {
 
     private void loadGrades() {
         try {
-            Connection conn = MySQL.getConnection();
-            String query = "SELECT grade_name FROM grade ORDER BY grade_name";
-            PreparedStatement stmt = conn.prepareStatement(query);
-            ResultSet rs = stmt.executeQuery();
+            ResultSet rs = MySQL.executeSearch("SELECT grade_name FROM grade ORDER BY grade_name");
             
             while (rs.next()) {
                 cmbGrade.addItem(rs.getString("grade_name"));
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     private void loadSubjects() {
         try {
-            Connection conn = MySQL.getConnection();
-            String query = "SELECT DISTINCT subject_name FROM subject ORDER BY subject_name";
-            PreparedStatement stmt = conn.prepareStatement(query);
-            ResultSet rs = stmt.executeQuery();
+            ResultSet rs = MySQL.executeSearch("SELECT DISTINCT subject_name FROM subject ORDER BY subject_name");
             
             while (rs.next()) {
                 cmbSubject.addItem(rs.getString("subject_name"));
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -124,18 +114,14 @@ public class AcademicPerformance extends JPanel {
         try {
             tableModel.setRowCount(0);
             
-            Connection conn = MySQL.getConnection();
-            String query = "SELECT r.student_id, s.first_name, s.last_name, sub.subject_name, e.exam_name, " +
+            ResultSet rs = MySQL.executeSearch("SELECT r.student_id, s.first_name, s.last_name, sub.subject_name, e.exam_name, " +
                           "r.marks_obtained, r.grade_letter " +
                           "FROM result r " +
                           "JOIN student s ON r.student_id = s.student_id " +
                           "JOIN exam e ON r.exam_id = e.exam_id " +
                           "JOIN subject sub ON e.subject_id = sub.subject_id " +
                           "ORDER BY r.marks_obtained DESC " +
-                          "LIMIT 50";
-            
-            PreparedStatement stmt = conn.prepareStatement(query);
-            ResultSet rs = stmt.executeQuery();
+                          "LIMIT 50");
             
             while (rs.next()) {
                 String studentId = rs.getString("student_id");
@@ -149,10 +135,8 @@ public class AcademicPerformance extends JPanel {
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error loading performance data: " + e.getMessage());
         }
     }

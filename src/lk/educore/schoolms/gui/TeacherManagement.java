@@ -199,15 +199,11 @@ public class TeacherManagement extends JPanel {
         try {
             tableModel.setRowCount(0);
             
-            Connection conn = MySQL.getConnection();
-            String query = "SELECT t.NIC, t.first_name, t.last_name, tt.type_name, t.email, t.phone, t.salary, ts.status_name " +
+            ResultSet rs = MySQL.executeSearch("SELECT t.NIC, t.first_name, t.last_name, tt.type_name, t.email, t.phone, t.salary, ts.status_name " +
                           "FROM teacher t " +
                           "JOIN teacher_type tt ON t.teacher_type_id = tt.teacher_type_id " +
                           "JOIN teacher_status ts ON t.status_id = ts.status_id " +
-                          "ORDER BY t.first_name, t.last_name";
-            
-            PreparedStatement stmt = conn.prepareStatement(query);
-            ResultSet rs = stmt.executeQuery();
+                          "ORDER BY t.first_name, t.last_name");
             
             while (rs.next()) {
                 String nic = rs.getString("NIC");
@@ -222,10 +218,8 @@ public class TeacherManagement extends JPanel {
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error loading teacher data: " + e.getMessage());
         }
     }
@@ -242,7 +236,6 @@ public class TeacherManagement extends JPanel {
             
             tableModel.setRowCount(0);
             
-            Connection conn = MySQL.getConnection();
             String query;
             
             switch (searchBy) {
@@ -251,7 +244,7 @@ public class TeacherManagement extends JPanel {
                             "FROM teacher t " +
                             "JOIN teacher_type tt ON t.teacher_type_id = tt.teacher_type_id " +
                             "JOIN teacher_status ts ON t.status_id = ts.status_id " +
-                            "WHERE t.NIC LIKE ? " +
+                            "WHERE t.NIC LIKE '%" + searchTerm + "%' " +
                             "ORDER BY t.first_name, t.last_name";
                     break;
                 case "Name":
@@ -259,7 +252,7 @@ public class TeacherManagement extends JPanel {
                             "FROM teacher t " +
                             "JOIN teacher_type tt ON t.teacher_type_id = tt.teacher_type_id " +
                             "JOIN teacher_status ts ON t.status_id = ts.status_id " +
-                            "WHERE t.first_name LIKE ? OR t.last_name LIKE ? " +
+                            "WHERE t.first_name LIKE '%" + searchTerm + "%' OR t.last_name LIKE '%" + searchTerm + "%' " +
                             "ORDER BY t.first_name, t.last_name";
                     break;
                 case "Type":
@@ -267,7 +260,7 @@ public class TeacherManagement extends JPanel {
                             "FROM teacher t " +
                             "JOIN teacher_type tt ON t.teacher_type_id = tt.teacher_type_id " +
                             "JOIN teacher_status ts ON t.status_id = ts.status_id " +
-                            "WHERE tt.type_name LIKE ? " +
+                            "WHERE tt.type_name LIKE '%" + searchTerm + "%' " +
                             "ORDER BY t.first_name, t.last_name";
                     break;
                 case "Status":
@@ -275,7 +268,7 @@ public class TeacherManagement extends JPanel {
                             "FROM teacher t " +
                             "JOIN teacher_type tt ON t.teacher_type_id = tt.teacher_type_id " +
                             "JOIN teacher_status ts ON t.status_id = ts.status_id " +
-                            "WHERE ts.status_name LIKE ? " +
+                            "WHERE ts.status_name LIKE '%" + searchTerm + "%' " +
                             "ORDER BY t.first_name, t.last_name";
                     break;
                 default:
@@ -286,16 +279,7 @@ public class TeacherManagement extends JPanel {
                             "ORDER BY t.first_name, t.last_name";
             }
             
-            PreparedStatement stmt = conn.prepareStatement(query);
-            
-            if (searchBy.equals("Name")) {
-                stmt.setString(1, "%" + searchTerm + "%");
-                stmt.setString(2, "%" + searchTerm + "%");
-            } else {
-                stmt.setString(1, "%" + searchTerm + "%");
-            }
-            
-            ResultSet rs = stmt.executeQuery();
+            ResultSet rs = MySQL.executeSearch(query);
             
             while (rs.next()) {
                 String nic = rs.getString("NIC");
@@ -310,10 +294,8 @@ public class TeacherManagement extends JPanel {
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error searching teachers: " + e.getMessage());
         }
     }
@@ -348,18 +330,13 @@ public class TeacherManagement extends JPanel {
         
         if (confirm == JOptionPane.YES_OPTION) {
             try {
-                Connection conn = MySQL.getConnection();
-                String query = "UPDATE teacher SET status_id = 2 WHERE NIC = ?"; // 2 = Inactive
-                PreparedStatement stmt = conn.prepareStatement(query);
-                stmt.setString(1, nic);
-                stmt.executeUpdate();
-                stmt.close();
-                conn.close();
+                String query = "UPDATE teacher SET status_id = 2 WHERE NIC = '" + nic + "'"; // 2 = Inactive
+                MySQL.executeIUD(query);
                 
                 JOptionIcon.showSuccessDialog(this, "Teacher deleted successfully.");
                 loadTeacherData();
                 
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 JOptionIcon.showErrorDialog(this, "Error deleting teacher: " + e.getMessage());
             }
         }

@@ -121,20 +121,15 @@ public class BasicSalaryOptions extends JDialog {
 
     private void loadTeacherTypes() {
         try {
-            Connection conn = MySQL.getConnection();
-            String query = "SELECT type_name FROM teacher_type ORDER BY type_name";
-            PreparedStatement stmt = conn.prepareStatement(query);
-            ResultSet rs = stmt.executeQuery();
+            ResultSet rs = MySQL.executeSearch("SELECT type_name FROM teacher_type ORDER BY type_name");
             
             while (rs.next()) {
                 cmbTeacherType.addItem(rs.getString("type_name"));
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error loading teacher types: " + e.getMessage());
         }
     }
@@ -143,19 +138,11 @@ public class BasicSalaryOptions extends JDialog {
         String teacherType = (String) cmbTeacherType.getSelectedItem();
         if (teacherType == null) return;
         
-        try {
-            Connection conn = MySQL.getConnection();
-            // In a real implementation, you would have a salary_config table
-            // For now, we'll just clear the fields
-            txtBasicSalary.setText("");
-            txtAllowance.setText("");
-            txtBonus.setText("");
-            
-            conn.close();
-            
-        } catch (SQLException e) {
-            JOptionIcon.showErrorDialog(this, "Error loading configuration: " + e.getMessage());
-        }
+        // In a real implementation, you would have a salary_config table
+        // For now, we'll just clear the fields
+        txtBasicSalary.setText("");
+        txtAllowance.setText("");
+        txtBonus.setText("");
     }
 
     private void saveConfiguration() {

@@ -149,12 +149,8 @@ public class GuardianDialog extends JDialog {
 
     private void loadGuardianDetails() {
         try {
-            Connection conn = MySQL.getConnection();
-            String query = "SELECT first_name, last_name, nic, relationship, phone, email, address, occupation " +
-                          "FROM guardian WHERE guardian_id = ?";
-            PreparedStatement stmt = conn.prepareStatement(query);
-            stmt.setInt(1, guardianId);
-            ResultSet rs = stmt.executeQuery();
+            ResultSet rs = MySQL.executeSearch("SELECT first_name, last_name, nic, relationship, phone, email, address, occupation " +
+                          "FROM guardian WHERE guardian_id = '" + guardianId + "'");
             
             if (rs.next()) {
                 txtFirstName.setText(rs.getString("first_name"));
@@ -168,10 +164,8 @@ public class GuardianDialog extends JDialog {
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error loading guardian details: " + e.getMessage());
         }
     }
@@ -200,29 +194,16 @@ public class GuardianDialog extends JDialog {
                 DataValidator.isValidEmail(email);
             }
             
-            Connection conn = MySQL.getConnection();
-            String query = "UPDATE guardian SET first_name = ?, last_name = ?, nic = ?, relationship = ?, " +
-                          "phone = ?, email = ?, occupation = ?, address = ? WHERE guardian_id = ?";
-            PreparedStatement stmt = conn.prepareStatement(query);
-            stmt.setString(1, firstName);
-            stmt.setString(2, lastName);
-            stmt.setString(3, nic.isEmpty() ? null : nic);
-            stmt.setString(4, relationship);
-            stmt.setString(5, phone);
-            stmt.setString(6, email.isEmpty() ? null : email);
-            stmt.setString(7, occupation.isEmpty() ? null : occupation);
-            stmt.setString(8, address);
-            stmt.setInt(9, guardianId);
-            stmt.executeUpdate();
-            stmt.close();
-            conn.close();
+            String query = "UPDATE guardian SET first_name = '" + firstName + "', last_name = '" + lastName + "', nic = " + (nic.isEmpty() ? "NULL" : "'" + nic + "'") + ", relationship = '" + relationship + "', " +
+                          "phone = '" + phone + "', email = " + (email.isEmpty() ? "NULL" : "'" + email + "'") + ", occupation = " + (occupation.isEmpty() ? "NULL" : "'" + occupation + "'") + ", address = '" + address + "' WHERE guardian_id = '" + guardianId + "'";
+            MySQL.executeIUD(query);
             
             JOptionIcon.showSuccessDialog(this, "Guardian details updated successfully!");
             dispose();
             
         } catch (ValidationException e) {
             JOptionIcon.showErrorDialog(this, e.getUserFriendlyMessage());
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error saving guardian details: " + e.getMessage());
         }
     }

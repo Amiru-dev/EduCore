@@ -159,17 +159,13 @@ public class ExamManagement extends JPanel {
         try {
             tableModel.setRowCount(0);
             
-            Connection conn = MySQL.getConnection();
-            String query = "SELECT e.exam_id, e.exam_name, sub.subject_name, g.grade_name, " +
+            ResultSet rs = MySQL.executeSearch("SELECT e.exam_id, e.exam_name, sub.subject_name, g.grade_name, " +
                           "et.exam_type_name, e.exam_date, e.max_marks " +
                           "FROM exam e " +
                           "JOIN subject sub ON e.subject_id = sub.subject_id " +
                           "JOIN grade g ON e.grade_id = g.grade_id " +
                           "JOIN exam_type et ON e.exam_type_id = et.exam_type_id " +
-                          "ORDER BY e.exam_date DESC";
-            
-            PreparedStatement stmt = conn.prepareStatement(query);
-            ResultSet rs = stmt.executeQuery();
+                          "ORDER BY e.exam_date DESC");
             
             while (rs.next()) {
                 int examId = rs.getInt("exam_id");
@@ -184,10 +180,8 @@ public class ExamManagement extends JPanel {
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error loading exam data: " + e.getMessage());
         }
     }
@@ -204,7 +198,6 @@ public class ExamManagement extends JPanel {
             
             tableModel.setRowCount(0);
             
-            Connection conn = MySQL.getConnection();
             String query;
             
             switch (searchBy) {
@@ -215,7 +208,7 @@ public class ExamManagement extends JPanel {
                             "JOIN subject sub ON e.subject_id = sub.subject_id " +
                             "JOIN grade g ON e.grade_id = g.grade_id " +
                             "JOIN exam_type et ON e.exam_type_id = et.exam_type_id " +
-                            "WHERE e.exam_name LIKE ? " +
+                            "WHERE e.exam_name LIKE '%" + searchTerm + "%' " +
                             "ORDER BY e.exam_date DESC";
                     break;
                 case "Subject":
@@ -225,7 +218,7 @@ public class ExamManagement extends JPanel {
                             "JOIN subject sub ON e.subject_id = sub.subject_id " +
                             "JOIN grade g ON e.grade_id = g.grade_id " +
                             "JOIN exam_type et ON e.exam_type_id = et.exam_type_id " +
-                            "WHERE sub.subject_name LIKE ? " +
+                            "WHERE sub.subject_name LIKE '%" + searchTerm + "%' " +
                             "ORDER BY e.exam_date DESC";
                     break;
                 case "Grade":
@@ -235,7 +228,7 @@ public class ExamManagement extends JPanel {
                             "JOIN subject sub ON e.subject_id = sub.subject_id " +
                             "JOIN grade g ON e.grade_id = g.grade_id " +
                             "JOIN exam_type et ON e.exam_type_id = et.exam_type_id " +
-                            "WHERE g.grade_name LIKE ? " +
+                            "WHERE g.grade_name LIKE '%" + searchTerm + "%' " +
                             "ORDER BY e.exam_date DESC";
                     break;
                 case "Exam Type":
@@ -245,7 +238,7 @@ public class ExamManagement extends JPanel {
                             "JOIN subject sub ON e.subject_id = sub.subject_id " +
                             "JOIN grade g ON e.grade_id = g.grade_id " +
                             "JOIN exam_type et ON e.exam_type_id = et.exam_type_id " +
-                            "WHERE et.exam_type_name LIKE ? " +
+                            "WHERE et.exam_type_name LIKE '%" + searchTerm + "%' " +
                             "ORDER BY e.exam_date DESC";
                     break;
                 default:
@@ -258,9 +251,7 @@ public class ExamManagement extends JPanel {
                             "ORDER BY e.exam_date DESC";
             }
             
-            PreparedStatement stmt = conn.prepareStatement(query);
-            stmt.setString(1, "%" + searchTerm + "%");
-            ResultSet rs = stmt.executeQuery();
+            ResultSet rs = MySQL.executeSearch(query);
             
             while (rs.next()) {
                 int examId = rs.getInt("exam_id");
@@ -275,10 +266,8 @@ public class ExamManagement extends JPanel {
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error searching exams: " + e.getMessage());
         }
     }

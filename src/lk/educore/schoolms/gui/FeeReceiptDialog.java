@@ -157,18 +157,13 @@ public class FeeReceiptDialog extends JDialog {
 
     private void loadReceiptDetails() {
         try {
-            Connection conn = MySQL.getConnection();
-            String query = "SELECT f.receipt_no, f.student_id, s.first_name, s.last_name, ft.fee_type_name, " +
+            ResultSet rs = MySQL.executeSearch("SELECT f.receipt_no, f.student_id, s.first_name, s.last_name, ft.fee_type_name, " +
                           "f.amount, f.due_date, f.paid_date, pm.method_name " +
                           "FROM fee f " +
                           "JOIN student s ON f.student_id = s.student_id " +
                           "JOIN fee_type ft ON f.fee_type_id = ft.fee_type_id " +
                           "LEFT JOIN payment_method pm ON f.payment_method_id = pm.payment_method_id " +
-                          "WHERE f.fee_id = ?";
-            
-            PreparedStatement stmt = conn.prepareStatement(query);
-            stmt.setInt(1, feeId);
-            ResultSet rs = stmt.executeQuery();
+                          "WHERE f.fee_id = '" + feeId + "'");
             
             DecimalFormat df = new DecimalFormat("'Rs.' #,##0.00");
             
@@ -184,10 +179,8 @@ public class FeeReceiptDialog extends JDialog {
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error loading receipt details: " + e.getMessage());
         }
     }

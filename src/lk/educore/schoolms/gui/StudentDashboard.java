@@ -259,18 +259,12 @@ public class StudentDashboard extends JFrame {
 
     private void loadStudentInfo() {
         try {
-            Connection conn = MySQL.getConnection();
-            
             // Get student info from username
-            String studentQuery = "SELECT s.student_id, s.first_name, s.last_name, g.grade_name, s.email, s.phone " +
+            ResultSet studentRs = MySQL.executeSearch("SELECT s.student_id, s.first_name, s.last_name, g.grade_name, s.email, s.phone " +
                                  "FROM student s " +
                                  "JOIN grade g ON s.grade_id = g.grade_id " +
                                  "JOIN user u ON s.user_id = u.user_id " +
-                                 "WHERE u.username = ?";
-            
-            PreparedStatement studentStmt = conn.prepareStatement(studentQuery);
-            studentStmt.setString(1, username);
-            ResultSet studentRs = studentStmt.executeQuery();
+                                 "WHERE u.username = '" + username + "'");
             
             if (studentRs.next()) {
                 studentId = studentRs.getString("student_id");
@@ -282,98 +276,73 @@ public class StudentDashboard extends JFrame {
             }
             
             studentRs.close();
-            studentStmt.close();
             
             // Load attendance rate
-            loadAttendance(conn);
+            loadAttendance();
             
             // Load fee summary
-            loadFeeSummary(conn);
+            loadFeeSummary();
             
             // Load results
-            loadResults(conn);
+            loadResults();
             
-            conn.close();
-            
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error loading student information: " + e.getMessage());
         }
     }
 
-    private void loadAttendance(Connection conn) throws SQLException {
-        String query = "SELECT " +
+    private void loadAttendance() throws Exception {
+        ResultSet rs = MySQL.executeSearch("SELECT " +
                        "ROUND((SELECT COUNT(*) FROM student_attendance " +
-                       "WHERE student_id = ? AND status = 'Present' AND date_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)) * 100.0 / " +
+                       "WHERE student_id = '" + studentId + "' AND status = 'Present' AND date_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)) * 100.0 / " +
                        "(SELECT COUNT(*) FROM student_attendance " +
-                       "WHERE student_id = ? AND date_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)), 1)";
-        
-        PreparedStatement stmt = conn.prepareStatement(query);
-        stmt.setString(1, studentId);
-        stmt.setString(2, studentId);
-        ResultSet rs = stmt.executeQuery();
+                       "WHERE student_id = '" + studentId + "' AND date_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)), 1)");
         
         if (rs.next()) {
             lblAttendanceRate.setText(rs.getString(1) + "%");
         }
         
         rs.close();
-        stmt.close();
     }
 
-    private void loadFeeSummary(Connection conn) throws SQLException {
+    private void loadFeeSummary() throws Exception {
         // Total fees
-        String totalQuery = "SELECT COALESCE(SUM(amount), 0) FROM fee WHERE student_id = ?";
-        PreparedStatement totalStmt = conn.prepareStatement(totalQuery);
-        totalStmt.setString(1, studentId);
-        ResultSet totalRs = totalStmt.executeQuery();
+        ResultSet totalRs = MySQL.executeSearch("SELECT COALESCE(SUM(amount), 0) FROM fee WHERE student_id = '" + studentId + "'");
         
         if (totalRs.next()) {
             lblTotalFees.setText("Rs. " + String.format("%,.2f", totalRs.getDouble(1)));
         }
         
         totalRs.close();
-        totalStmt.close();
         
         // Paid fees
-        String paidQuery = "SELECT COALESCE(SUM(amount), 0) FROM fee WHERE student_id = ? AND status = 'Paid'";
-        PreparedStatement paidStmt = conn.prepareStatement(paidQuery);
-        paidStmt.setString(1, studentId);
-        ResultSet paidRs = paidStmt.executeQuery();
+        ResultSet paidRs = MySQL.executeSearch("SELECT COALESCE(SUM(amount), 0) FROM fee WHERE student_id = '" + studentId + "' AND status = 'Paid'");
         
         if (paidRs.next()) {
             lblPaidFees.setText("Rs. " + String.format("%,.2f", paidRs.getDouble(1)));
         }
         
         paidRs.close();
-        paidStmt.close();
         
         // Pending fees
-        String pendingQuery = "SELECT COALESCE(SUM(amount), 0) FROM fee WHERE student_id = ? AND status != 'Paid'";
-        PreparedStatement pendingStmt = conn.prepareStatement(pendingQuery);
-        pendingStmt.setString(1, studentId);
-        ResultSet pendingRs = pendingStmt.executeQuery();
+        ResultSet pendingRs = MySQL.executeSearch("SELECT COALESCE(SUM(amount), 0) FROM fee WHERE student_id = '" + studentId + "' AND status != 'Paid'");
         
         if (pendingRs.next()) {
             lblPendingFees.setText("Rs. " + String.format("%,.2f", pendingRs.getDouble(1)));
         }
         
         pendingRs.close();
-        pendingStmt.close();
     }
 
-    private void loadResults(Connection conn) throws SQLException {
+    private void loadResults() throws Exception {
         tableModel.setRowCount(0);
         
-        String query = "SELECT e.exam_name, sub.subject_name, r.marks_obtained, r.grade_letter, e.exam_date " +
+        ResultSet rs = MySQL.executeSearch("SELECT e.exam_name, sub.subject_name, r.marks_obtained, r.grade_letter, e.exam_date " +
                        "FROM result r " +
                        "JOIN exam e ON r.exam_id = e.exam_id " +
                        "JOIN subject sub ON e.subject_id = sub.subject_id " +
-                       "WHERE r.student_id = ? " +
-                       "ORDER BY e.exam_date DESC";
-        
-        PreparedStatement stmt = conn.prepareStatement(query);
-        stmt.setString(1, studentId);
-        ResultSet rs = stmt.executeQuery();
+                       "WHERE r.student_id = '" + studentId + "' " +
+                       "ORDER BY e.exam_date DESC");
         
         while (rs.next()) {
             String exam = rs.getString("exam_name");
@@ -386,7 +355,6 @@ public class StudentDashboard extends JFrame {
         }
         
         rs.close();
-        stmt.close();
     }
 
     private void handleLogout() {
