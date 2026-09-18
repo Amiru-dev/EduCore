@@ -27,7 +27,7 @@ public class Dashboard extends JFrame {
     }
 
     private void initComponents() {
-        setTitle("Dashboard - EduCore School Management System");
+        setTitle("EduCore School Management System");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1200, 700);
         setLocationRelativeTo(null);
