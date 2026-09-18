@@ -184,6 +184,16 @@ public class DataValidator {
     }
 
     /**
+     * Validate required field with field label
+     */
+    public static boolean isRequired(String text, String fieldLabel) throws ValidationException {
+        if (text == null || text.trim().isEmpty()) {
+            throw new ValidationException(fieldLabel + " is required", fieldLabel, text);
+        }
+        return true;
+    }
+
+    /**
      * Validate string length
      */
     public static boolean isValidLength(String text, int minLength, int maxLength) throws ValidationException {
@@ -206,17 +216,24 @@ public class DataValidator {
      * Validate positive number
      */
     public static boolean isPositiveNumber(String text) throws ValidationException {
+        return isPositiveNumber(text, "This field");
+    }
+
+    /**
+     * Validate positive number with field label
+     */
+    public static boolean isPositiveNumber(String text, String fieldLabel) throws ValidationException {
         if (text == null || text.trim().isEmpty()) {
-            throw new ValidationException("This field is required", "positive", text);
+            throw new ValidationException(fieldLabel + " is required", fieldLabel, text);
         }
         
         try {
             double value = Double.parseDouble(text);
             if (value <= 0) {
-                throw new ValidationException("This field must be a positive number", "positive", text);
+                throw new ValidationException(fieldLabel + " must be a positive number", fieldLabel, text);
             }
         } catch (NumberFormatException e) {
-            throw new ValidationException("Invalid number format", "positive", text);
+            throw new ValidationException(fieldLabel + " must be a valid number", fieldLabel, text);
         }
         
         return true;

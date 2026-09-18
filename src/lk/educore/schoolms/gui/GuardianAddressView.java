@@ -85,7 +85,7 @@ public class GuardianAddressView extends JPanel {
     private void saveAddress() {
         try {
             String address = txtAddress.getText().trim();
-            DataValidator.isRequired(address);
+            DataValidator.isRequired(address, "Address");
             
             MySQL.executeIUD("UPDATE guardian SET address = '" + address + "' WHERE guardian_id = '" + guardianId + "'");
             

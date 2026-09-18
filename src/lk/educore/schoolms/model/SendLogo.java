@@ -15,7 +15,7 @@ public class SendLogo {
      */
     public static ImageIcon getLogo() {
         try {
-            InputStream is = SendLogo.class.getResourceAsStream("/resources/logo.png");
+            InputStream is = SendLogo.class.getResourceAsStream("/lk/educore/schoolms/resources/logo.png");
             if (is != null) {
                 byte[] imageData = new byte[is.available()];
                 is.read(imageData);
@@ -32,7 +32,7 @@ public class SendLogo {
      */
     public static ImageIcon getSchoolLogo() {
         try {
-            InputStream is = SendLogo.class.getResourceAsStream("/resources/school-logo.png");
+            InputStream is = SendLogo.class.getResourceAsStream("/lk/educore/schoolms/resources/school-logo.png");
             if (is != null) {
                 byte[] imageData = new byte[is.available()];
                 is.read(imageData);
@@ -49,7 +49,7 @@ public class SendLogo {
      */
     public static ImageIcon getSuccessIcon() {
         try {
-            InputStream is = SendLogo.class.getResourceAsStream("/resources/icons8-success-48.png");
+            InputStream is = SendLogo.class.getResourceAsStream("/lk/educore/schoolms/resources/icons8-success-48.png");
             if (is != null) {
                 byte[] imageData = new byte[is.available()];
                 is.read(imageData);
@@ -66,7 +66,7 @@ public class SendLogo {
      */
     public static ImageIcon getWarningIcon() {
         try {
-            InputStream is = SendLogo.class.getResourceAsStream("/resources/icons8-warning-48.png");
+            InputStream is = SendLogo.class.getResourceAsStream("/lk/educore/schoolms/resources/icons8-warning-48.png");
             if (is != null) {
                 byte[] imageData = new byte[is.available()];
                 is.read(imageData);
@@ -83,7 +83,7 @@ public class SendLogo {
      */
     public static ImageIcon getErrorIcon() {
         try {
-            InputStream is = SendLogo.class.getResourceAsStream("/resources/icons8-error-48.png");
+            InputStream is = SendLogo.class.getResourceAsStream("/lk/educore/schoolms/resources/icons8-error-48.png");
             if (is != null) {
                 byte[] imageData = new byte[is.available()];
                 is.read(imageData);
@@ -100,7 +100,7 @@ public class SendLogo {
      */
     public static ImageIcon getInfoIcon() {
         try {
-            InputStream is = SendLogo.class.getResourceAsStream("/resources/icons8-info-48.png");
+            InputStream is = SendLogo.class.getResourceAsStream("/lk/educore/schoolms/resources/icons8-info-48.png");
             if (is != null) {
                 byte[] imageData = new byte[is.available()];
                 is.read(imageData);
@@ -117,7 +117,7 @@ public class SendLogo {
      */
     public static ImageIcon getProfileIcon() {
         try {
-            InputStream is = SendLogo.class.getResourceAsStream("/resources/other/profileIcon.png");
+            InputStream is = SendLogo.class.getResourceAsStream("/lk/educore/schoolms/resources/other/profileIcon.png");
             if (is != null) {
                 byte[] imageData = new byte[is.available()];
                 is.read(imageData);
@@ -134,7 +134,7 @@ public class SendLogo {
      */
     public static ImageIcon getNavIcon(String iconName) {
         try {
-            InputStream is = SendLogo.class.getResourceAsStream("/resources/other/" + iconName);
+            InputStream is = SendLogo.class.getResourceAsStream("/lk/educore/schoolms/resources/other/" + iconName);
             if (is != null) {
                 byte[] imageData = new byte[is.available()];
                 is.read(imageData);

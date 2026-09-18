@@ -5,7 +5,6 @@ import java.sql.*;
 import java.util.Properties;
 import javax.crypto.*;
 import javax.crypto.spec.*;
-import java.security.*;
 import java.util.Base64;
 
 /**
@@ -15,7 +14,7 @@ import java.util.Base64;
 public class MySQL {
 
     private static final String CONFIG_FILE = "dbinfor.ser";
-    private static final String ENCRYPTION_KEY = "EduCoreSchool2026"; // 16 bytes for AES-128 (must be 16, 24, or 32 bytes)
+    private static final String ENCRYPTION_KEY = "EduCoreSchool2026"; // 16 bytes for AES-128
     private static Connection connection;
     private static String dbHost;
     private static String dbPort;

@@ -79,7 +79,7 @@ public class VehicleTypeDialog extends JDialog {
             String typeName = txtTypeName.getText().trim();
             String description = txtDescription.getText().trim();
             
-            DataValidator.isRequired(typeName);
+            DataValidator.isRequired(typeName, "Vehicle Type Name");
             
             String descValue = description.isEmpty() ? "NULL" : "'" + description + "'";
             MySQL.executeIUD("INSERT INTO vehicle_type (type_name, description) VALUES ('" + typeName + "', " + descValue + ")");

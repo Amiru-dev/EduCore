@@ -181,10 +181,10 @@ public class GuardianDialog extends JDialog {
             String occupation = txtOccupation.getText().trim();
             String address = txtAddress.getText().trim();
             
-            DataValidator.isRequired(firstName);
-            DataValidator.isRequired(lastName);
-            DataValidator.isRequired(phone);
-            DataValidator.isRequired(address);
+            DataValidator.isRequired(firstName, "First Name");
+            DataValidator.isRequired(lastName, "Last Name");
+            DataValidator.isRequired(phone, "Phone");
+            DataValidator.isRequired(address, "Address");
             
             if (!nic.isEmpty()) {
                 DataValidator.isValidNIC(nic);

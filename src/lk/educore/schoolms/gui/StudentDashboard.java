@@ -1,5 +1,6 @@
 package lk.educore.schoolms.gui;
 
+import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import lk.educore.schoolms.model.MySQL;
 import lk.educore.schoolms.validate.JOptionIcon;
 
@@ -32,13 +33,6 @@ public class StudentDashboard extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(900, 600);
         setLocationRelativeTo(null);
-
-        // Apply FlatLaf theme
-        try {
-            UIManager.setLookAndFeel("com.formdev.flatlaf.FlatLightLaf");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         // Main panel with tabs
         JTabbedPane tabbedPane = new JTabbedPane();

@@ -1,5 +1,6 @@
 package lk.educore.schoolms.gui;
 
+import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import lk.educore.schoolms.model.SendLogo;
 import lk.educore.schoolms.validate.JOptionIcon;
 
@@ -31,13 +32,6 @@ public class Dashboard extends JFrame {
         setSize(1200, 700);
         setLocationRelativeTo(null);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
-
-        // Apply FlatLaf theme
-        try {
-            UIManager.setLookAndFeel("com.formdev.flatlaf.FlatLightLaf");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         // Main panel with BorderLayout
         JPanel mainPanel = new JPanel(new BorderLayout());
@@ -229,6 +223,8 @@ public class Dashboard extends JFrame {
     }
 
     public static void main(String[] args) {
+        FlatMacLightLaf.registerCustomDefaultsSource("lk/educore/schoolms/theme");
+        FlatMacLightLaf.setup();
         SwingUtilities.invokeLater(() -> {
             new Dashboard("admin", "Admin").setVisible(true);
         });

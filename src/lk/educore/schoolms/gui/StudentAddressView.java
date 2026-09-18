@@ -85,7 +85,7 @@ public class StudentAddressView extends JPanel {
     private void saveAddress() {
         try {
             String address = txtAddress.getText().trim();
-            DataValidator.isRequired(address);
+            DataValidator.isRequired(address, "Address");
             
             MySQL.executeIUD("UPDATE student SET address = '" + address + "' WHERE student_id = '" + studentId + "'");
             

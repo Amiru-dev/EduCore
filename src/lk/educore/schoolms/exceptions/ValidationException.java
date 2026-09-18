@@ -68,7 +68,7 @@ public class ValidationException extends Exception {
      * Get user-friendly error message
      */
     public String getUserFriendlyMessage() {
-        if (fieldName != null) {
+        if (fieldName != null && getMessage() != null && !getMessage().toLowerCase().contains(fieldName.toLowerCase())) {
             return "Invalid " + fieldName + ": " + getMessage();
         }
         return getMessage();

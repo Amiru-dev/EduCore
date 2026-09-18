@@ -152,15 +152,15 @@ public class BasicSalaryOptions extends JDialog {
             String allowance = txtAllowance.getText().trim();
             String bonus = txtBonus.getText().trim();
             
-            DataValidator.isRequired(basicSalary);
-            DataValidator.isPositiveNumber(basicSalary);
+            DataValidator.isRequired(basicSalary, "Basic Salary");
+            DataValidator.isPositiveNumber(basicSalary, "Basic Salary");
             
             if (!allowance.isEmpty()) {
-                DataValidator.isPositiveNumber(allowance);
+                DataValidator.isPositiveNumber(allowance, "Allowance");
             }
             
             if (!bonus.isEmpty()) {
-                DataValidator.isPositiveNumber(bonus);
+                DataValidator.isPositiveNumber(bonus, "Bonus");
             }
             
             // In a real implementation, save to salary_config table

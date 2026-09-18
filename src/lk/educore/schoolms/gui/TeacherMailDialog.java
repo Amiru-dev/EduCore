@@ -137,12 +137,12 @@ public class TeacherMailDialog extends JDialog {
             String subject = txtSubject.getText().trim();
             String message = txtMessage.getText().trim();
             
-            DataValidator.isRequired(subject);
-            DataValidator.isRequired(message);
+            DataValidator.isRequired(subject, "Subject");
+            DataValidator.isRequired(message, "Message");
             
             if (chkAttachFile.isSelected()) {
                 String attachmentPath = txtAttachment.getText().trim();
-                DataValidator.isRequired(attachmentPath);
+                DataValidator.isRequired(attachmentPath, "Attachment");
                 SendFileEmail.sendEmailWithAttachment(teacherEmail, subject, message, attachmentPath);
             } else {
                 SendEmail.sendEmail(teacherEmail, subject, message);

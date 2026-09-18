@@ -356,14 +356,14 @@ public class StudentRegistration extends JDialog {
             String guardianOccupation = txtGuardianOccupation.getText().trim();
             String relationship = (String) cmbGuardianRelationship.getSelectedItem();
 
-            DataValidator.isRequired(firstName);
-            DataValidator.isRequired(lastName);
+            DataValidator.isRequired(firstName, "First Name");
+            DataValidator.isRequired(lastName, "Last Name");
             DataValidator.isValidNIC(nic);
             DataValidator.isValidEmail(email);
             DataValidator.isValidPhone(phone);
-            DataValidator.isRequired(address);
-            DataValidator.isRequired(guardianName);
-            DataValidator.isRequired(guardianPhone);
+            DataValidator.isRequired(address, "Address");
+            DataValidator.isRequired(guardianName, "Guardian Name");
+            DataValidator.isRequired(guardianPhone, "Guardian Phone");
 
             Connection conn = MySQL.getConnection();
             conn.setAutoCommit(false);

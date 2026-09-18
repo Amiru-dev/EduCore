@@ -1,5 +1,6 @@
 package lk.educore.schoolms.gui;
 
+import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import lk.educore.schoolms.model.MySQL;
 import lk.educore.schoolms.validate.JOptionIcon;
 import lk.educore.schoolms.validate.DataValidator;
@@ -8,10 +9,14 @@ import lk.educore.schoolms.exceptions.ValidationException;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.logging.Level;
+import javax.imageio.ImageIO;
 
 /**
- * Database Connection Setup Screen
- * Allows users to configure database connection settings
+ * Database Connection Setup Screen Allows users to configure database
+ * connection settings
  */
 public class SetupConnection extends JFrame {
 
@@ -26,21 +31,29 @@ public class SetupConnection extends JFrame {
     public SetupConnection() {
         initComponents();
         loadExistingConfig();
+
+        try {
+            InputStream imgStream = getClass().getResourceAsStream("/lk/educore/schoolms/resources/fruitshop-logo.png");
+            if (imgStream == null) {
+                SignIn.getLoggerObject().log(Level.WARNING, "Fruit shop logo image resource not found at /lk/educore/schoolms/resources/fruitshop-logo.png");
+                return;
+            }
+            ImageIcon originalIcon = new ImageIcon(ImageIO.read(imgStream));
+            this.setIconImage(originalIcon.getImage());
+
+        } catch (IOException e) {
+            SignIn.getLoggerObject().log(Level.WARNING, "Failed to load fruit shop logo image: " + e.getMessage(), e);
+        } catch (Exception e) {
+            SignIn.getLoggerObject().log(Level.WARNING, "Unexpected error loading fruit shop logo image: " + e.getMessage(), e);
+        }
     }
 
     private void initComponents() {
-        setTitle("Database Setup - EduCore School Management System");
+        setTitle("EduCore School Management System");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(500, 450);
         setLocationRelativeTo(null);
         setResizable(false);
-
-        // Apply FlatLaf theme
-        try {
-            UIManager.setLookAndFeel("com.formdev.flatlaf.FlatLightLaf");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         // Main panel
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -150,13 +163,13 @@ public class SetupConnection extends JFrame {
 
         // Button panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        
+
         JButton btnTest = new JButton("Test Connection");
         btnTest.addActionListener(e -> testConnection());
-        
+
         JButton btnSave = new JButton("Save & Continue");
         btnSave.addActionListener(e -> saveConfiguration());
-        
+
         JButton btnCancel = new JButton("Cancel");
         btnCancel.addActionListener(e -> cancelSetup());
 
@@ -209,11 +222,11 @@ public class SetupConnection extends JFrame {
     private void testConnection() {
         try {
             // Validate inputs (dump path not required for connection test)
-            DataValidator.isRequired(txtHost.getText().trim());
-            DataValidator.isRequired(txtPort.getText().trim());
-            DataValidator.isRequired(txtDBName.getText().trim());
-            DataValidator.isRequired(txtUsername.getText().trim());
-            DataValidator.isRequired(new String(txtPassword.getPassword()).trim());
+            DataValidator.isRequired(txtHost.getText().trim(), "Database Host");
+            DataValidator.isRequired(txtPort.getText().trim(), "Port");
+            DataValidator.isRequired(txtDBName.getText().trim(), "Database Name");
+            DataValidator.isRequired(txtUsername.getText().trim(), "Username");
+            DataValidator.isRequired(new String(txtPassword.getPassword()).trim(), "Password");
 
             String host = txtHost.getText().trim();
             String port = txtPort.getText().trim();
@@ -228,7 +241,7 @@ public class SetupConnection extends JFrame {
                 JOptionIcon.showErrorDialog(this, "Failed to connect to database. Please check your settings.");
             }
         } catch (ValidationException e) {
-            JOptionIcon.showErrorDialog(this, e.getUserFriendlyMessage());
+            JOptionIcon.showWarningDialog(this, e.getUserFriendlyMessage());
         } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error testing connection: " + e.getMessage());
         }
@@ -237,12 +250,12 @@ public class SetupConnection extends JFrame {
     private void saveConfiguration() {
         try {
             // Validate inputs
-            DataValidator.isRequired(txtHost.getText().trim());
-            DataValidator.isRequired(txtPort.getText().trim());
-            DataValidator.isRequired(txtDBName.getText().trim());
-            DataValidator.isRequired(txtUsername.getText().trim());
-            DataValidator.isRequired(new String(txtPassword.getPassword()).trim());
-            DataValidator.isRequired(txtBackupPath.getText().trim());
+            DataValidator.isRequired(txtHost.getText().trim(), "Database Host");
+            DataValidator.isRequired(txtPort.getText().trim(), "Port");
+            DataValidator.isRequired(txtDBName.getText().trim(), "Database Name");
+            DataValidator.isRequired(txtUsername.getText().trim(), "Username");
+            DataValidator.isRequired(new String(txtPassword.getPassword()).trim(), "Password");
+            DataValidator.isRequired(txtBackupPath.getText().trim(), "Backup Path");
 
             String host = txtHost.getText().trim();
             String port = txtPort.getText().trim();
@@ -284,7 +297,7 @@ public class SetupConnection extends JFrame {
             new SignIn().setVisible(true);
 
         } catch (ValidationException e) {
-            JOptionIcon.showErrorDialog(this, e.getUserFriendlyMessage());
+            JOptionIcon.showWarningDialog(this, e.getUserFriendlyMessage());
         } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error saving configuration: " + e.getMessage());
         }
@@ -302,6 +315,8 @@ public class SetupConnection extends JFrame {
     }
 
     public static void main(String[] args) {
+        FlatMacLightLaf.registerCustomDefaultsSource("lk/educore/schoolms/theme");
+        FlatMacLightLaf.setup();
         SwingUtilities.invokeLater(() -> {
             new SetupConnection().setVisible(true);
         });
