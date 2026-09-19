@@ -205,6 +205,10 @@ public class MySQL {
         return dumpPath;
     }
 
+    public static String getDbPassword() {
+        return dbPassword;
+    }
+
     public static String getBackupPath() {
         return backupPath;
     }

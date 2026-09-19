@@ -266,7 +266,7 @@ public class Dashboard extends JFrame {
         JMenuItem backupMenu = new JMenuItem("Backup");
         backupMenu.addActionListener(e -> {
             if ("Admin".equals(role)) {
-                new BackupUtility(this).setVisible(true);
+                new BackupUtility().setVisible(true);
             } else {
                 JOptionIcon.showWarningDialog(this, "Access blocked for role: " + role);
             }
