@@ -10,6 +10,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Level;
 import javax.imageio.ImageIO;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  * Main Dashboard Frame Main application window with sidebar navigation for
@@ -69,6 +74,8 @@ public class Dashboard extends JFrame {
         mainPanel.add(headerPanel, BorderLayout.NORTH);
 
         add(mainPanel);
+        
+        setJMenuBar(createMenuBar());
     }
 
     private JPanel createSidebar() {
@@ -238,6 +245,103 @@ public class Dashboard extends JFrame {
         if (confirm == JOptionPane.YES_OPTION) {
             dispose();
             new SignIn().setVisible(true);
+        }
+    }
+
+    private JMenuBar createMenuBar() {
+        JMenuBar menuBar = new JMenuBar();
+        
+        // File Menu
+        JMenu fileMenu = new JMenu("File");
+        
+        JMenuItem setupDatabaseMenu = new JMenuItem("Setup Database");
+        setupDatabaseMenu.addActionListener(e -> {
+            if ("Admin".equals(role)) {
+                new SetupConnection().setVisible(true);
+            } else {
+                JOptionIcon.showWarningDialog(this, "Access blocked for role: " + role);
+            }
+        });
+        
+        JMenuItem backupMenu = new JMenuItem("Backup");
+        backupMenu.addActionListener(e -> {
+            if ("Admin".equals(role)) {
+                new BackupUtility(this).setVisible(true);
+            } else {
+                JOptionIcon.showWarningDialog(this, "Access blocked for role: " + role);
+            }
+        });
+        
+        JMenuItem logOutMenu = new JMenuItem("Log Out");
+        logOutMenu.addActionListener(e -> handleLogout());
+        
+        JMenuItem exitMenu = new JMenuItem("Exit");
+        exitMenu.addActionListener(e -> {
+            System.exit(0);
+        });
+        
+        fileMenu.add(setupDatabaseMenu);
+        fileMenu.add(backupMenu);
+        fileMenu.add(logOutMenu);
+        fileMenu.add(exitMenu);
+        
+        // Edit Menu
+        JMenu editMenu = new JMenu("Edit");
+        
+        JMenuItem updateLogoMenu = new JMenuItem("Update Logo");
+        updateLogoMenu.addActionListener(e -> {
+            if ("Admin".equals(role)) {
+                updateLogo();
+            } else {
+                JOptionIcon.showWarningDialog(this, "Access blocked for role: " + role);
+            }
+        });
+        
+        editMenu.add(updateLogoMenu);
+        
+        menuBar.add(fileMenu);
+        menuBar.add(editMenu);
+        
+        return menuBar;
+    }
+
+    private void updateLogo() {
+        try {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Select a PNG Logo");
+            fileChooser.setFileFilter(new FileNameExtensionFilter("PNG Images", "png"));
+
+            int result = fileChooser.showOpenDialog(this);
+
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+
+                // Validate .png extension
+                if (!selectedFile.getName().toLowerCase().endsWith(".png")) {
+                    JOptionIcon.showErrorDialog(this, "Only .png files are allowed!");
+                    return;
+                }
+
+                File targetFile = new File("src/lk/educore/schoolms/resources/logo.png");
+
+                if (!targetFile.getParentFile().exists()) {
+                    targetFile.getParentFile().mkdirs();
+                }
+
+                // Copy file
+                try (InputStream in = new FileInputStream(selectedFile); OutputStream out = new FileOutputStream(targetFile)) {
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = in.read(buffer)) > 0) {
+                        out.write(buffer, 0, length);
+                    }
+                    JOptionIcon.showSuccessDialog(this, "Logo image replaced successfully!");
+                } catch (IOException ex) {
+                    JOptionIcon.showErrorDialog(this, "Error replacing image: " + ex.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            JOptionIcon.showErrorDialog(this, "Unexpected error: " + e.getMessage());
         }
     }
 

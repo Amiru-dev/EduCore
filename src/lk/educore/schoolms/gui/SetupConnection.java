@@ -50,7 +50,7 @@ public class SetupConnection extends JFrame {
 
     private void initComponents() {
         setTitle("EduCore School Management System");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(500, 450);
         setLocationRelativeTo(null);
         setResizable(false);
