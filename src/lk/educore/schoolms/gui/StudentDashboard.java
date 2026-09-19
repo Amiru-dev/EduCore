@@ -74,7 +74,7 @@ public class StudentDashboard extends JFrame {
         JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JLabel titleLabel = new JLabel("My Profile");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        titlePanel.add(titlePanel);
+        titlePanel.add(titleLabel);
         panel.add(titlePanel, BorderLayout.NORTH);
 
         // Info panel
@@ -152,7 +152,7 @@ public class StudentDashboard extends JFrame {
         JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JLabel titleLabel = new JLabel("Attendance Overview");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        titlePanel.add(titlePanel);
+        titlePanel.add(titleLabel);
         panel.add(titlePanel, BorderLayout.NORTH);
 
         // Stats panel
@@ -180,7 +180,7 @@ public class StudentDashboard extends JFrame {
         JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JLabel titleLabel = new JLabel("Fee Summary");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        titlePanel.add(titlePanel);
+        titlePanel.add(titleLabel);
         panel.add(titlePanel, BorderLayout.NORTH);
 
         // Stats panel
@@ -227,7 +227,7 @@ public class StudentDashboard extends JFrame {
         JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JLabel titleLabel = new JLabel("My Results");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        titlePanel.add(titlePanel);
+        titlePanel.add(titleLabel);
         panel.add(titlePanel, BorderLayout.NORTH);
 
         // Table
