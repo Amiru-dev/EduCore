@@ -25,7 +25,8 @@ public class Dashboard extends JFrame {
     private String username;
     private String role;
     private JPanel contentPanel;
-    private JButton[] navButtons;
+    private JToggleButton[] navButtons;
+    private ButtonGroup navButtonGroup;
     private JLabel lblUsername;
     private JLabel lblRole;
 
@@ -96,7 +97,7 @@ public class Dashboard extends JFrame {
         sidebar.add(logoPanel, BorderLayout.NORTH);
 
         // Navigation buttons
-        JPanel navPanel = new JPanel(new GridLayout(10, 1, 0, 2));
+        JPanel navPanel = new JPanel(new GridLayout(11, 1, 0, 2));
         navPanel.setBackground(new Color(44, 62, 80));
         navPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
@@ -114,11 +115,17 @@ public class Dashboard extends JFrame {
             "Library"
         };
 
-        navButtons = new JButton[navItems.length];
+        navButtons = new JToggleButton[navItems.length];
+        navButtonGroup = new ButtonGroup();
+        String[] iconBases = {
+            "dashboard", "students", "teachers", "fees", "exams", "transport", "academic", "finance", "events", "guardians", "library"
+        };
+
         for (int i = 0; i < navItems.length; i++) {
-            navButtons[i] = createNavButton(navItems[i]);
+            navButtons[i] = createNavButton(navItems[i], iconBases[i]);
             final int index = i;
             navButtons[i].addActionListener(e -> handleNavigation(index));
+            navButtonGroup.add(navButtons[i]);
             navPanel.add(navButtons[i]);
         }
 
@@ -141,14 +148,48 @@ public class Dashboard extends JFrame {
         return sidebar;
     }
 
-    private JButton createNavButton(String text) {
-        JButton button = new JButton(text);
-        button.setBackground(new Color(52, 73, 94));
+    private JToggleButton createNavButton(String text, String iconBase) {
+        JToggleButton button = new JToggleButton(text);
+        button.setBackground(new Color(44, 62, 80));
         button.setForeground(Color.WHITE);
         button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setHorizontalAlignment(SwingConstants.LEFT);
+        button.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        button.setHorizontalAlignment(SwingConstants.CENTER);
         button.setPreferredSize(new Dimension(180, 35));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                if (!button.isSelected()) {
+                    button.setBackground(new Color(52, 73, 94)); // Hover background
+                    button.setForeground(new Color(165, 216, 221)); // Hover font color
+                }
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                if (!button.isSelected()) {
+                    button.setBackground(new Color(44, 62, 80)); // Default background
+                    button.setForeground(Color.WHITE); // Default font color
+                }
+            }
+        });
+
+        button.addItemListener(e -> {
+            if (e.getStateChange() == java.awt.event.ItemEvent.SELECTED) {
+                button.setBackground(new Color(39, 174, 96)); // Selected background
+                button.setForeground(Color.WHITE); 
+            } else {
+                button.setBackground(new Color(44, 62, 80)); // Default background
+                button.setForeground(Color.WHITE);
+            }
+        });
+        
+        try {
+            button.setIcon(new ImageIcon(getClass().getResource("/lk/educore/schoolms/resources/" + iconBase + "-light.png")));
+            button.setRolloverIcon(new ImageIcon(getClass().getResource("/lk/educore/schoolms/resources/" + iconBase + "-colored.png")));
+            button.setSelectedIcon(new ImageIcon(getClass().getResource("/lk/educore/schoolms/resources/" + iconBase + "-colored.png")));
+        } catch (Exception e) {
+            // Ignore if icon not found
+        }
+        
         return button;
     }
 
@@ -189,14 +230,6 @@ public class Dashboard extends JFrame {
     }
 
     private void handleNavigation(int index) {
-        // Reset all button colors
-        for (JButton button : navButtons) {
-            button.setBackground(new Color(52, 73, 94));
-        }
-
-        // Highlight selected button
-        navButtons[index].setBackground(new Color(39, 174, 96));
-
         // Update content panel based on selection
         contentPanel.removeAll();
 
