@@ -30,18 +30,18 @@ public class SignIn extends javax.swing.JFrame {
         initializeLogging();
 
         try {
-            InputStream imgStream = getClass().getResourceAsStream("/lk/educore/schoolms/resources/fruitshop-logo.png");
+            InputStream imgStream = getClass().getResourceAsStream("/lk/educore/schoolms/resources/logo.png");
             if (imgStream == null) {
-                logger.log(Level.WARNING, "Fruit shop logo image resource not found at /lk/educore/schoolms/resources/fruitshop-logo.png");
+                logger.log(Level.WARNING, "EduCore logo image resource not found at /lk/educore/schoolms/resources/logo.png");
                 return;
             }
             ImageIcon originalIcon = new ImageIcon(ImageIO.read(imgStream));
             this.setIconImage(originalIcon.getImage());
 
         } catch (IOException e) {
-            logger.log(Level.WARNING, "Failed to load fruit shop logo image: " + e.getMessage(), e);
+            logger.log(Level.WARNING, "Failed to load educore logo image: " + e.getMessage(), e);
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Unexpected error loading fruit shop logo image: " + e.getMessage(), e);
+            logger.log(Level.WARNING, "Unexpected error loading educore logo image: " + e.getMessage(), e);
         }
     }
 
@@ -221,7 +221,7 @@ public class SignIn extends javax.swing.JFrame {
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
         jPanel1.setPreferredSize(new java.awt.Dimension(320, 400));
 
-        jLabel4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/lk/educore/schoolms/resources/fruitshop-logo.png"))); // NOI18N
+        jLabel4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/lk/educore/schoolms/resources/logo.png"))); // NOI18N
         jLabel4.setPreferredSize(new java.awt.Dimension(300, 320));
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);

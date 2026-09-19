@@ -33,9 +33,9 @@ public class SetupConnection extends JFrame {
         loadExistingConfig();
 
         try {
-            InputStream imgStream = getClass().getResourceAsStream("/lk/educore/schoolms/resources/fruitshop-logo.png");
+            InputStream imgStream = getClass().getResourceAsStream("/lk/educore/schoolms/resources/logo.png");
             if (imgStream == null) {
-                SignIn.getLoggerObject().log(Level.WARNING, "Fruit shop logo image resource not found at /lk/educore/schoolms/resources/fruitshop-logo.png");
+                SignIn.getLoggerObject().log(Level.WARNING, "Fruit shop logo image resource not found at /lk/educore/schoolms/resources/logo.png");
                 return;
             }
             ImageIcon originalIcon = new ImageIcon(ImageIO.read(imgStream));

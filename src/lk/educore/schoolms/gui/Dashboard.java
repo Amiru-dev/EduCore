@@ -6,10 +6,14 @@ import lk.educore.schoolms.validate.JOptionIcon;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.logging.Level;
+import javax.imageio.ImageIO;
 
 /**
- * Main Dashboard Frame
- * Main application window with sidebar navigation for EduCore School Management System
+ * Main Dashboard Frame Main application window with sidebar navigation for
+ * EduCore School Management System
  */
 public class Dashboard extends JFrame {
 
@@ -24,6 +28,21 @@ public class Dashboard extends JFrame {
         this.username = username;
         this.role = role;
         initComponents();
+
+        try {
+            InputStream imgStream = getClass().getResourceAsStream("/lk/educore/schoolms/resources/logo.png");
+            if (imgStream == null) {
+                SignIn.getLoggerObject().log(Level.WARNING, "EduCore logo image resource not found at /lk/educore/schoolms/resources/logo.png");
+                return;
+            }
+            ImageIcon originalIcon = new ImageIcon(ImageIO.read(imgStream));
+            this.setIconImage(originalIcon.getImage());
+
+        } catch (IOException e) {
+            SignIn.getLoggerObject().log(Level.WARNING, "Failed to load educore logo image: " + e.getMessage(), e);
+        } catch (Exception e) {
+            SignIn.getLoggerObject().log(Level.WARNING, "Unexpected error loading educore logo image: " + e.getMessage(), e);
+        }
     }
 
     private void initComponents() {
@@ -61,12 +80,12 @@ public class Dashboard extends JFrame {
         JPanel logoPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         logoPanel.setBackground(new Color(44, 62, 80));
         logoPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
-        
+
         JLabel logoLabel = new JLabel("EduCore");
         logoLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
         logoLabel.setForeground(Color.WHITE);
         logoPanel.add(logoLabel);
-        
+
         sidebar.add(logoPanel, BorderLayout.NORTH);
 
         // Navigation buttons
@@ -102,14 +121,14 @@ public class Dashboard extends JFrame {
         JPanel logoutPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         logoutPanel.setBackground(new Color(44, 62, 80));
         logoutPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 20, 10));
-        
+
         JButton btnLogout = new JButton("Logout");
         btnLogout.setBackground(new Color(231, 76, 60));
         btnLogout.setForeground(Color.WHITE);
         btnLogout.setFocusPainted(false);
         btnLogout.addActionListener(e -> handleLogout());
         logoutPanel.add(btnLogout);
-        
+
         sidebar.add(logoutPanel, BorderLayout.SOUTH);
 
         return sidebar;
