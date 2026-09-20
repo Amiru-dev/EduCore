@@ -15,6 +15,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Main Dashboard Frame Main application window with sidebar navigation for
@@ -108,34 +110,56 @@ public class Dashboard extends JFrame {
         sidebar.add(logoPanel, BorderLayout.NORTH);
 
         // Navigation buttons
-        JPanel navPanel = new JPanel(new GridLayout(11, 1, 0, 2));
+        List<String> navItemsList = new ArrayList<>();
+        List<String> iconBasesList = new ArrayList<>();
+        List<Integer> indexMapping = new ArrayList<>();
+
+        // 0: Dashboard
+        navItemsList.add("Dashboard"); iconBasesList.add("dashboard"); indexMapping.add(0);
+        // 1: Students
+        navItemsList.add("Students"); iconBasesList.add("students"); indexMapping.add(1);
+        
+        if ("Admin".equals(role)) {
+            // 2: Teachers
+            navItemsList.add("Teachers"); iconBasesList.add("teachers"); indexMapping.add(2);
+            // 3: Fees
+            navItemsList.add("Fees"); iconBasesList.add("fees"); indexMapping.add(3);
+        }
+        
+        // 4: Exams
+        navItemsList.add("Exams"); iconBasesList.add("exams"); indexMapping.add(4);
+        
+        if ("Admin".equals(role)) {
+            // 5: Transport
+            navItemsList.add("Transport"); iconBasesList.add("transport"); indexMapping.add(5);
+        }
+        
+        // 6: Academic
+        navItemsList.add("Academic"); iconBasesList.add("academic"); indexMapping.add(6);
+        
+        if ("Admin".equals(role)) {
+            // 7: Finance
+            navItemsList.add("Finance"); iconBasesList.add("finance"); indexMapping.add(7);
+        }
+        
+        // 8: Events
+        navItemsList.add("Events"); iconBasesList.add("events"); indexMapping.add(8);
+        // 9: Guardians
+        navItemsList.add("Guardians"); iconBasesList.add("guardians"); indexMapping.add(9);
+        // 10: Library
+        navItemsList.add("Library"); iconBasesList.add("library"); indexMapping.add(10);
+
+        JPanel navPanel = new JPanel(new GridLayout(navItemsList.size(), 1, 0, 2));
         navPanel.setBackground(new Color(44, 62, 80));
         navPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        String[] navItems = {
-            "Dashboard",
-            "Students",
-            "Teachers",
-            "Fees",
-            "Exams",
-            "Transport",
-            "Academic",
-            "Finance",
-            "Events",
-            "Guardians",
-            "Library"
-        };
-
-        navButtons = new JToggleButton[navItems.length];
+        navButtons = new JToggleButton[navItemsList.size()];
         navButtonGroup = new ButtonGroup();
-        String[] iconBases = {
-            "dashboard", "students", "teachers", "fees", "exams", "transport", "academic", "finance", "events", "guardians", "library"
-        };
 
-        for (int i = 0; i < navItems.length; i++) {
-            navButtons[i] = createNavButton(navItems[i], iconBases[i]);
-            final int index = i;
-            navButtons[i].addActionListener(e -> handleNavigation(index));
+        for (int i = 0; i < navItemsList.size(); i++) {
+            navButtons[i] = createNavButton(navItemsList.get(i), iconBasesList.get(i));
+            final int originalIndex = indexMapping.get(i);
+            navButtons[i].addActionListener(e -> handleNavigation(originalIndex));
             navButtonGroup.add(navButtons[i]);
             navPanel.add(navButtons[i]);
         }
