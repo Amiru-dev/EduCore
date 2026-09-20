@@ -64,7 +64,7 @@ public class DashboardPanel extends JPanel {
                 BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(225, 225, 225)),
                 BorderFactory.createEmptyBorder(15, 25, 15, 25)));
 
-        JLabel title = new JLabel("Dashboard");
+        JLabel title = new JLabel("Dashboard Overview");
         title.setFont(new Font("Segoe UI", Font.PLAIN, 18));
         title.setForeground(new Color(60, 60, 60));
         header.add(title, BorderLayout.WEST);
@@ -187,12 +187,12 @@ public class DashboardPanel extends JPanel {
         // ── Teacher Types ──
         teacherChartHolder = new JPanel(new BorderLayout());
         teacherChartHolder.setOpaque(false);
-        row.add(wrapChart("Employee Types", teacherChartHolder));
+        row.add(wrapChart("Teacher Types", teacherChartHolder));
 
         // ── Fee Collection Status ──
         feeChartHolder = new JPanel(new BorderLayout());
         feeChartHolder.setOpaque(false);
-        row.add(wrapChart("Order Count By Status", feeChartHolder));
+        row.add(wrapChart("Fee Collection Status", feeChartHolder));
 
         return row;
     }

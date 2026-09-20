@@ -88,7 +88,7 @@ public class RoundPanel extends JPanel {
         // Paint background
         if (gradientEnabled) {
             // Gradient background
-            GradientPaint gradient = new GradientPaint(0, 0, startColor, 0, height, endColor);
+            GradientPaint gradient = new GradientPaint(0, 0, startColor, width, 0, endColor);
             g2d.setPaint(gradient);
         } else {
             // Solid background
