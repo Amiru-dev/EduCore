@@ -280,6 +280,11 @@ public class DashboardPanel extends JPanel {
         PieChart chart = new PieChart();
         chart.setChartType(PieChart.PeiChartType.DONUT_CHART);
 
+        JPanel legendPanel = new JPanel();
+        legendPanel.setLayout(new BoxLayout(legendPanel, BoxLayout.Y_AXIS));
+        legendPanel.setOpaque(false);
+        legendPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 10));
+
         Color[] palette = {
             new Color(23, 126, 238), // Blue
             new Color(221, 65, 65), // Red
@@ -310,7 +315,9 @@ public class DashboardPanel extends JPanel {
                 String name = rs.getString("type_name");
                 int count = rs.getInt("count");
                 if (count > 0) {
-                    chart.addData(new ModelPieChart(name, count, palette[idx % palette.length]));
+                    Color c = palette[idx % palette.length];
+                    chart.addData(new ModelPieChart(name, count, c));
+                    legendPanel.add(createLegendItem(name, count, c));
                     hasData = true;
                 }
                 idx++;
@@ -322,13 +329,23 @@ public class DashboardPanel extends JPanel {
 
         if (!hasData) {
             // Fallback sample data
-            chart.addData(new ModelPieChart("Teacher", 8, palette[0]));
-            chart.addData(new ModelPieChart("Principal", 1, palette[1]));
-            chart.addData(new ModelPieChart("Office Staff", 3, palette[2]));
-            chart.addData(new ModelPieChart("Support Staff", 2, palette[3]));
+            String[] names = {"Teacher", "Principal", "Office Staff", "Support Staff"};
+            int[] counts = {8, 1, 3, 2};
+            for(int i=0; i<4; i++) {
+                chart.addData(new ModelPieChart(names[i], counts[i], palette[i]));
+                legendPanel.add(createLegendItem(names[i], counts[i], palette[i]));
+            }
         }
 
+        // Use a JScrollPane for the legend in case there are many types
+        JScrollPane scrollLegend = new JScrollPane(legendPanel);
+        scrollLegend.setBorder(null);
+        scrollLegend.setOpaque(false);
+        scrollLegend.getViewport().setOpaque(false);
+        scrollLegend.setPreferredSize(new Dimension(140, 0));
+
         teacherChartHolder.add(chart, BorderLayout.CENTER);
+        teacherChartHolder.add(scrollLegend, BorderLayout.EAST);
         teacherChartHolder.revalidate();
         teacherChartHolder.repaint();
     }
@@ -337,6 +354,11 @@ public class DashboardPanel extends JPanel {
     private void loadFeeStatusChart() {
         PieChart chart = new PieChart();
         chart.setChartType(PieChart.PeiChartType.DONUT_CHART);
+
+        JPanel legendPanel = new JPanel();
+        legendPanel.setLayout(new BoxLayout(legendPanel, BoxLayout.Y_AXIS));
+        legendPanel.setOpaque(false);
+        legendPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 10, 10));
 
         boolean hasData = false;
         try {
@@ -363,6 +385,7 @@ public class DashboardPanel extends JPanel {
                             break;
                     }
                     chart.addData(new ModelPieChart(status, count, color));
+                    legendPanel.add(createLegendItem(status, count, color));
                     hasData = true;
                 }
             }
@@ -374,13 +397,38 @@ public class DashboardPanel extends JPanel {
         if (!hasData) {
             // Fallback sample data
             chart.addData(new ModelPieChart("Paid", 52, new Color(76, 175, 80)));
+            legendPanel.add(createLegendItem("Paid", 52, new Color(76, 175, 80)));
             chart.addData(new ModelPieChart("Pending", 24, new Color(33, 150, 243)));
+            legendPanel.add(createLegendItem("Pending", 24, new Color(33, 150, 243)));
             chart.addData(new ModelPieChart("Overdue", 24, new Color(244, 67, 54)));
+            legendPanel.add(createLegendItem("Overdue", 24, new Color(244, 67, 54)));
         }
 
         feeChartHolder.add(chart, BorderLayout.CENTER);
+        feeChartHolder.add(legendPanel, BorderLayout.EAST);
         feeChartHolder.revalidate();
         feeChartHolder.repaint();
+    }
+    
+    /**
+     * Create a single row for the chart legend containing a color box and label.
+     */
+    private JPanel createLegendItem(String label, int value, Color color) {
+        JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 2));
+        row.setOpaque(false);
+        row.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPanel colorBox = new JPanel();
+        colorBox.setBackground(color);
+        colorBox.setPreferredSize(new Dimension(14, 14));
+
+        JLabel lbl = new JLabel(label + " (" + value + ")");
+        lbl.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lbl.setForeground(new Color(80, 80, 80));
+
+        row.add(colorBox);
+        row.add(lbl);
+        return row;
     }
     
     /**
