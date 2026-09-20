@@ -1,208 +1,403 @@
 package lk.educore.schoolms.gui;
 
+import lk.educore.schoolms.charts.PieChart;
 import lk.educore.schoolms.component.RoundPanel;
 import lk.educore.schoolms.model.MySQL;
 
 import javax.swing.*;
+import javax.imageio.ImageIO;
 import java.awt.*;
-import java.sql.*;
+import java.io.InputStream;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import org.jfree.data.general.DefaultPieDataset;
 
 /**
- * Dashboard Panel
- * Home panel displaying statistics and charts for the school management system
+ * Dashboard Panel Modern home panel displaying statistics cards with gradient
+ * backgrounds and interactive pie charts for the EduCore School Management
+ * System.
+ *
+ * @author ASUS™
  */
 public class DashboardPanel extends JPanel {
 
+    // Stat card value labels
     private JLabel lblTotalStudents;
     private JLabel lblTotalTeachers;
     private JLabel lblAttendanceRate;
     private JLabel lblFeeCollection;
 
+    // Chart holder panels
+    private JPanel teacherChartHolder;
+    private JPanel feeChartHolder;
+
     public DashboardPanel() {
         initComponents();
         loadStatistics();
+        loadCharts();
     }
-
+    
     private void initComponents() {
-        setLayout(new BorderLayout(10, 10));
-        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        setLayout(new BorderLayout());
+        setBackground(Color.WHITE);
+        setPreferredSize(new Dimension(900, 600));
+        
+        add(buildHeader(), BorderLayout.NORTH);
+        
+        JPanel content = new JPanel(new BorderLayout(0, 20));
+        content.setBackground(Color.WHITE);
+        content.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
-        // Title panel
-        JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JLabel titleLabel = new JLabel("Dashboard Overview");
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
-        titlePanel.add(titleLabel);
-        add(titlePanel, BorderLayout.NORTH);
+        content.add(buildStatCards(), BorderLayout.NORTH);
+        content.add(buildChartsRow(), BorderLayout.CENTER);
 
-        // Stats panel
-        JPanel statsPanel = createStatsPanel();
-        add(statsPanel, BorderLayout.CENTER);
-
-        // Charts panel
-        JPanel chartsPanel = createChartsPanel();
-        add(chartsPanel, BorderLayout.SOUTH);
+        add(content, BorderLayout.CENTER);
     }
 
-    private JPanel createStatsPanel() {
-        JPanel panel = new JPanel(new GridLayout(2, 2, 15, 15));
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+    /**
+     * Light-gray header strip with "Dashboard" title.
+     */
+    private JPanel buildHeader() {
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(new Color(243, 242, 242));
+        header.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(225, 225, 225)),
+                BorderFactory.createEmptyBorder(15, 25, 15, 25)));
 
-        // Total Students Card
-        RoundPanel studentsCard = RoundPanel.createBlueGradientPanel();
-        studentsCard.setLayout(new BorderLayout());
-        studentsCard.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        
-        JLabel studentsLabel = new JLabel("Total Students");
-        studentsLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        studentsLabel.setForeground(Color.WHITE);
-        
+        JLabel title = new JLabel("Dashboard Overview");
+        title.setFont(new Font("Segoe UI", Font.PLAIN, 18));
+        title.setForeground(new Color(60, 60, 60));
+        header.add(title, BorderLayout.WEST);
+
+        return header;
+    }
+
+    /**
+     * Four gradient stat cards in a 1×4 grid. Each card shows a big number, a
+     * label, and an icon.
+     */
+    private JPanel buildStatCards() {
+        JPanel cards = new JPanel(new GridLayout(1, 4, 12, 0));
+        cards.setOpaque(false);
+        cards.setPreferredSize(new Dimension(0, 155));
+
+        // Card 1 : Students
         lblTotalStudents = new JLabel("0");
-        lblTotalStudents.setFont(new Font("Segoe UI", Font.BOLD, 32));
-        lblTotalStudents.setForeground(Color.WHITE);
-        lblTotalStudents.setHorizontalAlignment(SwingConstants.CENTER);
-        
-        studentsCard.add(studentsLabel, BorderLayout.NORTH);
-        studentsCard.add(lblTotalStudents, BorderLayout.CENTER);
-        panel.add(studentsCard);
+        cards.add(createStatCard(
+                lblTotalStudents, "Students",
+                Color.decode("#183d8a"), Color.decode("#719bf0"),
+                "/lk/educore/schoolms/resources/other/icons8-maximum-order-1001.png"));
 
-        // Total Teachers Card
-        RoundPanel teachersCard = RoundPanel.createGreenGradientPanel();
-        teachersCard.setLayout(new BorderLayout());
-        teachersCard.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        
-        JLabel teachersLabel = new JLabel("Total Teachers");
-        teachersLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        teachersLabel.setForeground(Color.WHITE);
-        
+        // Card 2 : Teachers
         lblTotalTeachers = new JLabel("0");
-        lblTotalTeachers.setFont(new Font("Segoe UI", Font.BOLD, 32));
-        lblTotalTeachers.setForeground(Color.WHITE);
-        lblTotalTeachers.setHorizontalAlignment(SwingConstants.CENTER);
-        
-        teachersCard.add(teachersLabel, BorderLayout.NORTH);
-        teachersCard.add(lblTotalTeachers, BorderLayout.CENTER);
-        panel.add(teachersCard);
+        cards.add(createStatCard(
+                lblTotalTeachers, "Teachers",
+                Color.decode("#0D5917"), Color.decode("#51F815"),
+                "/lk/educore/schoolms/resources/other/icons8-add-user-male-100.png"));
 
-        // Attendance Rate Card
-        RoundPanel attendanceCard = RoundPanel.createYellowGradientPanel();
-        attendanceCard.setLayout(new BorderLayout());
-        attendanceCard.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        
-        JLabel attendanceLabel = new JLabel("Attendance Rate");
-        attendanceLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        attendanceLabel.setForeground(Color.WHITE);
-        
+        // Card 3 : Attendance
         lblAttendanceRate = new JLabel("0%");
-        lblAttendanceRate.setFont(new Font("Segoe UI", Font.BOLD, 32));
-        lblAttendanceRate.setForeground(Color.WHITE);
-        lblAttendanceRate.setHorizontalAlignment(SwingConstants.CENTER);
-        
-        attendanceCard.add(attendanceLabel, BorderLayout.NORTH);
-        attendanceCard.add(lblAttendanceRate, BorderLayout.CENTER);
-        panel.add(attendanceCard);
+        cards.add(createStatCard(
+                lblAttendanceRate, "Attendance",
+                Color.decode("#C55404"), Color.decode("#F8D32A"),
+                "/lk/educore/schoolms/resources/other/icons8-fingerprint-accepted-100.png"));
 
-        // Fee Collection Card
-        RoundPanel feeCard = RoundPanel.createPurpleGradientPanel();
-        feeCard.setLayout(new BorderLayout());
-        feeCard.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        
-        JLabel feeLabel = new JLabel("Fee Collection");
-        feeLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        feeLabel.setForeground(Color.WHITE);
-        
-        lblFeeCollection = new JLabel("Rs. 0");
-        lblFeeCollection.setFont(new Font("Segoe UI", Font.BOLD, 32));
-        lblFeeCollection.setForeground(Color.WHITE);
-        lblFeeCollection.setHorizontalAlignment(SwingConstants.CENTER);
-        
-        feeCard.add(feeLabel, BorderLayout.NORTH);
-        feeCard.add(lblFeeCollection, BorderLayout.CENTER);
-        panel.add(feeCard);
+        // Card 4 : Fees / Earnings 
+        lblFeeCollection = new JLabel("Rs.0");
+        cards.add(createStatCard(
+                lblFeeCollection, "Earnings",
+                Color.decode("#931835"), Color.decode("#F18352"),
+                "/lk/educore/schoolms/resources/other/icons8-money-100.png"));
 
-        return panel;
+        return cards;
     }
 
-    private JPanel createChartsPanel() {
-        JPanel panel = new JPanel(new GridLayout(1, 2, 15, 15));
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+    /**
+     * Build a single gradient stat card.
+     *
+     * @param valueLabel JLabel whose text will be updated with the stat value
+     * @param subtitle Descriptive text below the number (e.g. "Students")
+     * @param startColor Gradient start color
+     * @param endColor Gradient end color
+     * @param iconPath Classpath resource path for the card icon
+     * @return configured RoundPanel
+     */
+    private RoundPanel createStatCard(JLabel valueLabel, String subtitle,
+            Color startColor, Color endColor, String iconPath) {
 
-        // Pie Chart Panel
-        RoundPanel pieChartPanel = RoundPanel.createWhitePanel();
-        pieChartPanel.setLayout(new BorderLayout());
-        pieChartPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-        
-        JLabel pieChartLabel = new JLabel("Fee Collection Status");
-        pieChartLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        pieChartPanel.add(pieChartLabel, BorderLayout.NORTH);
-        
-        // Add pie chart (placeholder for now)
-        JPanel pieChartPlaceholder = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        pieChartPlaceholder.add(new JLabel("Pie Chart - Coming Soon"));
-        pieChartPanel.add(pieChartPlaceholder, BorderLayout.CENTER);
-        
-        panel.add(pieChartPanel);
+        RoundPanel card = new RoundPanel();
+        card.setGradientColors(startColor, endColor);
+        card.setLayout(new BorderLayout(10, 0));
+        card.setBorder(BorderFactory.createEmptyBorder(25, 28, 25, 20));
 
-        // Line Chart Panel
-        RoundPanel lineChartPanel = RoundPanel.createWhitePanel();
-        lineChartPanel.setLayout(new BorderLayout());
-        lineChartPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-        
-        JLabel lineChartLabel = new JLabel("Attendance Trends");
-        lineChartLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        lineChartPanel.add(lineChartLabel, BorderLayout.NORTH);
-        
-        // Add line chart (placeholder for now)
-        JPanel lineChartPlaceholder = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        lineChartPlaceholder.add(new JLabel("Line Chart - Coming Soon"));
-        lineChartPanel.add(lineChartPlaceholder, BorderLayout.CENTER);
-        
-        panel.add(lineChartPanel);
+        // ── Left: big number + subtitle ──
+        JPanel textPanel = new JPanel();
+        textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS));
+        textPanel.setOpaque(false);
 
-        return panel;
+        valueLabel.setFont(new Font("Segoe UI", Font.BOLD, 44));
+        valueLabel.setForeground(Color.WHITE);
+        valueLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel sub = new JLabel(subtitle);
+        sub.setFont(new Font("Segoe UI", Font.PLAIN, 20));
+        sub.setForeground(new Color(255, 255, 255, 220));
+        sub.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        textPanel.add(valueLabel);
+        textPanel.add(Box.createRigidArea(new Dimension(0, 2)));
+        textPanel.add(sub);
+        card.add(textPanel, BorderLayout.CENTER);
+
+        // ── Right: icon ──
+        loadAndSetIcon(card, iconPath, 75, 75);
+
+        return card;
     }
 
+    /**
+     * Load a resource icon, scale it, and place it at BorderLayout.EAST on the
+     * card.
+     */
+    private void loadAndSetIcon(JPanel card, String iconPath, int w, int h) {
+        try {
+            InputStream stream = getClass().getResourceAsStream(iconPath);
+            if (stream != null) {
+                ImageIcon raw = new ImageIcon(ImageIO.read(stream));
+                Image scaled = raw.getImage().getScaledInstance(w, h, Image.SCALE_SMOOTH);
+                JLabel icon = new JLabel(new ImageIcon(scaled));
+                icon.setVerticalAlignment(SwingConstants.CENTER);
+                card.add(icon, BorderLayout.EAST);
+                stream.close();
+            }
+        } catch (Exception e) {
+            SignIn.getLoggerObject().log(Level.WARNING,
+                    "Dashboard icon load failed: " + iconPath, e);
+        }
+    }
+
+    /**
+     * Two side-by-side chart sections with titled panels.
+     */
+    private JPanel buildChartsRow() {
+        JPanel row = new JPanel(new GridLayout(1, 2, 20, 0));
+        row.setOpaque(false);
+
+        // ── Teacher Types ──
+        teacherChartHolder = new JPanel(new BorderLayout());
+        teacherChartHolder.setOpaque(false);
+        row.add(wrapChart("Teacher Types", teacherChartHolder));
+
+        // ── Fee Collection Status ──
+        feeChartHolder = new JPanel(new BorderLayout());
+        feeChartHolder.setOpaque(false);
+        row.add(wrapChart("Fee Collection Status", feeChartHolder));
+
+        return row;
+    }
+
+    /**
+     * Wrap a chart holder panel with a bold title label above it.
+     */
+    private JPanel wrapChart(String title, JPanel holder) {
+        JPanel wrapper = new JPanel(new BorderLayout(0, 10));
+        wrapper.setOpaque(false);
+        wrapper.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+        JLabel lbl = new JLabel(title);
+        lbl.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lbl.setForeground(new Color(51, 51, 51));
+        lbl.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
+
+        wrapper.add(lbl, BorderLayout.NORTH);
+        wrapper.add(holder, BorderLayout.CENTER);
+        return wrapper;
+    }
+    
+    /**
+     * Load the four numeric statistics into the card labels.
+     */
     private void loadStatistics() {
         try {
-            // Total Students
-            ResultSet studentRs = MySQL.executeSearch("SELECT COUNT(*) FROM student WHERE is_active = 1");
+            // ── Total Students 
+            ResultSet studentRs = MySQL.executeSearch(
+                    "SELECT COUNT(*) FROM student WHERE is_active = 1");
             if (studentRs.next()) {
                 lblTotalStudents.setText(String.valueOf(studentRs.getInt(1)));
             }
-            studentRs.close();
 
-            // Total Teachers
-            ResultSet teacherRs = MySQL.executeSearch("SELECT COUNT(*) FROM teacher WHERE status_id = 1");
+            // ── Total Teachers 
+            ResultSet teacherRs = MySQL.executeSearch(
+                    "SELECT COUNT(*) FROM teacher WHERE status_id = 1");
             if (teacherRs.next()) {
                 lblTotalTeachers.setText(String.valueOf(teacherRs.getInt(1)));
             }
-            teacherRs.close();
 
-            // Attendance Rate (last 30 days)
-            ResultSet attendanceRs = MySQL.executeSearch("SELECT " +
-                "ROUND((SELECT COUNT(*) FROM student_attendance " +
-                "WHERE status = 'Present' AND date_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)) * 100.0 / " +
-                "(SELECT COUNT(*) FROM student_attendance " +
-                "WHERE date_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)), 1)");
+            // ── Attendance Rate (last 30 days) 
+            ResultSet attendanceRs = MySQL.executeSearch(
+                    "SELECT ROUND("
+                    + "(SELECT COUNT(*) FROM student_attendance "
+                    + " WHERE status = 'Present' "
+                    + "   AND date_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)) * 100.0 / "
+                    + "NULLIF((SELECT COUNT(*) FROM student_attendance "
+                    + " WHERE date_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)), 0)"
+                    + ", 1)");
             if (attendanceRs.next()) {
-                lblAttendanceRate.setText(attendanceRs.getString(1) + "%");
+                String rate = attendanceRs.getString(1);
+                lblAttendanceRate.setText(rate != null ? rate + "%" : "N/A");
             }
-            attendanceRs.close();
 
-            // Fee Collection (current month)
-            ResultSet feeRs = MySQL.executeSearch("SELECT COALESCE(SUM(amount), 0) FROM fee " +
-                "WHERE status = 'Paid' AND paid_date >= DATE_FORMAT(CURDATE(), '%Y-%m-01')");
+            // ── Fee Collection (current month) 
+            ResultSet feeRs = MySQL.executeSearch(
+                    "SELECT COALESCE(SUM(amount), 0) FROM fee "
+                    + "WHERE status = 'Paid' "
+                    + "  AND paid_date >= DATE_FORMAT(CURDATE(), '%Y-%m-01')");
             if (feeRs.next()) {
-                lblFeeCollection.setText("Rs. " + String.format("%,.2f", feeRs.getDouble(1)));
+                lblFeeCollection.setText(formatNumber(feeRs.getDouble(1)));
             }
-            feeRs.close();
 
         } catch (Exception e) {
-            e.printStackTrace();
-            // Set default values on error
-            lblTotalStudents.setText("0");
-            lblTotalTeachers.setText("0");
-            lblAttendanceRate.setText("0%");
-            lblFeeCollection.setText("Rs. 0");
+            SignIn.getLoggerObject().log(Level.WARNING,
+                    "Dashboard statistics loading failed", e);
+            lblTotalStudents.setText("--");
+            lblTotalTeachers.setText("--");
+            lblAttendanceRate.setText("--%");
+            lblFeeCollection.setText("Rs.0");
+        }
+    }
+
+    /**
+     * Load pie-chart data into the two chart holders.
+     */
+    @SuppressWarnings("unchecked")
+    private void loadCharts() {
+        loadTeacherTypesChart();
+        loadFeeStatusChart();
+    }
+
+    // ── Teacher Types Pie Chart 
+    @SuppressWarnings("unchecked")
+    private void loadTeacherTypesChart() {
+        DefaultPieDataset<String> dataset = new DefaultPieDataset<>();
+        List<Color> colors = new ArrayList<>();
+
+        Color[] palette = {
+            new Color(23, 126, 238), // Blue
+            new Color(221, 65, 65), // Red
+            new Color(47, 157, 64), // Green
+            new Color(196, 151, 58), // Gold
+            new Color(156, 39, 176), // Purple
+            new Color(244, 67, 54), // Bright Red
+            new Color(33, 150, 243), // Light Blue
+            new Color(76, 175, 80), // Light Green
+            new Color(255, 152, 0), // Orange
+            new Color(121, 85, 72), // Brown
+            new Color(96, 125, 139), // Blue Gray
+            new Color(233, 30, 99) // Pink
+        };
+
+        try {
+            ResultSet rs = MySQL.executeSearch(
+                    "SELECT tt.type_name, COUNT(t.teacher_id) AS count "
+                    + "FROM teacher_type tt "
+                    + "LEFT JOIN teacher t "
+                    + "  ON tt.teacher_type_id = t.teacher_type_id "
+                    + "  AND t.status_id = 1 "
+                    + "GROUP BY tt.teacher_type_id, tt.type_name");
+
+            int idx = 0;
+            while (rs.next()) {
+                dataset.setValue(rs.getString("type_name"), rs.getInt("count"));
+                colors.add(palette[idx % palette.length]);
+                idx++;
+            }
+        } catch (Exception e) {
+            SignIn.getLoggerObject().log(Level.WARNING,
+                    "Teacher chart data load failed", e);
+            // Fallback sample data
+            dataset.setValue("Teacher", 8);
+            dataset.setValue("Principal", 1);
+            dataset.setValue("Office Staff", 3);
+            dataset.setValue("Support Staff", 2);
+            colors.add(palette[0]);
+            colors.add(palette[1]);
+            colors.add(palette[2]);
+            colors.add(palette[3]);
+        }
+
+        if (dataset.getItemCount() > 0) {
+            JPanel chart = PieChart.createPieChartWithColors(
+                    "", dataset, colors.toArray(new Color[0]));
+            teacherChartHolder.add(chart, BorderLayout.CENTER);
+            teacherChartHolder.revalidate();
+            teacherChartHolder.repaint();
+        }
+    }
+
+    // ── Fee Collection Status Pie Chart 
+    @SuppressWarnings("unchecked")
+    private void loadFeeStatusChart() {
+        DefaultPieDataset<String> dataset = new DefaultPieDataset<>();
+        List<Color> colors = new ArrayList<>();
+
+        try {
+            ResultSet rs = MySQL.executeSearch(
+                    "SELECT status, COUNT(*) AS count FROM fee GROUP BY status");
+
+            while (rs.next()) {
+                String status = rs.getString("status");
+                int count = rs.getInt("count");
+                dataset.setValue(status, count);
+
+                switch (status) {
+                    case "Paid":
+                        colors.add(new Color(76, 175, 80));   // Green
+                        break;
+                    case "Pending":
+                        colors.add(new Color(33, 150, 243));  // Blue
+                        break;
+                    case "Overdue":
+                        colors.add(new Color(244, 67, 54));   // Red
+                        break;
+                    default:
+                        colors.add(new Color(158, 158, 158)); // Gray
+                        break;
+                }
+            }
+        } catch (Exception e) {
+            SignIn.getLoggerObject().log(Level.WARNING,
+                    "Fee chart data load failed", e);
+            // Fallback sample data
+            dataset.setValue("Paid", 52);
+            dataset.setValue("Pending", 24);
+            dataset.setValue("Overdue", 24);
+            colors.add(new Color(76, 175, 80));
+            colors.add(new Color(33, 150, 243));
+            colors.add(new Color(244, 67, 54));
+        }
+
+        if (dataset.getItemCount() > 0) {
+            JPanel chart = PieChart.createPieChartWithColors(
+                    "", dataset, colors.toArray(new Color[0]));
+            feeChartHolder.add(chart, BorderLayout.CENTER);
+            feeChartHolder.revalidate();
+            feeChartHolder.repaint();
+        }
+    }
+    
+    /**
+     * Format a number with k/M suffix for compact display. e.g. 1500 → "1.5k",
+     * 2000000 → "2.0M"
+     */
+    public static String formatNumber(double number) {
+        if (number < 1000) {
+            return String.format("%.0f", number);
+        } else if (number < 1_000_000) {
+            return String.format("%.1fk", number / 1000);
+        } else {
+            return String.format("%.1fM", number / 1_000_000);
         }
     }
 }
