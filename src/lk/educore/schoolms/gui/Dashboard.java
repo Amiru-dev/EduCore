@@ -90,6 +90,17 @@ public class Dashboard extends JFrame {
         logoPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
 
         JLabel logoLabel = new JLabel("EduCore");
+        try {
+            InputStream is = getClass().getResourceAsStream("/lk/educore/schoolms/resources/logo.png");
+            if (is != null) {
+                Image img = ImageIO.read(is).getScaledInstance(35, 35, Image.SCALE_SMOOTH);
+                logoLabel.setIcon(new ImageIcon(img));
+                logoLabel.setIconTextGap(10);
+                is.close();
+            }
+        } catch (Exception e) {
+            SignIn.getLoggerObject().log(Level.WARNING, "Failed to load sidebar logo", e);
+        }
         logoLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
         logoLabel.setForeground(Color.WHITE);
         logoPanel.add(logoLabel);
