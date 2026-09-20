@@ -215,12 +215,12 @@ public class Dashboard extends JFrame {
 
         // Username
         lblUsername = new JLabel(username);
-        lblUsername.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblUsername.setFont(new Font("Segoe UI", Font.PLAIN, 18));
         userPanel.add(lblUsername);
 
         // Role
         lblRole = new JLabel("(" + role + ")");
-        lblRole.setFont(new Font("Segoe UI", Font.ITALIC, 11));
+        lblRole.setFont(new Font("Segoe UI", Font.ITALIC, 18));
         lblRole.setForeground(Color.GRAY);
         userPanel.add(lblRole);
 
