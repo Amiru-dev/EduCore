@@ -1,6 +1,7 @@
 package lk.educore.schoolms.gui;
 
-import lk.educore.schoolms.charts.PieChart;
+import javaswingdev.chart.ModelPieChart;
+import javaswingdev.chart.PieChart;
 import lk.educore.schoolms.component.RoundPanel;
 import lk.educore.schoolms.model.MySQL;
 
@@ -9,10 +10,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.io.InputStream;
 import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
-import org.jfree.data.general.DefaultPieDataset;
 
 /**
  * Dashboard Panel Modern home panel displaying statistics cards with gradient
@@ -66,7 +64,7 @@ public class DashboardPanel extends JPanel {
                 BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(225, 225, 225)),
                 BorderFactory.createEmptyBorder(15, 25, 15, 25)));
 
-        JLabel title = new JLabel("Dashboard Overview");
+        JLabel title = new JLabel("Dashboard");
         title.setFont(new Font("Segoe UI", Font.PLAIN, 18));
         title.setForeground(new Color(60, 60, 60));
         header.add(title, BorderLayout.WEST);
@@ -184,16 +182,17 @@ public class DashboardPanel extends JPanel {
     private JPanel buildChartsRow() {
         JPanel row = new JPanel(new GridLayout(1, 2, 20, 0));
         row.setOpaque(false);
+        row.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
 
         // ── Teacher Types ──
         teacherChartHolder = new JPanel(new BorderLayout());
         teacherChartHolder.setOpaque(false);
-        row.add(wrapChart("Teacher Types", teacherChartHolder));
+        row.add(wrapChart("Employee Types", teacherChartHolder));
 
         // ── Fee Collection Status ──
         feeChartHolder = new JPanel(new BorderLayout());
         feeChartHolder.setOpaque(false);
-        row.add(wrapChart("Fee Collection Status", feeChartHolder));
+        row.add(wrapChart("Order Count By Status", feeChartHolder));
 
         return row;
     }
@@ -271,17 +270,15 @@ public class DashboardPanel extends JPanel {
     /**
      * Load pie-chart data into the two chart holders.
      */
-    @SuppressWarnings("unchecked")
     private void loadCharts() {
         loadTeacherTypesChart();
         loadFeeStatusChart();
     }
 
     // ── Teacher Types Pie Chart 
-    @SuppressWarnings("unchecked")
     private void loadTeacherTypesChart() {
-        DefaultPieDataset<String> dataset = new DefaultPieDataset<>();
-        List<Color> colors = new ArrayList<>();
+        PieChart chart = new PieChart();
+        chart.setChartType(PieChart.PeiChartType.DONUT_CHART);
 
         Color[] palette = {
             new Color(23, 126, 238), // Blue
@@ -298,6 +295,7 @@ public class DashboardPanel extends JPanel {
             new Color(233, 30, 99) // Pink
         };
 
+        boolean hasData = false;
         try {
             ResultSet rs = MySQL.executeSearch(
                     "SELECT tt.type_name, COUNT(t.teacher_id) AS count "
@@ -309,39 +307,38 @@ public class DashboardPanel extends JPanel {
 
             int idx = 0;
             while (rs.next()) {
-                dataset.setValue(rs.getString("type_name"), rs.getInt("count"));
-                colors.add(palette[idx % palette.length]);
+                String name = rs.getString("type_name");
+                int count = rs.getInt("count");
+                if (count > 0) {
+                    chart.addData(new ModelPieChart(name, count, palette[idx % palette.length]));
+                    hasData = true;
+                }
                 idx++;
             }
         } catch (Exception e) {
             SignIn.getLoggerObject().log(Level.WARNING,
                     "Teacher chart data load failed", e);
-            // Fallback sample data
-            dataset.setValue("Teacher", 8);
-            dataset.setValue("Principal", 1);
-            dataset.setValue("Office Staff", 3);
-            dataset.setValue("Support Staff", 2);
-            colors.add(palette[0]);
-            colors.add(palette[1]);
-            colors.add(palette[2]);
-            colors.add(palette[3]);
         }
 
-        if (dataset.getItemCount() > 0) {
-            JPanel chart = PieChart.createPieChartWithColors(
-                    "", dataset, colors.toArray(new Color[0]));
-            teacherChartHolder.add(chart, BorderLayout.CENTER);
-            teacherChartHolder.revalidate();
-            teacherChartHolder.repaint();
+        if (!hasData) {
+            // Fallback sample data
+            chart.addData(new ModelPieChart("Teacher", 8, palette[0]));
+            chart.addData(new ModelPieChart("Principal", 1, palette[1]));
+            chart.addData(new ModelPieChart("Office Staff", 3, palette[2]));
+            chart.addData(new ModelPieChart("Support Staff", 2, palette[3]));
         }
+
+        teacherChartHolder.add(chart, BorderLayout.CENTER);
+        teacherChartHolder.revalidate();
+        teacherChartHolder.repaint();
     }
 
     // ── Fee Collection Status Pie Chart 
-    @SuppressWarnings("unchecked")
     private void loadFeeStatusChart() {
-        DefaultPieDataset<String> dataset = new DefaultPieDataset<>();
-        List<Color> colors = new ArrayList<>();
+        PieChart chart = new PieChart();
+        chart.setChartType(PieChart.PeiChartType.DONUT_CHART);
 
+        boolean hasData = false;
         try {
             ResultSet rs = MySQL.executeSearch(
                     "SELECT status, COUNT(*) AS count FROM fee GROUP BY status");
@@ -349,42 +346,41 @@ public class DashboardPanel extends JPanel {
             while (rs.next()) {
                 String status = rs.getString("status");
                 int count = rs.getInt("count");
-                dataset.setValue(status, count);
-
-                switch (status) {
-                    case "Paid":
-                        colors.add(new Color(76, 175, 80));   // Green
-                        break;
-                    case "Pending":
-                        colors.add(new Color(33, 150, 243));  // Blue
-                        break;
-                    case "Overdue":
-                        colors.add(new Color(244, 67, 54));   // Red
-                        break;
-                    default:
-                        colors.add(new Color(158, 158, 158)); // Gray
-                        break;
+                if (count > 0) {
+                    Color color;
+                    switch (status) {
+                        case "Paid":
+                            color = new Color(76, 175, 80);   // Green
+                            break;
+                        case "Pending":
+                            color = new Color(33, 150, 243);  // Blue
+                            break;
+                        case "Overdue":
+                            color = new Color(244, 67, 54);   // Red
+                            break;
+                        default:
+                            color = new Color(158, 158, 158); // Gray
+                            break;
+                    }
+                    chart.addData(new ModelPieChart(status, count, color));
+                    hasData = true;
                 }
             }
         } catch (Exception e) {
             SignIn.getLoggerObject().log(Level.WARNING,
                     "Fee chart data load failed", e);
-            // Fallback sample data
-            dataset.setValue("Paid", 52);
-            dataset.setValue("Pending", 24);
-            dataset.setValue("Overdue", 24);
-            colors.add(new Color(76, 175, 80));
-            colors.add(new Color(33, 150, 243));
-            colors.add(new Color(244, 67, 54));
         }
 
-        if (dataset.getItemCount() > 0) {
-            JPanel chart = PieChart.createPieChartWithColors(
-                    "", dataset, colors.toArray(new Color[0]));
-            feeChartHolder.add(chart, BorderLayout.CENTER);
-            feeChartHolder.revalidate();
-            feeChartHolder.repaint();
+        if (!hasData) {
+            // Fallback sample data
+            chart.addData(new ModelPieChart("Paid", 52, new Color(76, 175, 80)));
+            chart.addData(new ModelPieChart("Pending", 24, new Color(33, 150, 243)));
+            chart.addData(new ModelPieChart("Overdue", 24, new Color(244, 67, 54)));
         }
+
+        feeChartHolder.add(chart, BorderLayout.CENTER);
+        feeChartHolder.revalidate();
+        feeChartHolder.repaint();
     }
     
     /**
