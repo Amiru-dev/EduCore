@@ -86,28 +86,28 @@ public class DashboardPanel extends JPanel {
         cards.add(createStatCard(
                 lblTotalStudents, "Students",
                 Color.decode("#183d8a"), Color.decode("#719bf0"),
-                "/lk/educore/schoolms/resources/other/icons8-maximum-order-1001.png"));
+                "/lk/educore/schoolms/resources/other/student.png"));
 
         // Card 2 : Teachers
         lblTotalTeachers = new JLabel("0");
         cards.add(createStatCard(
                 lblTotalTeachers, "Teachers",
                 Color.decode("#0D5917"), Color.decode("#51F815"),
-                "/lk/educore/schoolms/resources/other/icons8-add-user-male-100.png"));
+                "/lk/educore/schoolms/resources/other/teacher.png"));
 
         // Card 3 : Attendance
         lblAttendanceRate = new JLabel("0%");
         cards.add(createStatCard(
                 lblAttendanceRate, "Attendance",
                 Color.decode("#C55404"), Color.decode("#F8D32A"),
-                "/lk/educore/schoolms/resources/other/icons8-fingerprint-accepted-100.png"));
+                "/lk/educore/schoolms/resources/other/attendance.png"));
 
         // Card 4 : Fees / Earnings 
         lblFeeCollection = new JLabel("Rs.0");
         cards.add(createStatCard(
                 lblFeeCollection, "Earnings",
                 Color.decode("#931835"), Color.decode("#F18352"),
-                "/lk/educore/schoolms/resources/other/icons8-money-100.png"));
+                "/lk/educore/schoolms/resources/other/fee.png"));
 
         return cards;
     }
@@ -140,7 +140,7 @@ public class DashboardPanel extends JPanel {
         valueLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel sub = new JLabel(subtitle);
-        sub.setFont(new Font("Segoe UI", Font.PLAIN, 20));
+        sub.setFont(new Font("Segoe UI", Font.PLAIN, 25));
         sub.setForeground(new Color(255, 255, 255, 220));
         sub.setAlignmentX(Component.LEFT_ALIGNMENT);
 
