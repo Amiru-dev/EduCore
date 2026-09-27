@@ -69,7 +69,7 @@ public class Dashboard extends JFrame {
 
         // Content panel
         contentPanel = new JPanel(new BorderLayout());
-        contentPanel.add(new DashboardPanel(), BorderLayout.CENTER);
+        contentPanel.add(new DashboardPanel(role), BorderLayout.CENTER);
         mainPanel.add(contentPanel, BorderLayout.CENTER);
 
         // Header panel
@@ -270,7 +270,7 @@ public class Dashboard extends JFrame {
 
         switch (index) {
             case 0: // Dashboard
-                contentPanel.add(new DashboardPanel(), BorderLayout.CENTER);
+                contentPanel.add(new DashboardPanel(role), BorderLayout.CENTER);
                 break;
             case 1: // Students
                 contentPanel.add(new StudentManagement(), BorderLayout.CENTER);
