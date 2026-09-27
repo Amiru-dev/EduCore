@@ -13,12 +13,12 @@ import javax.activation.*;
  */
 public class SendFileEmail {
 
-    // Email configuration - UPDATE WITH YOUR GMAIL APP PASSWORD
+    // Email configuration 
     private static final String EMAIL_HOST = "smtp.gmail.com";
     private static final String EMAIL_PORT = "587";
-    private static final String EMAIL_USERNAME = "asuspro5001@gmail.com"; // UPDATE WITH YOUR EMAIL
-    private static final String EMAIL_PASSWORD = "your-app-password"; // UPDATE WITH YOUR GMAIL APP PASSWORD
-    private static final String FROM_EMAIL = "asuspro5001@gmail.com"; // UPDATE WITH YOUR EMAIL
+    private static final String EMAIL_USERNAME = "asuspro5001@gmail.com"; 
+    private static final String EMAIL_PASSWORD = "xdhmaqxxfflvhxpg"; 
+    private static final String FROM_EMAIL = "asuspro5001@gmail.com"; 
 
     /**
      * Send email with single file attachment
