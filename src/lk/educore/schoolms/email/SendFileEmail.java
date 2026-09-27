@@ -16,9 +16,9 @@ public class SendFileEmail {
     // Email configuration 
     private static final String EMAIL_HOST = "smtp.gmail.com";
     private static final String EMAIL_PORT = "465";
-    private static final String EMAIL_USERNAME = "asuspro5001@gmail.com";
-    private static final String EMAIL_PASSWORD = "xdhmaqxxfflvhxpg";
-    private static final String FROM_EMAIL = "asuspro5001@gmail.com";
+    private static final String EMAIL_USERNAME = "asuspro162@gmail.com";
+    private static final String EMAIL_PASSWORD = "ieovbnmqbrdtjjrp";
+    private static final String FROM_EMAIL = "asuspro162@gmail.com";
 
     /**
      * Send email with single file attachment
