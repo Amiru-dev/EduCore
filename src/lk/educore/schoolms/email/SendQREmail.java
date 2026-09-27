@@ -2,23 +2,11 @@ package lk.educore.schoolms.email;
 
 import lk.educore.schoolms.exceptions.EmailException;
 import lk.educore.schoolms.model.QRCodeGenerator;
-import java.io.*;
-import java.util.*;
-import javax.mail.*;
-import javax.mail.internet.*;
-import javax.activation.*;
 
 /**
  * QR Code Email Sender Sends emails with QR code attachments using JavaMail API
  */
 public class SendQREmail {
-
-    // Email configuration
-    private static final String EMAIL_HOST = "smtp.gmail.com";
-    private static final String EMAIL_PORT = "587";
-    private static final String EMAIL_USERNAME = "asuspro5001@gmail.com";
-    private static final String EMAIL_PASSWORD = "xdhmaqxxfflvhxpg";
-    private static final String FROM_EMAIL = "asuspro5001@gmail.com";
 
     /**
      * Send student ID card with QR code via email
