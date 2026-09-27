@@ -283,20 +283,22 @@ public class StudentRegistration extends JDialog {
 
     private void loadGrades() {
         try {
-            Connection conn = MySQL.getConnection();
-            String query = "SELECT grade_name FROM grade ORDER BY grade_name";
-            PreparedStatement stmt = conn.prepareStatement(query);
-            ResultSet rs = stmt.executeQuery();
+            String query = "SELECT grade_name, section FROM grade ORDER BY grade_name, section";
+            ResultSet rs = MySQL.executeSearch(query);
             
             while (rs.next()) {
-                cmbGrade.addItem(rs.getString("grade_name"));
+                String gName = rs.getString("grade_name");
+                String sec = rs.getString("section");
+                if (sec != null && !sec.isEmpty()) {
+                    cmbGrade.addItem(gName + " - " + sec);
+                } else {
+                    cmbGrade.addItem(gName);
+                }
             }
             
             rs.close();
-            stmt.close();
-            conn.close();
             
-        } catch (SQLException e) {
+        } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error loading grades: " + e.getMessage());
         }
     }
@@ -396,16 +398,27 @@ public class StudentRegistration extends JDialog {
                 guardianStmt.close();
 
                 // Get grade ID
-                String gradeQuery = "SELECT grade_id FROM grade WHERE grade_name = ?";
-                PreparedStatement gradeStmt = conn.prepareStatement(gradeQuery);
-                gradeStmt.setString(1, grade);
-                ResultSet gradeRs = gradeStmt.executeQuery();
+                String gradeName = grade;
+                String section = null;
+                if (grade.contains(" - ")) {
+                    String[] gradeParts = grade.split(" - ", 2);
+                    gradeName = gradeParts[0];
+                    section = gradeParts[1];
+                }
+
+                String gradeQuery;
+                if (section != null) {
+                    gradeQuery = "SELECT grade_id FROM grade WHERE grade_name = '" + gradeName + "' AND section = '" + section + "'";
+                } else {
+                    gradeQuery = "SELECT grade_id FROM grade WHERE grade_name = '" + gradeName + "' AND (section IS NULL OR section = '')";
+                }
+
+                ResultSet gradeRs = MySQL.executeSearch(gradeQuery);
                 int gradeId = -1;
                 if (gradeRs.next()) {
                     gradeId = gradeRs.getInt("grade_id");
                 }
                 gradeRs.close();
-                gradeStmt.close();
 
                 // Create user account
                 String username = email;
