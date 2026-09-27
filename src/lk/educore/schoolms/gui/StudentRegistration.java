@@ -55,7 +55,7 @@ public class StudentRegistration extends JDialog {
         JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JLabel titleLabel = new JLabel("Student Registration");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        titlePanel.add(titlePanel);
+        titlePanel.add(titleLabel);
         mainPanel.add(titlePanel, BorderLayout.NORTH);
 
         // Form panel
