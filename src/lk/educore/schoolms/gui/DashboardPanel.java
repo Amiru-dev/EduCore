@@ -154,14 +154,14 @@ public class DashboardPanel extends JPanel {
             cards.add(createStatCard(
                     lblUpcomingExams, "Exams",
                     Color.decode("#C55404"), Color.decode("#F8D32A"),
-                    "/lk/educore/schoolms/resources/other/icons8-marketing-20.png"));
+                    "/lk/educore/schoolms/resources/other/exam.png"));
 
             // Card 4 : Active Events
             lblActiveEvents = new JLabel("0");
             cards.add(createStatCard(
                     lblActiveEvents, "Events",
                     Color.decode("#4A148C"), Color.decode("#CE93D8"),
-                    "/lk/educore/schoolms/resources/other/icons8-production-20 (3).png"));
+                    "/lk/educore/schoolms/resources/other/event.png"));
         }
 
         return cards;
