@@ -372,23 +372,22 @@ public class StudentRegistration extends JDialog {
 
             try {
                 // Insert guardian
-                String guardianQuery = "INSERT INTO guardian (first_name, last_name, nic, relationship, phone, email, address, occupation) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-                PreparedStatement guardianStmt = conn.prepareStatement(guardianQuery, Statement.RETURN_GENERATED_KEYS);
-                
                 String[] guardianNameParts = guardianName.split(" ", 2);
                 String guardianFirstName = guardianNameParts[0];
                 String guardianLastName = guardianNameParts.length > 1 ? guardianNameParts[1] : "";
                 
-                guardianStmt.setString(1, guardianFirstName);
-                guardianStmt.setString(2, guardianLastName);
-                guardianStmt.setString(3, guardianNIC.isEmpty() ? null : guardianNIC);
-                guardianStmt.setString(4, relationship);
-                guardianStmt.setString(5, guardianPhone);
-                guardianStmt.setString(6, guardianEmail.isEmpty() ? null : guardianEmail);
-                guardianStmt.setString(7, guardianAddress);
-                guardianStmt.setString(8, guardianOccupation);
+                String guardianQuery = "INSERT INTO guardian (first_name, last_name, nic, relationship, phone, email, address, occupation) VALUES ('" 
+                        + guardianFirstName + "', '" 
+                        + guardianLastName + "', " 
+                        + (guardianNIC.isEmpty() ? "NULL" : "'" + guardianNIC + "'") + ", '" 
+                        + relationship + "', '" 
+                        + guardianPhone + "', " 
+                        + (guardianEmail.isEmpty() ? "NULL" : "'" + guardianEmail + "'") + ", '" 
+                        + guardianAddress + "', '" 
+                        + guardianOccupation + "')";
+                Statement guardianStmt = conn.createStatement();
+                guardianStmt.executeUpdate(guardianQuery, Statement.RETURN_GENERATED_KEYS);
                 
-                guardianStmt.executeUpdate();
                 ResultSet guardianRs = guardianStmt.getGeneratedKeys();
                 int guardianId = -1;
                 if (guardianRs.next()) {
@@ -424,12 +423,9 @@ public class StudentRegistration extends JDialog {
                 String username = email;
                 String temporaryPassword = generateRandomPassword();
                 
-                String userQuery = "INSERT INTO user (username, password, email, user_type_id, is_active) VALUES (?, ?, ?, 3, 1)";
-                PreparedStatement userStmt = conn.prepareStatement(userQuery, Statement.RETURN_GENERATED_KEYS);
-                userStmt.setString(1, username);
-                userStmt.setString(2, temporaryPassword); // In production, hash this
-                userStmt.setString(3, email);
-                userStmt.executeUpdate();
+                String userQuery = "INSERT INTO user (username, password, email, user_type_id, is_active) VALUES ('" + username + "', '" + temporaryPassword + "', '" + email + "', 3, 1)";
+                Statement userStmt = conn.createStatement();
+                userStmt.executeUpdate(userQuery, Statement.RETURN_GENERATED_KEYS);
                 
                 ResultSet userRs = userStmt.getGeneratedKeys();
                 int userId = -1;
@@ -440,19 +436,19 @@ public class StudentRegistration extends JDialog {
                 userStmt.close();
 
                 // Insert student
-                String studentQuery = "INSERT INTO student (student_id, first_name, last_name, dob, gender, nic, email, phone, address, grade_id, guardian_id, user_id, registration_date, is_active) VALUES (?, ?, ?, CURDATE(), 'Other', ?, ?, ?, ?, ?, ?, ?, CURDATE(), 1)";
-                PreparedStatement studentStmt = conn.prepareStatement(studentQuery);
-                studentStmt.setString(1, studentId);
-                studentStmt.setString(2, firstName);
-                studentStmt.setString(3, lastName);
-                studentStmt.setString(4, nic.isEmpty() ? null : nic);
-                studentStmt.setString(5, email);
-                studentStmt.setString(6, phone);
-                studentStmt.setString(7, address);
-                studentStmt.setInt(8, gradeId);
-                studentStmt.setInt(9, guardianId);
-                studentStmt.setInt(10, userId);
-                studentStmt.executeUpdate();
+                String studentQuery = "INSERT INTO student (student_id, first_name, last_name, dob, gender, nic, email, phone, address, grade_id, guardian_id, user_id, registration_date, is_active) VALUES ('" 
+                        + studentId + "', '" 
+                        + firstName + "', '" 
+                        + lastName + "', CURDATE(), 'Other', " 
+                        + (nic.isEmpty() ? "NULL" : "'" + nic + "'") + ", '" 
+                        + email + "', '" 
+                        + phone + "', '" 
+                        + address + "', " 
+                        + gradeId + ", " 
+                        + guardianId + ", " 
+                        + userId + ", CURDATE(), 1)";
+                Statement studentStmt = conn.createStatement();
+                studentStmt.executeUpdate(studentQuery);
                 studentStmt.close();
 
                 conn.commit();
