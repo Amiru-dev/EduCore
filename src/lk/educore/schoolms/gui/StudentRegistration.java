@@ -11,6 +11,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.sql.*;
 import java.security.SecureRandom;
+import java.text.SimpleDateFormat;
+import com.toedter.calendar.JDateChooser;
 
 /**
  * Student Registration Dialog
@@ -26,7 +28,8 @@ public class StudentRegistration extends JDialog {
     private JTextField txtPhone;
     private JTextArea txtAddress;
     private JComboBox<String> cmbGrade;
-    private JTextField txtGuardianName;
+    private JTextField txtGuardianFirstName;
+    private JTextField txtGuardianLastName;
     private JTextField txtGuardianNIC;
     private JTextField txtGuardianPhone;
     private JTextField txtGuardianEmail;
@@ -35,6 +38,10 @@ public class StudentRegistration extends JDialog {
     private JComboBox<String> cmbGuardianRelationship;
     private JCheckBox chkSendEmail;
     private JCheckBox chkGenerateQR;
+    private JDateChooser dateChooserDOB;
+    private JRadioButton rdoMale;
+    private JRadioButton rdoFemale;
+    private ButtonGroup genderGroup;
 
     public StudentRegistration(Frame parent) {
         super(parent, "Student Registration", true);
@@ -99,9 +106,40 @@ public class StudentRegistration extends JDialog {
         txtLastName = new JTextField(20);
         formPanel.add(txtLastName, gbc);
 
-        // NIC
+        // DOB
         gbc.gridx = 0;
         gbc.gridy = 3;
+        gbc.weightx = 0.0;
+        formPanel.add(new JLabel("Date of Birth:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 1.0;
+        dateChooserDOB = new JDateChooser();
+        dateChooserDOB.setDateFormatString("yyyy-MM-dd");
+        formPanel.add(dateChooserDOB, gbc);
+
+        // Gender
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.weightx = 0.0;
+        formPanel.add(new JLabel("Gender:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 1.0;
+        JPanel genderPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        rdoMale = new JRadioButton("Male");
+        rdoFemale = new JRadioButton("Female");
+        rdoMale.setSelected(true);
+        genderGroup = new ButtonGroup();
+        genderGroup.add(rdoMale);
+        genderGroup.add(rdoFemale);
+        genderPanel.add(rdoMale);
+        genderPanel.add(rdoFemale);
+        formPanel.add(genderPanel, gbc);
+
+        // NIC
+        gbc.gridx = 0;
+        gbc.gridy = 5;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("NIC:"), gbc);
 
@@ -112,7 +150,7 @@ public class StudentRegistration extends JDialog {
 
         // Email
         gbc.gridx = 0;
-        gbc.gridy = 4;
+        gbc.gridy = 6;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Email:"), gbc);
 
@@ -123,7 +161,7 @@ public class StudentRegistration extends JDialog {
 
         // Phone
         gbc.gridx = 0;
-        gbc.gridy = 5;
+        gbc.gridy = 7;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Phone:"), gbc);
 
@@ -134,7 +172,7 @@ public class StudentRegistration extends JDialog {
 
         // Address
         gbc.gridx = 0;
-        gbc.gridy = 6;
+        gbc.gridy = 8;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Address:"), gbc);
 
@@ -146,7 +184,7 @@ public class StudentRegistration extends JDialog {
 
         // Grade
         gbc.gridx = 0;
-        gbc.gridy = 7;
+        gbc.gridy = 9;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Grade:"), gbc);
 
@@ -158,7 +196,7 @@ public class StudentRegistration extends JDialog {
 
         // Guardian Section Label
         gbc.gridx = 0;
-        gbc.gridy = 8;
+        gbc.gridy = 10;
         gbc.gridwidth = 2;
         gbc.weightx = 0.0;
         JLabel guardianLabel = new JLabel("Guardian Information");
@@ -166,21 +204,32 @@ public class StudentRegistration extends JDialog {
         guardianLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 5, 0));
         formPanel.add(guardianLabel, gbc);
 
-        // Guardian Name
+        // Guardian First Name
         gbc.gridx = 0;
-        gbc.gridy = 9;
+        gbc.gridy = 11;
         gbc.gridwidth = 1;
         gbc.weightx = 0.0;
-        formPanel.add(new JLabel("Guardian Name:"), gbc);
+        formPanel.add(new JLabel("Guardian First Name:"), gbc);
 
         gbc.gridx = 1;
         gbc.weightx = 1.0;
-        txtGuardianName = new JTextField(20);
-        formPanel.add(txtGuardianName, gbc);
+        txtGuardianFirstName = new JTextField(20);
+        formPanel.add(txtGuardianFirstName, gbc);
+
+        // Guardian Last Name
+        gbc.gridx = 0;
+        gbc.gridy = 12;
+        gbc.weightx = 0.0;
+        formPanel.add(new JLabel("Guardian Last Name:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 1.0;
+        txtGuardianLastName = new JTextField(20);
+        formPanel.add(txtGuardianLastName, gbc);
 
         // Guardian NIC
         gbc.gridx = 0;
-        gbc.gridy = 10;
+        gbc.gridy = 13;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Guardian NIC:"), gbc);
 
@@ -191,7 +240,7 @@ public class StudentRegistration extends JDialog {
 
         // Guardian Relationship
         gbc.gridx = 0;
-        gbc.gridy = 11;
+        gbc.gridy = 14;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Relationship:"), gbc);
 
@@ -202,7 +251,7 @@ public class StudentRegistration extends JDialog {
 
         // Guardian Phone
         gbc.gridx = 0;
-        gbc.gridy = 12;
+        gbc.gridy = 15;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Guardian Phone:"), gbc);
 
@@ -213,7 +262,7 @@ public class StudentRegistration extends JDialog {
 
         // Guardian Email
         gbc.gridx = 0;
-        gbc.gridy = 13;
+        gbc.gridy = 16;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Guardian Email:"), gbc);
 
@@ -224,7 +273,7 @@ public class StudentRegistration extends JDialog {
 
         // Guardian Address
         gbc.gridx = 0;
-        gbc.gridy = 14;
+        gbc.gridy = 17;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Guardian Address:"), gbc);
 
@@ -235,7 +284,7 @@ public class StudentRegistration extends JDialog {
 
         // Guardian Occupation
         gbc.gridx = 0;
-        gbc.gridy = 15;
+        gbc.gridy = 18;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Guardian Occupation:"), gbc);
 
@@ -246,7 +295,7 @@ public class StudentRegistration extends JDialog {
 
         // Email and QR options
         gbc.gridx = 0;
-        gbc.gridy = 16;
+        gbc.gridy = 19;
         gbc.gridwidth = 2;
         gbc.weightx = 0.0;
         JPanel optionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -350,7 +399,8 @@ public class StudentRegistration extends JDialog {
             String phone = txtPhone.getText().trim();
             String address = txtAddress.getText().trim();
             String grade = (String) cmbGrade.getSelectedItem();
-            String guardianName = txtGuardianName.getText().trim();
+            String guardianFirstName = txtGuardianFirstName.getText().trim();
+            String guardianLastName = txtGuardianLastName.getText().trim();
             String guardianNIC = txtGuardianNIC.getText().trim();
             String guardianPhone = txtGuardianPhone.getText().trim();
             String guardianEmail = txtGuardianEmail.getText().trim();
@@ -364,18 +414,23 @@ public class StudentRegistration extends JDialog {
             DataValidator.isValidEmail(email);
             DataValidator.isValidPhone(phone);
             DataValidator.isRequired(address, "Address");
-            DataValidator.isRequired(guardianName, "Guardian Name");
+            DataValidator.isRequired(guardianFirstName, "Guardian First Name");
+            DataValidator.isRequired(guardianLastName, "Guardian Last Name");
             DataValidator.isRequired(guardianPhone, "Guardian Phone");
+            
+            java.util.Date dobDate = dateChooserDOB.getDate();
+            if (dobDate == null) {
+                throw new ValidationException("Date of Birth is required");
+            }
+            String dob = new SimpleDateFormat("yyyy-MM-dd").format(dobDate);
+            
+            String gender = rdoMale.isSelected() ? "Male" : "Female";
 
             Connection conn = MySQL.getConnection();
             conn.setAutoCommit(false);
 
             try {
                 // Insert guardian
-                String[] guardianNameParts = guardianName.split(" ", 2);
-                String guardianFirstName = guardianNameParts[0];
-                String guardianLastName = guardianNameParts.length > 1 ? guardianNameParts[1] : "";
-                
                 String guardianQuery = "INSERT INTO guardian (first_name, last_name, nic, relationship, phone, email, address, occupation) VALUES ('" 
                         + guardianFirstName + "', '" 
                         + guardianLastName + "', " 
@@ -439,7 +494,7 @@ public class StudentRegistration extends JDialog {
                 String studentQuery = "INSERT INTO student (student_id, first_name, last_name, dob, gender, nic, email, phone, address, grade_id, guardian_id, user_id, registration_date, is_active) VALUES ('" 
                         + studentId + "', '" 
                         + firstName + "', '" 
-                        + lastName + "', CURDATE(), 'Other', " 
+                        + lastName + "', '" + dob + "', '" + gender + "', " 
                         + (nic.isEmpty() ? "NULL" : "'" + nic + "'") + ", '" 
                         + email + "', '" 
                         + phone + "', '" 
