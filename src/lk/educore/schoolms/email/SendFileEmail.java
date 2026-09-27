@@ -8,20 +8,21 @@ import javax.mail.internet.*;
 import javax.activation.*;
 
 /**
- * File Attachment Email Sender
- * Sends emails with file attachments using JavaMail API
+ * File Attachment Email Sender Sends emails with file attachments using
+ * JavaMail API
  */
 public class SendFileEmail {
 
     // Email configuration 
     private static final String EMAIL_HOST = "smtp.gmail.com";
-    private static final String EMAIL_PORT = "587";
-    private static final String EMAIL_USERNAME = "asuspro5001@gmail.com"; 
-    private static final String EMAIL_PASSWORD = "xdhmaqxxfflvhxpg"; 
-    private static final String FROM_EMAIL = "asuspro5001@gmail.com"; 
+    private static final String EMAIL_PORT = "465";
+    private static final String EMAIL_USERNAME = "asuspro5001@gmail.com";
+    private static final String EMAIL_PASSWORD = "xdhmaqxxfflvhxpg";
+    private static final String FROM_EMAIL = "asuspro5001@gmail.com";
 
     /**
      * Send email with single file attachment
+     *
      * @param to Recipient email address
      * @param subject Email subject
      * @param message Email body content
@@ -48,6 +49,10 @@ public class SendFileEmail {
             props.put("mail.smtp.auth", "true");
             props.put("mail.smtp.starttls.enable", "true");
             props.put("mail.smtp.ssl.trust", EMAIL_HOST);
+            props.put("mail.smtp.ssl.enable", "true");
+            props.put("mail.smtp.connectiontimeout", "10000");
+            props.put("mail.smtp.timeout", "10000");
+            props.put("mail.smtp.writetimeout", "10000");
 
             // Create session with authentication
             Session session = Session.getInstance(props, new Authenticator() {
@@ -98,6 +103,7 @@ public class SendFileEmail {
 
     /**
      * Send email with multiple file attachments
+     *
      * @param to Recipient email address
      * @param subject Email subject
      * @param message Email body content
@@ -126,6 +132,10 @@ public class SendFileEmail {
             props.put("mail.smtp.auth", "true");
             props.put("mail.smtp.starttls.enable", "true");
             props.put("mail.smtp.ssl.trust", EMAIL_HOST);
+            props.put("mail.smtp.ssl.enable", "true");
+            props.put("mail.smtp.connectiontimeout", "10000");
+            props.put("mail.smtp.timeout", "10000");
+            props.put("mail.smtp.writetimeout", "10000");
 
             // Create session with authentication
             Session session = Session.getInstance(props, new Authenticator() {
@@ -179,6 +189,7 @@ public class SendFileEmail {
 
     /**
      * Send HTML email with file attachment
+     *
      * @param to Recipient email address
      * @param subject Email subject
      * @param htmlContent HTML email body content
@@ -205,6 +216,10 @@ public class SendFileEmail {
             props.put("mail.smtp.auth", "true");
             props.put("mail.smtp.starttls.enable", "true");
             props.put("mail.smtp.ssl.trust", EMAIL_HOST);
+            props.put("mail.smtp.ssl.enable", "true");
+            props.put("mail.smtp.connectiontimeout", "10000");
+            props.put("mail.smtp.timeout", "10000");
+            props.put("mail.smtp.writetimeout", "10000");
 
             // Create session with authentication
             Session session = Session.getInstance(props, new Authenticator() {
@@ -255,6 +270,7 @@ public class SendFileEmail {
 
     /**
      * Send email with byte array attachment
+     *
      * @param to Recipient email address
      * @param subject Email subject
      * @param message Email body content
@@ -281,6 +297,10 @@ public class SendFileEmail {
             props.put("mail.smtp.auth", "true");
             props.put("mail.smtp.starttls.enable", "true");
             props.put("mail.smtp.ssl.trust", EMAIL_HOST);
+            props.put("mail.smtp.ssl.enable", "true");
+            props.put("mail.smtp.connectiontimeout", "10000");
+            props.put("mail.smtp.timeout", "10000");
+            props.put("mail.smtp.writetimeout", "10000");
 
             // Create session with authentication
             Session session = Session.getInstance(props, new Authenticator() {
@@ -333,6 +353,7 @@ public class SendFileEmail {
      * ByteArrayDataSource for handling byte array attachments
      */
     private static class ByteArrayDataSource implements DataSource {
+
         private final byte[] data;
         private final String type;
 

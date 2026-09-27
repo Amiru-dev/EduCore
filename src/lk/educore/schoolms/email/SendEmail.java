@@ -6,20 +6,20 @@ import javax.mail.*;
 import javax.mail.internet.*;
 
 /**
- * Simple Email Sender
- * Sends text emails using JavaMail API
+ * Simple Email Sender Sends text emails using JavaMail API
  */
 public class SendEmail {
 
     // Email configuration 
     private static final String EMAIL_HOST = "smtp.gmail.com";
-    private static final String EMAIL_PORT = "587";
-    private static final String EMAIL_USERNAME = "asuspro5001@gmail.com"; 
-    private static final String EMAIL_PASSWORD = "xdhmaqxxfflvhxpg"; 
-    private static final String FROM_EMAIL = "asuspro5001@gmail.com"; 
+    private static final String EMAIL_PORT = "465";
+    private static final String EMAIL_USERNAME = "asuspro5001@gmail.com";
+    private static final String EMAIL_PASSWORD = "xdhmaqxxfflvhxpg";
+    private static final String FROM_EMAIL = "asuspro5001@gmail.com";
 
     /**
      * Send simple text email
+     *
      * @param to Recipient email address
      * @param subject Email subject
      * @param message Email body content
@@ -39,6 +39,10 @@ public class SendEmail {
             props.put("mail.smtp.auth", "true");
             props.put("mail.smtp.starttls.enable", "true");
             props.put("mail.smtp.ssl.trust", EMAIL_HOST);
+            props.put("mail.smtp.ssl.enable", "true");
+            props.put("mail.smtp.connectiontimeout", "10000");
+            props.put("mail.smtp.timeout", "10000");
+            props.put("mail.smtp.writetimeout", "10000");
 
             // Create session with authentication
             Session session = Session.getInstance(props, new Authenticator() {
@@ -72,6 +76,7 @@ public class SendEmail {
 
     /**
      * Send HTML email
+     *
      * @param to Recipient email address
      * @param subject Email subject
      * @param htmlContent HTML email body content
@@ -124,6 +129,7 @@ public class SendEmail {
 
     /**
      * Send email to multiple recipients
+     *
      * @param recipients Array of recipient email addresses
      * @param subject Email subject
      * @param message Email body content
@@ -155,14 +161,14 @@ public class SendEmail {
             // Create message
             MimeMessage mimeMessage = new MimeMessage(session);
             mimeMessage.setFrom(new InternetAddress(FROM_EMAIL));
-            
+
             // Add all recipients
             InternetAddress[] recipientAddresses = new InternetAddress[recipients.length];
             for (int i = 0; i < recipients.length; i++) {
                 recipientAddresses[i] = new InternetAddress(recipients[i]);
             }
             mimeMessage.setRecipients(Message.RecipientType.TO, recipientAddresses);
-            
+
             mimeMessage.setSubject(subject);
             mimeMessage.setText(message);
 
@@ -180,6 +186,7 @@ public class SendEmail {
 
     /**
      * Update email credentials
+     *
      * @param username Email username
      * @param password Email password (app password for Gmail)
      * @param fromEmail From email address
@@ -191,6 +198,7 @@ public class SendEmail {
 
     /**
      * Test email connection
+     *
      * @return true if connection successful, false otherwise
      */
     public static boolean testConnection() {
