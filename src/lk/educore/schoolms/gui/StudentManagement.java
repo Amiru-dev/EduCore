@@ -280,8 +280,9 @@ public class StudentManagement extends JPanel {
         }
         
         String studentId = tableModel.getValueAt(selectedRow, 0).toString();
-        // TODO: Create edit dialog
-        JOptionIcon.showInfoDialog(this, "Edit Student: " + studentId + " - Coming Soon");
+        Window parent = SwingUtilities.getWindowAncestor(this);
+        new StudentEditDialog((Frame) parent, studentId).setVisible(true);
+        loadStudentData();
     }
 
     private void deleteStudent() {

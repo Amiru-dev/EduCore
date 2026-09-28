@@ -175,7 +175,9 @@ public class StudentView extends JDialog {
     }
 
     private void editStudent() {
-        JOptionIcon.showInfoDialog(this, "Edit Student - Coming Soon");
+        Window parent = SwingUtilities.getWindowAncestor(this);
+        new StudentEditDialog((Frame) parent, studentId).setVisible(true);
+        loadStudentSummary(); 
     }
 
     private void deleteStudent() {
