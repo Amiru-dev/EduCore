@@ -27,7 +27,7 @@ public class TeacherDialog extends JDialog {
     }
 
     private void initComponents() {
-        setSize(700, 600);
+        setSize(500, 600);
         setLayout(new BorderLayout(10, 10));
         JPanel panel = new JPanel(new GridLayout(14, 2, 5, 5));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -106,7 +106,6 @@ public class TeacherDialog extends JDialog {
         btnPanel.add(btnCancel);
         add(btnPanel, BorderLayout.SOUTH);
 
-        pack();
         setLocationRelativeTo(getParent());
     }
 
