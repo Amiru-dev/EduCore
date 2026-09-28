@@ -10,7 +10,8 @@ import java.text.SimpleDateFormat;
 
 public class TeacherDialog extends JDialog {
 
-    private JTextField txtNIC, txtFirstName, txtLastName, txtDob, txtEmail, txtPhone, txtAddress, txtUsername, txtPassword, txtSalary, txtHireDate;
+    private JTextField txtNIC, txtFirstName, txtLastName, txtEmail, txtPhone, txtAddress, txtUsername, txtPassword, txtSalary;
+    private com.toedter.calendar.JDateChooser dcDob, dcHireDate;
     private JComboBox<String> cmbGender, cmbType, cmbStatus;
     private JButton btnSave, btnCancel;
     private String teacherNIC;
@@ -36,7 +37,8 @@ public class TeacherDialog extends JDialog {
         txtNIC.setEnabled(!isEdit);
         txtFirstName = new JTextField();
         txtLastName = new JTextField();
-        txtDob = new JTextField();
+        dcDob = new com.toedter.calendar.JDateChooser();
+        dcDob.setDateFormatString("yyyy-MM-dd");
         cmbGender = new JComboBox<>(new String[]{"Male", "Female"});
         txtEmail = new JTextField();
         txtPhone = new JTextField();
@@ -45,7 +47,8 @@ public class TeacherDialog extends JDialog {
         txtUsername = new JTextField();
         txtPassword = new JTextField();
         txtSalary = new JTextField();
-        txtHireDate = new JTextField();
+        dcHireDate = new com.toedter.calendar.JDateChooser();
+        dcHireDate.setDateFormatString("yyyy-MM-dd");
         cmbStatus = new JComboBox<>();
 
         try {
@@ -70,8 +73,8 @@ public class TeacherDialog extends JDialog {
         panel.add(txtFirstName);
         panel.add(new JLabel("Last Name:"));
         panel.add(txtLastName);
-        panel.add(new JLabel("Date of Birth (yyyy-MM-dd):"));
-        panel.add(txtDob);
+        panel.add(new JLabel("Date of Birth:"));
+        panel.add(dcDob);
         panel.add(new JLabel("Gender:"));
         panel.add(cmbGender);
         panel.add(new JLabel("Email:"));
@@ -88,8 +91,8 @@ public class TeacherDialog extends JDialog {
         panel.add(txtPassword);
         panel.add(new JLabel("Salary:"));
         panel.add(txtSalary);
-        panel.add(new JLabel("Hire Date (yyyy-MM-dd):"));
-        panel.add(txtHireDate);
+        panel.add(new JLabel("Hire Date:"));
+        panel.add(dcHireDate);
         panel.add(new JLabel("Status:"));
         panel.add(cmbStatus);
 
@@ -116,7 +119,8 @@ public class TeacherDialog extends JDialog {
                 txtNIC.setText(rs.getString("NIC"));
                 txtFirstName.setText(rs.getString("first_name"));
                 txtLastName.setText(rs.getString("last_name"));
-                txtDob.setText(rs.getString("dob"));
+                java.sql.Date dobDate = rs.getDate("dob");
+                if (dobDate != null) dcDob.setDate(dobDate);
                 cmbGender.setSelectedItem(rs.getString("gender"));
                 txtEmail.setText(rs.getString("email"));
                 txtPhone.setText(rs.getString("phone"));
@@ -124,7 +128,8 @@ public class TeacherDialog extends JDialog {
                 txtUsername.setText(rs.getString("username"));
                 txtPassword.setText(rs.getString("password"));
                 txtSalary.setText(rs.getString("salary"));
-                txtHireDate.setText(rs.getString("hire_date"));
+                java.sql.Date hireDate = rs.getDate("hire_date");
+                if (hireDate != null) dcHireDate.setDate(hireDate);
 
                 String typeId = rs.getString("teacher_type_id");
                 for (int i = 0; i < cmbType.getItemCount(); i++) {
@@ -153,7 +158,8 @@ public class TeacherDialog extends JDialog {
             String nic = txtNIC.getText().trim();
             String fName = txtFirstName.getText().trim();
             String lName = txtLastName.getText().trim();
-            String dob = txtDob.getText().trim();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            String dob = dcDob.getDate() != null ? sdf.format(dcDob.getDate()) : "";
             String gender = cmbGender.getSelectedItem().toString();
             String email = txtEmail.getText().trim();
             String phone = txtPhone.getText().trim();
@@ -162,7 +168,7 @@ public class TeacherDialog extends JDialog {
             String user = txtUsername.getText().trim();
             String pass = txtPassword.getText().trim();
             String sal = txtSalary.getText().trim();
-            String hire = txtHireDate.getText().trim();
+            String hire = dcHireDate.getDate() != null ? sdf.format(dcHireDate.getDate()) : "";
             String stat = cmbStatus.getSelectedItem().toString().split(" - ")[0];
 
             if (nic.isEmpty() || fName.isEmpty() || lName.isEmpty() || dob.isEmpty() || phone.isEmpty() || sal.isEmpty() || hire.isEmpty()) {

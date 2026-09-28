@@ -108,7 +108,7 @@ public class TeacherManagement extends JPanel {
         btnEdit.addActionListener(e -> editTeacher());
         
         btnDelete = new JButton("Disable");
-        btnDelete.addActionListener(e -> deleteTeacher());
+        btnDelete.addActionListener(e -> disableTeacher());
         
         btnView = new JButton("View Details");
         btnView.addActionListener(e -> viewTeacherDetails());
@@ -534,10 +534,10 @@ public class TeacherManagement extends JPanel {
         loadTeacherData();
     }
 
-    private void deleteTeacher() {
+    private void disableTeacher() {
         int selectedRow = teacherTable.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionIcon.showWarningDialog(this, "Please select a teacher to delete.");
+            JOptionIcon.showWarningDialog(this, "Please select a teacher to disable.");
             return;
         }
         
@@ -545,18 +545,18 @@ public class TeacherManagement extends JPanel {
         String teacherName = tableModel.getValueAt(selectedRow, 1).toString();
         
         int confirm = JOptionIcon.showConfirmDialog(this, 
-            "Are you sure you want to delete teacher " + teacherName + " (" + nic + ")?");
+            "Are you sure you want to disable teacher " + teacherName + " (" + nic + ")?");
         
         if (confirm == JOptionPane.YES_OPTION) {
             try {
                 String query = "UPDATE teacher SET status_id = 2 WHERE NIC = '" + nic + "'"; // 2 = Inactive
                 MySQL.executeIUD(query);
                 
-                JOptionIcon.showSuccessDialog(this, "Teacher deleted successfully.");
+                JOptionIcon.showSuccessDialog(this, "Teacher disabled successfully.");
                 loadTeacherData();
                 
             } catch (Exception e) {
-                JOptionIcon.showErrorDialog(this, "Error deleting teacher: " + e.getMessage());
+                JOptionIcon.showErrorDialog(this, "Error disabling teacher: " + e.getMessage());
             }
         }
     }
