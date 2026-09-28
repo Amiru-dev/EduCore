@@ -23,7 +23,7 @@ public class StudentView extends JDialog {
     }
 
     private void initComponents() {
-        setSize(600, 500);
+        setSize(700, 550);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout(10, 10));
 
@@ -231,7 +231,8 @@ public class StudentView extends JDialog {
     }
 
     private void viewAttendance() {
-        JOptionIcon.showInfoDialog(this, "View Attendance - Coming Soon");
+        Window parent = SwingUtilities.getWindowAncestor(this);
+        new StudentAttendanceDialog((Frame) parent, studentId).setVisible(true);
     }
 
     private void viewFees() {

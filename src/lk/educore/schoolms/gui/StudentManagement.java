@@ -331,8 +331,8 @@ public class StudentManagement extends JPanel {
         }
 
         String studentId = tableModel.getValueAt(selectedRow, 0).toString();
-        // TODO: Create attendance dialog
-        JOptionIcon.showInfoDialog(this, "Mark Attendance for: " + studentId + " - Coming Soon");
+        Window parent = SwingUtilities.getWindowAncestor(this);
+        new StudentAttendanceDialog((Frame) parent, studentId).setVisible(true);
     }
 
     private void generateQRCode() {
