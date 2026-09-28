@@ -300,7 +300,7 @@ public class StudentManagement extends JPanel {
         
         if (confirm == JOptionPane.YES_OPTION) {
             try {
-                String query = "UPDATE student SET is_active = 0 WHERE student_id = '" + studentId + "'";
+                String query = "DELETE FROM student WHERE student_id = '" + studentId + "'";
                 MySQL.executeIUD(query);
                 
                 JOptionIcon.showSuccessDialog(this, "Student deleted successfully.");

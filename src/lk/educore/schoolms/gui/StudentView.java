@@ -184,7 +184,7 @@ public class StudentView extends JDialog {
         int confirm = JOptionIcon.showConfirmDialog(this, "Are you sure you want to delete this student?");
         if (confirm == JOptionPane.YES_OPTION) {
             try {
-                MySQL.executeIUD("UPDATE student SET is_active = 0 WHERE student_id = '" + studentId + "'");
+                MySQL.executeIUD("DELETE FROM student WHERE student_id = '" + studentId + "'");
                 
                 JOptionIcon.showSuccessDialog(this, "Student deleted successfully.");
                 dispose();
