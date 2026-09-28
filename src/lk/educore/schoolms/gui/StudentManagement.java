@@ -157,14 +157,131 @@ public class StudentManagement extends JPanel {
 
     private JPanel createAttendancePanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
-        panel.add(new JLabel("Attendance Management - Coming Soon", SwingConstants.CENTER), BorderLayout.CENTER);
+        
+        // Top Panel for Refresh button
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton btnRefresh = new JButton("Refresh Attendance");
+        topPanel.add(btnRefresh);
+        panel.add(topPanel, BorderLayout.NORTH);
+
+        // Table
+        DefaultTableModel attendanceModel = new DefaultTableModel(
+                new Object[]{"ID", "Student ID", "Name", "Date", "Status", "Check In", "Check Out"}, 0
+        ) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        JTable attendanceTable = new JTable(attendanceModel);
+        attendanceTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        attendanceTable.setRowHeight(25);
+        attendanceTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
+        
+        JScrollPane scrollPane = new JScrollPane(attendanceTable);
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        ActionListener loadAction = e -> {
+            try {
+                attendanceModel.setRowCount(0);
+                ResultSet rs = MySQL.executeSearch("SELECT a.attendance_id, a.student_id, "
+                        + "CONCAT(s.first_name, ' ', s.last_name) as name, "
+                        + "a.attendance_date, a.status, a.check_in_time, a.check_out_time "
+                        + "FROM student_attendance a "
+                        + "INNER JOIN student s ON a.student_id = s.student_id "
+                        + "ORDER BY a.attendance_date DESC LIMIT 100");
+
+                while (rs.next()) {
+                    attendanceModel.addRow(new Object[]{
+                        rs.getString("attendance_id"), 
+                        rs.getString("student_id"), 
+                        rs.getString("name"),
+                        rs.getString("attendance_date"), 
+                        rs.getString("status"), 
+                        rs.getString("check_in_time"), 
+                        rs.getString("check_out_time")
+                    });
+                }
+                rs.close();
+            } catch (Exception ex) {
+                JOptionIcon.showErrorDialog(this, "Error loading attendance data: " + ex.getMessage());
+            }
+        };
+
+        btnRefresh.addActionListener(loadAction);
+        
+        // Load data initially
+        SwingUtilities.invokeLater(() -> loadAction.actionPerformed(null));
+        
         return panel;
     }
 
     private JPanel createChartsPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
-        panel.add(new JLabel("Student Analytics - Coming Soon", SwingConstants.CENTER), BorderLayout.CENTER);
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        
+        JPanel statsPanel = new JPanel(new GridLayout(2, 2, 20, 20));
+        
+        // Cards
+        JPanel cardTotal = createStatCard("Total Students", "Loading...");
+        JPanel cardActive = createStatCard("Active Students", "Loading...");
+        JPanel cardMale = createStatCard("Male Students", "Loading...");
+        JPanel cardFemale = createStatCard("Female Students", "Loading...");
+        
+        statsPanel.add(cardTotal);
+        statsPanel.add(cardActive);
+        statsPanel.add(cardMale);
+        statsPanel.add(cardFemale);
+        
+        panel.add(statsPanel, BorderLayout.CENTER);
+        
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton btnRefresh = new JButton("Refresh Analytics");
+        bottomPanel.add(btnRefresh);
+        panel.add(bottomPanel, BorderLayout.SOUTH);
+        
+        ActionListener loadAction = e -> {
+            try {
+                ResultSet rs = MySQL.executeSearch("SELECT COUNT(*) as total, SUM(IF(is_active=1, 1, 0)) as active, SUM(IF(gender='Male', 1, 0)) as male, SUM(IF(gender='Female', 1, 0)) as female FROM student");
+                if (rs.next()) {
+                    ((JLabel) cardTotal.getComponent(1)).setText(rs.getString("total") == null ? "0" : rs.getString("total"));
+                    ((JLabel) cardActive.getComponent(1)).setText(rs.getString("active") == null ? "0" : rs.getString("active"));
+                    ((JLabel) cardMale.getComponent(1)).setText(rs.getString("male") == null ? "0" : rs.getString("male"));
+                    ((JLabel) cardFemale.getComponent(1)).setText(rs.getString("female") == null ? "0" : rs.getString("female"));
+                }
+                rs.close();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        };
+        
+        btnRefresh.addActionListener(loadAction);
+        SwingUtilities.invokeLater(() -> loadAction.actionPerformed(null));
+        
         return panel;
+    }
+
+    private JPanel createStatCard(String title, String initialValue) {
+        JPanel card = new JPanel(new BorderLayout(10, 10));
+        card.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(220, 220, 220), 1, true),
+            BorderFactory.createEmptyBorder(20, 20, 20, 20)
+        ));
+        card.setBackground(Color.WHITE);
+        
+        JLabel lblTitle = new JLabel(title, SwingConstants.CENTER);
+        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lblTitle.setForeground(new Color(100, 116, 139));
+        
+        JLabel lblValue = new JLabel(initialValue, SwingConstants.CENTER);
+        lblValue.setFont(new Font("Segoe UI", Font.BOLD, 48));
+        lblValue.setForeground(new Color(37, 99, 235));
+        
+        card.add(lblTitle, BorderLayout.NORTH);
+        card.add(lblValue, BorderLayout.CENTER);
+        
+        return card;
     }
 
     private void loadStudentData() {
