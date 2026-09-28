@@ -23,7 +23,7 @@ public class StudentView extends JDialog {
     }
 
     private void initComponents() {
-        setSize(700, 550);
+        setSize(900, 700);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout(10, 10));
 
@@ -126,10 +126,68 @@ public class StudentView extends JDialog {
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
         panel.add(titleLabel, BorderLayout.NORTH);
         
-        JPanel contentPanel = new JPanel(new BorderLayout(10, 10));
-        contentPanel.add(new JLabel("Fee History - Coming Soon", SwingConstants.CENTER), BorderLayout.CENTER);
+        // Fee history table
+        String[] columns = {"Fee Type", "Amount", "Due Date", "Paid Date", "Status", "Receipt No"};
+        javax.swing.table.DefaultTableModel feeTableModel = new javax.swing.table.DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         
-        panel.add(contentPanel, BorderLayout.CENTER);
+        JTable feeTable = new JTable(feeTableModel);
+        feeTable.setRowHeight(25);
+        feeTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
+        feeTable.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        
+        // Load fee data
+        try {
+            String query = "SELECT ft.fee_type_name, f.amount, f.due_date, f.paid_date, f.status, f.receipt_no " +
+                           "FROM fee f " +
+                           "INNER JOIN fee_type ft ON f.fee_type_id = ft.fee_type_id " +
+                           "WHERE f.student_id = '" + studentId + "' " +
+                           "ORDER BY f.due_date DESC";
+            ResultSet rs = MySQL.executeSearch(query);
+            while (rs.next()) {
+                String feeType = rs.getString("fee_type_name");
+                String amount = String.format("Rs. %.2f", rs.getDouble("amount"));
+                String dueDate = rs.getString("due_date") != null ? rs.getString("due_date") : "-";
+                String paidDate = rs.getString("paid_date") != null ? rs.getString("paid_date") : "-";
+                String status = rs.getString("status");
+                String receiptNo = rs.getString("receipt_no") != null ? rs.getString("receipt_no") : "-";
+                feeTableModel.addRow(new Object[]{feeType, amount, dueDate, paidDate, status, receiptNo});
+            }
+            rs.close();
+        } catch (Exception e) {
+            JOptionIcon.showErrorDialog(this, "Error loading fee history: " + e.getMessage());
+        }
+        
+        JScrollPane scrollPane = new JScrollPane(feeTable);
+        panel.add(scrollPane, BorderLayout.CENTER);
+        
+        // Summary panel
+        JPanel summaryPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 5));
+        try {
+            ResultSet rsTotal = MySQL.executeSearch(
+                "SELECT COALESCE(SUM(amount), 0) as total FROM fee WHERE student_id = '" + studentId + "'");
+            ResultSet rsPaid = MySQL.executeSearch(
+                "SELECT COALESCE(SUM(amount), 0) as paid FROM fee WHERE student_id = '" + studentId + "' AND status = 'Paid'");
+            ResultSet rsPending = MySQL.executeSearch(
+                "SELECT COALESCE(SUM(amount), 0) as pending FROM fee WHERE student_id = '" + studentId + "' AND status IN ('Pending', 'Overdue')");
+            
+            double total = 0, paid = 0, pending = 0;
+            if (rsTotal.next()) total = rsTotal.getDouble("total");
+            if (rsPaid.next()) paid = rsPaid.getDouble("paid");
+            if (rsPending.next()) pending = rsPending.getDouble("pending");
+            rsTotal.close(); rsPaid.close(); rsPending.close();
+            
+            summaryPanel.add(new JLabel("Total: Rs. " + String.format("%.2f", total)));
+            summaryPanel.add(new JLabel("  |  Paid: Rs. " + String.format("%.2f", paid)));
+            summaryPanel.add(new JLabel("  |  Pending: Rs. " + String.format("%.2f", pending)));
+        } catch (Exception e) {
+            summaryPanel.add(new JLabel("Unable to load summary"));
+        }
+        panel.add(summaryPanel, BorderLayout.SOUTH);
         
         return panel;
     }
