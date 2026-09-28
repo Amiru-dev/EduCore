@@ -377,88 +377,7 @@ CREATE TABLE IF NOT EXISTS fee (
 );
 
 -- ============================================
--- TRANSPORT TABLES
--- ============================================
 
--- Vehicle Type Lookup Table
-CREATE TABLE IF NOT EXISTS vehicle_type (
-    vehicle_type_id INT PRIMARY KEY AUTO_INCREMENT,
-    type_name VARCHAR(50) NOT NULL UNIQUE,
-    description VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Insert default vehicle types
-INSERT IGNORE INTO vehicle_type (type_name, description) VALUES 
-('Bus', 'School bus'),
-('Van', 'School van'),
-('Mini Bus', 'Mini school bus');
-
--- Vehicle Status Lookup Table
-CREATE TABLE IF NOT EXISTS vehicle_status (
-    vehicle_status_id INT PRIMARY KEY AUTO_INCREMENT,
-    status_name VARCHAR(50) NOT NULL UNIQUE,
-    description VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Insert default vehicle statuses
-INSERT IGNORE INTO vehicle_status (status_name, description) VALUES 
-('Active', 'In service'),
-('Maintenance', 'Under maintenance'),
-('Retired', 'Retired from service'),
-('Out of Service', 'Temporarily out of service');
-
--- Vehicle Table
-CREATE TABLE IF NOT EXISTS vehicle (
-    vehicle_id INT PRIMARY KEY AUTO_INCREMENT,
-    plate_no VARCHAR(20) NOT NULL UNIQUE,
-    vehicle_type_id INT NOT NULL,
-    capacity INT NOT NULL,
-    driver_name VARCHAR(100) NOT NULL,
-    driver_phone VARCHAR(20) NOT NULL,
-    vehicle_status_id INT NOT NULL,
-    make VARCHAR(50),
-    model VARCHAR(50),
-    year INT,
-    fuel_type VARCHAR(20),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (vehicle_type_id) REFERENCES vehicle_type(vehicle_type_id) ON DELETE CASCADE,
-    FOREIGN KEY (vehicle_status_id) REFERENCES vehicle_status(vehicle_status_id) ON DELETE CASCADE
-);
-
--- Transport Route Table
-CREATE TABLE IF NOT EXISTS transport_route (
-    route_id INT PRIMARY KEY AUTO_INCREMENT,
-    route_name VARCHAR(100) NOT NULL UNIQUE,
-    start_point VARCHAR(255) NOT NULL,
-    end_point VARCHAR(255) NOT NULL,
-    distance_km DECIMAL(5, 2),
-    vehicle_id INT NOT NULL,
-    monthly_fee DECIMAL(10, 2) NOT NULL,
-    departure_time TIME NOT NULL,
-    arrival_time TIME NOT NULL,
-    description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (vehicle_id) REFERENCES vehicle(vehicle_id) ON DELETE CASCADE
-);
-
--- Student Transport Assignment Table
-CREATE TABLE IF NOT EXISTS student_transport (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    student_id VARCHAR(20) NOT NULL,
-    route_id INT NOT NULL,
-    pickup_point VARCHAR(255) NOT NULL,
-    drop_point VARCHAR(255),
-    assigned_date DATE NOT NULL,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE,
-    FOREIGN KEY (route_id) REFERENCES transport_route(route_id) ON DELETE CASCADE,
-    UNIQUE KEY unique_student_transport (student_id, route_id)
-);
-
--- ============================================
 -- EVENTS & NOTICES TABLES
 -- ============================================
 
@@ -632,15 +551,15 @@ INSERT IGNORE INTO user (username, password, email, user_type_id) VALUES
 
 -- Insert sample guardian
 INSERT IGNORE INTO guardian (first_name, last_name, nic, relationship, phone, email, address, occupation) VALUES 
-('John', 'Doe', '901234567V', 'Father', '+94771234567', 'john.doe@email.com', '123 Main Street, Anuradhapura', 'Engineer');
+('John', 'Doe', '901234567V', 'Father', '0771234567', 'john.doe@email.com', '123 Main Street, Anuradhapura', 'Engineer');
 
 -- Insert sample student
 INSERT IGNORE INTO student (student_id, first_name, last_name, dob, gender, nic, email, phone, address, grade_id, guardian_id, user_id, registration_date) VALUES 
-('STU-0001', 'Jane', 'Doe', '2008-05-15', 'Female', '081234567V', 'jane.doe@email.com', '+94771234568', '123 Main Street, Anuradhapura', 1, 1, 3, CURDATE());
+('STU-0001', 'Jane', 'Doe', '2008-05-15', 'Female', '081234567V', 'jane.doe@email.com', '0771234568', '123 Main Street, Anuradhapura', 1, 1, 3, CURDATE());
 
 -- Insert sample teacher
 INSERT IGNORE INTO teacher (NIC, first_name, last_name, dob, gender, email, phone, address, teacher_type_id, username, password, salary, hire_date, status_id, user_id) VALUES 
-('801234567V', 'Dr. Sarah', 'Smith', '1985-03-20', 'Female', 'sarah.smith@educore.com', '+94771234569', '456 School Road, Anuradhapura', 1, 'teacher1', 'teacher123', 75000.00, '2020-01-15', 1, 2);
+('801234567V', 'Dr. Sarah', 'Smith', '1985-03-20', 'Female', 'sarah.smith@educore.com', '0771234569', '456 School Road, Anuradhapura', 1, 'teacher1', 'teacher123', 75000.00, '2020-01-15', 1, 2);
 
 -- Insert sample subject
 INSERT IGNORE INTO subject (subject_name, grade_id, description) VALUES 

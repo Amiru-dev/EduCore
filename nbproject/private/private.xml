@@ -3,9 +3,10 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/C:/Users/ASUS/Documents/NetBeansProjects/EduCore/src/lk/educore/schoolms/gui/StudentView.java</file>
             <file>file:/C:/Users/ASUS/Documents/NetBeansProjects/EduCore/src/lk/educore/schoolms/gui/Dashboard.java</file>
-            <file>file:/C:/Users/ASUS/Documents/NetBeansProjects/EduCore/src/lk/educore/schoolms/model/SendLogo.java</file>
-            <file>file:/C:/Users/ASUS/Documents/NetBeansProjects/EduCore/src/lk/educore/schoolms/gui/SignIn.java</file>
+            <file>file:/C:/Users/ASUS/Documents/NetBeansProjects/EduCore/src/lk/educore/schoolms/gui/DashboardPanel.java</file>
+            <file>file:/C:/Users/ASUS/Documents/NetBeansProjects/EduCore/src/lk/educore/schoolms/gui/StudentManagement.java</file>
         </group>
     </open-files>
 </project-private>

@@ -51,12 +51,11 @@ public class AboutDialog extends JDialog {
             "EduCore School Management System is a comprehensive solution " +
             "for managing all aspects of school administration including " +
             "student records, teacher management, fee collection, exams, " +
-            "transport, library, and more.\n\n" +
+            "library, and more.\n\n" +
             "Features:\n" +
             "• Student and Teacher Management\n" +
             "• Fee Collection and Receipt Generation\n" +
             "• Exam and Results Management\n" +
-            "• Transport Management\n" +
             "• Library Management\n" +
             "• QR Code and Barcode Generation\n" +
             "• Email Integration\n" +

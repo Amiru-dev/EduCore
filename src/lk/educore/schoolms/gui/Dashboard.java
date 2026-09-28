@@ -128,11 +128,7 @@ public class Dashboard extends JFrame {
         
         // 4: Exams
         navItemsList.add("Exams"); iconBasesList.add("exams"); indexMapping.add(4);
-        
-        if ("Admin".equals(role)) {
-            // 5: Transport
-            navItemsList.add("Transport"); iconBasesList.add("transport"); indexMapping.add(5);
-        }
+
         
         // 6: Academic
         navItemsList.add("Academic"); iconBasesList.add("academic"); indexMapping.add(6);
@@ -284,9 +280,7 @@ public class Dashboard extends JFrame {
             case 4: // Exams
                 contentPanel.add(new ExamManagement(), BorderLayout.CENTER);
                 break;
-            case 5: // Transport
-                contentPanel.add(new TransportManagement(), BorderLayout.CENTER);
-                break;
+
             case 6: // Academic
                 contentPanel.add(new AcademicPerformance(), BorderLayout.CENTER);
                 break;

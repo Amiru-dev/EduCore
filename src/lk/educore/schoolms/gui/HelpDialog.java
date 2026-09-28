@@ -117,9 +117,6 @@ public class HelpDialog extends JDialog {
             "• Exam scheduling\n" +
             "• Marks entry and grade calculation\n" +
             "• Result sheet generation\n\n" +
-            "Transport Management:\n" +
-            "• Vehicle and route management\n" +
-            "• Student-transport assignment\n\n" +
             "Library Management:\n" +
             "• Book inventory management\n" +
             "• Issue and return tracking\n" +
