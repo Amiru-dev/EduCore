@@ -7,7 +7,11 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.*;
+import java.util.logging.Level;
+import javax.imageio.ImageIO;
 
 /**
  * Student View Dialog Comprehensive student details view with action buttons
@@ -36,6 +40,21 @@ public class StudentView extends JDialog {
     public StudentView(String studentId) {
         this.studentId = studentId;
         initComponents();
+
+        try {
+            InputStream imgStream = getClass().getResourceAsStream("/lk/educore/schoolms/resources/logo.png");
+            if (imgStream == null) {
+                SignIn.getLoggerObject().log(Level.WARNING, "EduCore logo image resource not found at /lk/educore/schoolms/resources/logo.png");
+                return;
+            }
+            ImageIcon originalIcon = new ImageIcon(ImageIO.read(imgStream));
+            this.setIconImage(originalIcon.getImage());
+
+        } catch (IOException e) {
+            SignIn.getLoggerObject().log(Level.WARNING, "Failed to load educore logo image: " + e.getMessage(), e);
+        } catch (Exception e) {
+            SignIn.getLoggerObject().log(Level.WARNING, "Unexpected error loading educore logo image: " + e.getMessage(), e);
+        }
     }
 
     private void initComponents() {
