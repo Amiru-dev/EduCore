@@ -5,9 +5,12 @@ import lk.educore.schoolms.validate.JOptionIcon;
 
 import javax.swing.*;
 import javax.swing.table.*;
+import com.toedter.calendar.JDateChooser;
 import java.awt.*;
 import java.awt.event.*;
 import java.sql.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Teacher Management Panel
@@ -625,8 +628,11 @@ public class TeacherManagement extends JPanel {
         
         String nic = tableModel.getValueAt(selectedRow, 0).toString();
         
-        JTextField txtStartDate = new JTextField(10);
-        JTextField txtEndDate = new JTextField(10);
+        JDateChooser startDateChooser = new JDateChooser();
+        JDateChooser endDateChooser = new JDateChooser();
+        startDateChooser.setDateFormatString("yyyy-MM-dd");
+        endDateChooser.setDateFormatString("yyyy-MM-dd");
+        
         JComboBox<String> cmbLeaveType = new JComboBox<>();
         try {
             ResultSet rs = MySQL.executeSearch("SELECT * FROM leave_type");
@@ -641,20 +647,35 @@ public class TeacherManagement extends JPanel {
         JPanel panel = new JPanel(new GridLayout(3, 2, 5, 5));
         panel.add(new JLabel("Leave Type:"));
         panel.add(cmbLeaveType);
-        panel.add(new JLabel("Start Date (yyyy-MM-dd):"));
-        panel.add(txtStartDate);
-        panel.add(new JLabel("End Date (yyyy-MM-dd):"));
-        panel.add(txtEndDate);
+        panel.add(new JLabel("Start Date:"));
+        panel.add(startDateChooser);
+        panel.add(new JLabel("End Date:"));
+        panel.add(endDateChooser);
         
         int result = JOptionPane.showConfirmDialog(this, panel, "Apply Leave for " + nic, JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
             try {
                 String typeStr = cmbLeaveType.getSelectedItem().toString();
                 String typeId = typeStr.split(" - ")[0];
-                String startDate = txtStartDate.getText();
-                String endDate = txtEndDate.getText();
                 
-                MySQL.executeIUD("INSERT INTO teacher_leave (teacher_NIC, leave_type_id, start_date, end_date, status) VALUES ('" + nic + "', " + typeId + ", '" + startDate + "', '" + endDate + "', 'Pending')");
+                Date startDate = startDateChooser.getDate();
+                Date endDate = endDateChooser.getDate();
+                
+                if (startDate == null || endDate == null) {
+                    JOptionIcon.showWarningDialog(this, "Please select both start and end dates.");
+                    return;
+                }
+                
+                if (startDate.after(endDate)) {
+                    JOptionIcon.showWarningDialog(this, "Start date must be before end date.");
+                    return;
+                }
+                
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                String startDateStr = sdf.format(startDate);
+                String endDateStr = sdf.format(endDate);
+                
+                MySQL.executeIUD("INSERT INTO teacher_leave (teacher_NIC, leave_type_id, start_date, end_date, status) VALUES ('" + nic + "', " + typeId + ", '" + startDateStr + "', '" + endDateStr + "', 'Pending')");
                 JOptionIcon.showSuccessDialog(this, "Leave applied successfully.");
             } catch (Exception e) {
                 JOptionIcon.showErrorDialog(this, "Error applying leave: " + e.getMessage());
