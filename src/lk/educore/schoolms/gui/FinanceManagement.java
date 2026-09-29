@@ -62,7 +62,7 @@ public class FinanceManagement extends JPanel {
         JPanel tablePanel = new JPanel(new BorderLayout(10, 10));
         
         tableModel = new DefaultTableModel(
-            new Object[]{"Transaction ID", "Description", "Type", "Amount", "Date", "Method"}, 0
+            new Object[]{"Transaction ID", "Description", "Type", "Amount", "Date"}, 0
         ) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -94,13 +94,12 @@ public class FinanceManagement extends JPanel {
         try {
             tableModel.setRowCount(0);
             
-            ResultSet rs = MySQL.executeSearch("SELECT f.finance_id, f.description, tt.type_name, f.amount, f.transaction_date, pm.method_name " +
+            ResultSet rs = MySQL.executeSearch("SELECT f.finance_id, f.description, tt.type_name, f.amount, f.transaction_date " +
                           "FROM finance f " +
                           "JOIN transaction_type tt ON f.transaction_type_id = tt.transaction_type_id " +
-                          "LEFT JOIN payment_method pm ON f.payment_method_id = pm.payment_method_id " +
                           "ORDER BY f.transaction_date DESC");
             
-            DecimalFormat df = new DecimalFormat("'Rs.' #,##0.00");
+            DecimalFormat df = new DecimalFormat("Rs. #,##0.00");
             
             while (rs.next()) {
                 int financeId = rs.getInt("finance_id");
@@ -108,9 +107,8 @@ public class FinanceManagement extends JPanel {
                 String type = rs.getString("type_name");
                 double amount = rs.getDouble("amount");
                 String date = rs.getString("transaction_date");
-                String method = rs.getString("method_name");
                 
-                tableModel.addRow(new Object[]{financeId, description, type, df.format(amount), date, method});
+                tableModel.addRow(new Object[]{financeId, description, type, df.format(amount), date});
             }
             
             rs.close();

@@ -164,11 +164,10 @@ public class FeeReceiptDialog extends JDialog {
     private void loadReceiptDetails() {
         try {
             ResultSet rs = MySQL.executeSearch("SELECT f.receipt_no, f.student_id, s.first_name, s.last_name, ft.fee_type_name, " +
-                          "f.amount, f.due_date, f.paid_date, pm.method_name " +
+                          "f.amount, f.due_date, f.paid_date " +
                           "FROM fee f " +
                           "JOIN student s ON f.student_id = s.student_id " +
                           "JOIN fee_type ft ON f.fee_type_id = ft.fee_type_id " +
-                          "LEFT JOIN payment_method pm ON f.payment_method_id = pm.payment_method_id " +
                           "WHERE f.fee_id = '" + feeId + "'");
             
             DecimalFormat df = new DecimalFormat("'Rs.' #,##0.00");
@@ -181,7 +180,7 @@ public class FeeReceiptDialog extends JDialog {
                 lblAmount.setText(df.format(rs.getDouble("amount")));
                 lblDueDate.setText(rs.getString("due_date"));
                 lblPaidDate.setText(rs.getString("paid_date"));
-                lblPaymentMethod.setText(rs.getString("method_name"));
+                lblPaymentMethod.setText("Cash"); // Only cash payments
             }
             
             rs.close();
@@ -195,11 +194,10 @@ public class FeeReceiptDialog extends JDialog {
         try {
             // Fetch receipt details
             ResultSet rs = MySQL.executeSearch("SELECT f.receipt_no, f.student_id, s.first_name, s.last_name, ft.fee_type_name, " +
-                          "f.amount, f.due_date, f.paid_date, pm.method_name " +
+                          "f.amount, f.due_date, f.paid_date " +
                           "FROM fee f " +
                           "JOIN student s ON f.student_id = s.student_id " +
                           "JOIN fee_type ft ON f.fee_type_id = ft.fee_type_id " +
-                          "LEFT JOIN payment_method pm ON f.payment_method_id = pm.payment_method_id " +
                           "WHERE f.fee_id = '" + feeId + "'");
             
             if (!rs.next()) {
@@ -208,7 +206,7 @@ public class FeeReceiptDialog extends JDialog {
                 return;
             }
             
-            DecimalFormat df = new DecimalFormat("Rs. #,##0.00");
+            DecimalFormat df = new DecimalFormat("'Rs.' #,##0.00");
             
             String receiptNo = rs.getString("receipt_no");
             String studentId = rs.getString("student_id");
@@ -217,7 +215,7 @@ public class FeeReceiptDialog extends JDialog {
             String amount = df.format(rs.getDouble("amount"));
             String dueDate = rs.getString("due_date");
             String paidDate = rs.getString("paid_date");
-            String paymentMethod = rs.getString("method_name");
+            String paymentMethod = "Cash"; // Only cash payments
             
             rs.close();
             
@@ -371,7 +369,7 @@ public class FeeReceiptDialog extends JDialog {
         gbc.gridy = 10;
         receiptPanel.add(new JLabel("Payment Method:"), gbc);
         gbc.gridx = 1;
-        receiptPanel.add(new JLabel(paymentMethod != null ? paymentMethod : "N/A"), gbc);
+        receiptPanel.add(new JLabel("Cash"), gbc);
         
         // Separator
         gbc.gridx = 0;

@@ -642,11 +642,10 @@ public class FeeManagement extends JPanel {
             // Fetch fee details and student email
             ResultSet rs = MySQL.executeSearch(
                 "SELECT f.receipt_no, f.student_id, s.first_name, s.last_name, s.email, " +
-                "ft.fee_type_name, f.amount, f.due_date, f.paid_date, pm.method_name " +
+                "ft.fee_type_name, f.amount, f.due_date, f.paid_date " +
                 "FROM fee f " +
                 "JOIN student s ON f.student_id = s.student_id " +
                 "JOIN fee_type ft ON f.fee_type_id = ft.fee_type_id " +
-                "LEFT JOIN payment_method pm ON f.payment_method_id = pm.payment_method_id " +
                 "WHERE f.fee_id = '" + feeId + "'"
             );
             
@@ -664,14 +663,14 @@ public class FeeManagement extends JPanel {
             }
             
             // Build receipt email content
-            DecimalFormat df = new DecimalFormat("Rs. #,##0.00");
+            DecimalFormat df = new DecimalFormat("'Rs.' #,##0.00");
             String receiptNumber = rs.getString("receipt_no");
             String studentName = rs.getString("first_name") + " " + rs.getString("last_name");
             String feeType = rs.getString("fee_type_name");
             String amount = df.format(rs.getDouble("amount"));
             String dueDate = rs.getString("due_date");
             String paidDate = rs.getString("paid_date");
-            String paymentMethod = rs.getString("method_name") != null ? rs.getString("method_name") : "N/A";
+            String paymentMethod = "Cash"; // Only cash payments
             
             rs.close();
             

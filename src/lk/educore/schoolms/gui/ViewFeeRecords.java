@@ -41,7 +41,7 @@ public class ViewFeeRecords extends JPanel {
 
         // Table
         tableModel = new DefaultTableModel(
-            new Object[]{"Receipt No", "Student ID", "Student Name", "Fee Type", "Amount", "Paid Date", "Payment Method"}, 0
+            new Object[]{"Receipt No", "Student ID", "Student Name", "Fee Type", "Amount", "Paid Date"}, 0
         ) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -120,11 +120,10 @@ public class ViewFeeRecords extends JPanel {
             tableModel.setRowCount(0);
             
             ResultSet rs = MySQL.executeSearch("SELECT f.receipt_no, f.student_id, s.first_name, s.last_name, ft.fee_type_name, " +
-                          "f.amount, f.paid_date, pm.method_name " +
+                          "f.amount, f.paid_date " +
                           "FROM fee f " +
                           "JOIN student s ON f.student_id = s.student_id " +
                           "JOIN fee_type ft ON f.fee_type_id = ft.fee_type_id " +
-                          "LEFT JOIN payment_method pm ON f.payment_method_id = pm.payment_method_id " +
                           "WHERE f.status = 'Paid' " +
                           "ORDER BY f.paid_date DESC");
             
@@ -137,10 +136,9 @@ public class ViewFeeRecords extends JPanel {
                 String feeType = rs.getString("fee_type_name");
                 double amount = rs.getDouble("amount");
                 String paidDate = rs.getString("paid_date");
-                String paymentMethod = rs.getString("method_name");
                 
                 tableModel.addRow(new Object[]{receiptNo, studentId, studentName, feeType, 
-                                           df.format(amount), paidDate, paymentMethod});
+                                           df.format(amount), paidDate});
             }
             
             rs.close();
@@ -160,11 +158,10 @@ public class ViewFeeRecords extends JPanel {
             
             StringBuilder queryBuilder = new StringBuilder(
                 "SELECT f.receipt_no, f.student_id, s.first_name, s.last_name, ft.fee_type_name, " +
-                "f.amount, f.paid_date, pm.method_name " +
+                "f.amount, f.paid_date " +
                 "FROM fee f " +
                 "JOIN student s ON f.student_id = s.student_id " +
                 "JOIN fee_type ft ON f.fee_type_id = ft.fee_type_id " +
-                "LEFT JOIN payment_method pm ON f.payment_method_id = pm.payment_method_id " +
                 "WHERE f.status = 'Paid' "
             );
             
@@ -199,10 +196,9 @@ public class ViewFeeRecords extends JPanel {
                 String feeType = rs.getString("fee_type_name");
                 double amount = rs.getDouble("amount");
                 String paidDate = rs.getString("paid_date");
-                String paymentMethod = rs.getString("method_name");
                 
                 tableModel.addRow(new Object[]{receiptNo, studentId, studentName, feeType, 
-                                           df.format(amount), paidDate, paymentMethod});
+                                           df.format(amount), paidDate});
             }
             
             rs.close();

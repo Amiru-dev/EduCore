@@ -343,21 +343,6 @@ INSERT IGNORE INTO fee_type (fee_type_name, description, default_amount) VALUES
 ('Library Fine', 'Library fine for overdue books', 50.00),
 ('Lost Book Charge', 'Charge for lost library books', 1000.00);
 
--- Payment Method Lookup Table
-CREATE TABLE IF NOT EXISTS payment_method (
-    payment_method_id INT PRIMARY KEY AUTO_INCREMENT,
-    method_name VARCHAR(50) NOT NULL UNIQUE,
-    description VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Insert default payment methods
-INSERT IGNORE INTO payment_method (method_name, description) VALUES 
-('Cash', 'Cash payment'),
-('Card', 'Credit/Debit card'),
-('Bank Transfer', 'Bank transfer'),
-('Check', 'Check payment');
-
 -- Fee Table
 CREATE TABLE IF NOT EXISTS fee (
     fee_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -366,14 +351,12 @@ CREATE TABLE IF NOT EXISTS fee (
     amount DECIMAL(10, 2) NOT NULL,
     due_date DATE NOT NULL,
     paid_date DATE,
-    payment_method_id INT,
     status ENUM('Pending', 'Paid', 'Overdue', 'Cancelled') DEFAULT 'Pending',
     receipt_no VARCHAR(50) UNIQUE,
     remarks TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE,
-    FOREIGN KEY (fee_type_id) REFERENCES fee_type(fee_type_id) ON DELETE CASCADE,
-    FOREIGN KEY (payment_method_id) REFERENCES payment_method(payment_method_id) ON DELETE SET NULL
+    FOREIGN KEY (fee_type_id) REFERENCES fee_type(fee_type_id) ON DELETE CASCADE
 );
 
 -- ============================================
@@ -433,14 +416,12 @@ CREATE TABLE IF NOT EXISTS finance (
     description TEXT NOT NULL,
     amount DECIMAL(12, 2) NOT NULL,
     transaction_type_id INT NOT NULL,
-    payment_method_id INT,
     transaction_date DATE NOT NULL,
     category VARCHAR(100),
     added_by VARCHAR(100),
     reference_no VARCHAR(50),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (transaction_type_id) REFERENCES transaction_type(transaction_type_id) ON DELETE CASCADE,
-    FOREIGN KEY (payment_method_id) REFERENCES payment_method(payment_method_id) ON DELETE SET NULL
+    FOREIGN KEY (transaction_type_id) REFERENCES transaction_type(transaction_type_id) ON DELETE CASCADE
 );
 
 -- ============================================
