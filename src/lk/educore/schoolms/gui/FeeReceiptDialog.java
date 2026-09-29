@@ -37,7 +37,7 @@ public class FeeReceiptDialog extends JDialog {
         JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JLabel titleLabel = new JLabel("Fee Receipt");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        titlePanel.add(titlePanel);
+        titlePanel.add(titleLabel);
         mainPanel.add(titlePanel, BorderLayout.NORTH);
 
         // Receipt details panel

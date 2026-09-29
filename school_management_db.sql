@@ -334,14 +334,16 @@ CREATE TABLE IF NOT EXISTS fee_type (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Insert default fee types
+-- Insert Central College Anuradhapura specific fee types
+-- Government national school with no tuition fees
 INSERT IGNORE INTO fee_type (fee_type_name, description, default_amount) VALUES 
-('Tuition Fee', 'Monthly tuition fee', 5000.00),
-('Lab Fee', 'Laboratory fee', 1000.00),
-('Library Fee', 'Library membership fee', 500.00),
-('Transport Fee', 'Transportation fee', 2000.00),
-('Sports Fee', 'Sports and activities fee', 750.00),
-('Exam Fee', 'Examination fee', 1500.00);
+('SDS Contribution', 'School Development Society contribution', 1000.00),
+('Exam Fee', 'Examination or term-test fee', 500.00),
+('Sports Meet Fee', 'Sports meet fee', 750.00),
+('Society/Club Fee', 'Society and club membership fee', 500.00),
+('Trip Charge', 'Educational trip charges', 1500.00),
+('Library Fine', 'Library fine for overdue books', 50.00),
+('Lost Book Charge', 'Charge for lost library books', 1000.00);
 
 -- Payment Method Lookup Table
 CREATE TABLE IF NOT EXISTS payment_method (
@@ -571,9 +573,9 @@ INSERT IGNORE INTO subject (subject_name, grade_id, description) VALUES
 INSERT IGNORE INTO exam (exam_name, exam_type_id, subject_id, grade_id, exam_date, max_marks, duration_minutes, description) VALUES 
 ('Term Test 1 - Mathematics', 1, 1, 1, CURDATE() + INTERVAL 7 DAY, 100.00, 90, 'First term test for Mathematics');
 
--- Insert sample fee
+-- Insert sample fee (using SDS Contribution - fee_type_id = 1)
 INSERT IGNORE INTO fee (student_id, fee_type_id, amount, due_date, status) VALUES 
-('STU-0001', 1, 5000.00, CURDATE() + INTERVAL 30 DAY, 'Pending');
+('STU-0001', 1, 1000.00, CURDATE() + INTERVAL 30 DAY, 'Pending');
 
 -- Insert sample books
 INSERT IGNORE INTO book (title, author, isbn, category_id, quantity, available_qty, publisher, publication_year, price, location, barcode) VALUES 
