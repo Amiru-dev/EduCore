@@ -197,15 +197,6 @@ public class FeeManagement extends JPanel {
         
         panel.add(statsPanel, BorderLayout.NORTH);
         
-        // Charts and tables panel
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        
-        // Pie chart panel
-        JPanel chartPanel = new JPanel(new BorderLayout(10, 10));
-        chartPanel.setBorder(BorderFactory.createTitledBorder("Fee Collection Status"));
-        chartPanel.add(new JLabel("Loading chart...", SwingConstants.CENTER), BorderLayout.CENTER);
-        splitPane.setTopComponent(chartPanel);
-        
         // Fee type breakdown table
         JPanel tablePanel = new JPanel(new BorderLayout(10, 10));
         tablePanel.setBorder(BorderFactory.createTitledBorder("Fee Type Breakdown"));
@@ -226,22 +217,19 @@ public class FeeManagement extends JPanel {
         JScrollPane tableScrollPane = new JScrollPane(breakdownTable);
         tablePanel.add(tableScrollPane, BorderLayout.CENTER);
         
-        splitPane.setBottomComponent(tablePanel);
-        splitPane.setResizeWeight(0.5);
-        
-        panel.add(splitPane, BorderLayout.CENTER);
+        panel.add(tablePanel, BorderLayout.CENTER);
         
         // Refresh button
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton btnRefresh = new JButton("Refresh Analytics");
         btnRefresh.addActionListener(e -> loadAnalytics(lblTotalCollected, lblTotalPending, lblTotalOverdue, 
-                                                        lblCollectionRate, chartPanel, breakdownModel));
+                                                        lblCollectionRate, breakdownModel));
         buttonPanel.add(btnRefresh);
         panel.add(buttonPanel, BorderLayout.SOUTH);
         
         // Load initial data
         SwingUtilities.invokeLater(() -> loadAnalytics(lblTotalCollected, lblTotalPending, lblTotalOverdue, 
-                                                     lblCollectionRate, chartPanel, breakdownModel));
+                                                     lblCollectionRate, breakdownModel));
         
         return panel;
     }
@@ -265,7 +253,7 @@ public class FeeManagement extends JPanel {
     }
     
     private void loadAnalytics(JLabel lblTotalCollected, JLabel lblTotalPending, JLabel lblTotalOverdue, 
-                             JLabel lblCollectionRate, JPanel chartPanel, DefaultTableModel breakdownModel) {
+                             JLabel lblCollectionRate, DefaultTableModel breakdownModel) {
         try {
             // Calculate statistics
             ResultSet rs = MySQL.executeSearch(
@@ -302,13 +290,6 @@ public class FeeManagement extends JPanel {
             double totalFees = collected + pending + overdue;
             double collectionRate = totalFees > 0 ? (collected / totalFees) * 100 : 0;
             lblCollectionRate.setText(String.format("%.1f%%", collectionRate));
-            
-            // Update pie chart
-            chartPanel.removeAll();
-            JPanel pieChart = PieChart.createFeePieChart(collected, pending, overdue);
-            chartPanel.add(pieChart, BorderLayout.CENTER);
-            chartPanel.revalidate();
-            chartPanel.repaint();
             
             // Load fee type breakdown
             breakdownModel.setRowCount(0);
@@ -646,10 +627,11 @@ public class FeeManagement extends JPanel {
             return;
         }
         
-        String status = tableModel.getValueAt(selectedRow, 6).toString();
-        String receiptNo = tableModel.getValueAt(selectedRow, 7).toString();
+        Object statusObj = tableModel.getValueAt(selectedRow, 6);
+        Object receiptNoObj = tableModel.getValueAt(selectedRow, 7);
         
-        if (!"Paid".equals(status) || receiptNo == null || receiptNo.isEmpty()) {
+        if (statusObj == null || !"Paid".equals(statusObj.toString()) || 
+            receiptNoObj == null || receiptNoObj.toString().isEmpty()) {
             JOptionIcon.showWarningDialog(this, "Cannot send receipt for unpaid fees.");
             return;
         }
