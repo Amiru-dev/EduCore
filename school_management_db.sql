@@ -338,8 +338,6 @@ CREATE TABLE IF NOT EXISTS fee_type (
 -- Government national school with no tuition fees
 INSERT IGNORE INTO fee_type (fee_type_name, description, default_amount) VALUES 
 ('SDS Contribution', 'School Development Society contribution', 1000.00),
-('Exam Fee', 'Examination or term-test fee', 500.00),
-('Sports Meet Fee', 'Sports meet fee', 750.00),
 ('Society/Club Fee', 'Society and club membership fee', 500.00),
 ('Trip Charge', 'Educational trip charges', 1500.00),
 ('Library Fine', 'Library fine for overdue books', 50.00),
