@@ -5,8 +5,14 @@ import lk.educore.schoolms.validate.JOptionIcon;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.print.*;
+import java.io.File;
 import java.sql.*;
 import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.Map;
+import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.util.JRLoader;
 
 /**
  * Fee Receipt Dialog
@@ -186,7 +192,245 @@ public class FeeReceiptDialog extends JDialog {
     }
 
     private void printReceipt() {
-        JOptionIcon.showInfoDialog(this, "Print Receipt - Coming Soon\n" +
-            "This would generate a printable receipt using JasperReports.");
+        try {
+            // Fetch receipt details
+            ResultSet rs = MySQL.executeSearch("SELECT f.receipt_no, f.student_id, s.first_name, s.last_name, ft.fee_type_name, " +
+                          "f.amount, f.due_date, f.paid_date, pm.method_name " +
+                          "FROM fee f " +
+                          "JOIN student s ON f.student_id = s.student_id " +
+                          "JOIN fee_type ft ON f.fee_type_id = ft.fee_type_id " +
+                          "LEFT JOIN payment_method pm ON f.payment_method_id = pm.payment_method_id " +
+                          "WHERE f.fee_id = '" + feeId + "'");
+            
+            if (!rs.next()) {
+                JOptionIcon.showErrorDialog(this, "Error loading receipt details for printing.");
+                rs.close();
+                return;
+            }
+            
+            DecimalFormat df = new DecimalFormat("Rs. #,##0.00");
+            
+            String receiptNo = rs.getString("receipt_no");
+            String studentId = rs.getString("student_id");
+            String studentName = rs.getString("first_name") + " " + rs.getString("last_name");
+            String feeType = rs.getString("fee_type_name");
+            String amount = df.format(rs.getDouble("amount"));
+            String dueDate = rs.getString("due_date");
+            String paidDate = rs.getString("paid_date");
+            String paymentMethod = rs.getString("method_name");
+            
+            rs.close();
+            
+            // Try to use JasperReports if template exists
+            File jasperFile = new File("reports/FeeReceipt.jasper");
+            File jrxmlFile = new File("reports/FeeReceipt.jrxml");
+            
+            if (jasperFile.exists() || jrxmlFile.exists()) {
+                // Create parameters for JasperReports
+                Map<String, Object> parameters = new HashMap<>();
+                parameters.put("receiptNo", receiptNo);
+                parameters.put("studentId", studentId);
+                parameters.put("studentName", studentName);
+                parameters.put("feeType", feeType);
+                parameters.put("amount", amount);
+                parameters.put("dueDate", dueDate);
+                parameters.put("paidDate", paidDate);
+                parameters.put("paymentMethod", paymentMethod != null ? paymentMethod : "N/A");
+                
+                try {
+                    JasperReport jasperReport;
+                    if (jasperFile.exists()) {
+                        jasperReport = (JasperReport) JRLoader.loadObject(jasperFile);
+                    } else {
+                        jasperReport = JasperCompileManager.compileReport(jrxmlFile.getAbsolutePath());
+                    }
+                    
+                    JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
+                    
+                    // Create PDF file
+                    JFileChooser fileChooser = new JFileChooser();
+                    fileChooser.setDialogTitle("Save Receipt as PDF");
+                    fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("PDF Files", "pdf"));
+                    
+                    String defaultFileName = "Receipt_" + receiptNo + ".pdf";
+                    fileChooser.setSelectedFile(new File(defaultFileName));
+                    
+                    int userSelection = fileChooser.showSaveDialog(this);
+                    
+                    if (userSelection == JFileChooser.APPROVE_OPTION) {
+                        File fileToSave = fileChooser.getSelectedFile();
+                        
+                        // Ensure .pdf extension
+                        if (!fileToSave.getName().toLowerCase().endsWith(".pdf")) {
+                            fileToSave = new File(fileToSave.getParent(), fileToSave.getName() + ".pdf");
+                        }
+                        
+                        // Export to PDF using JasperReports
+                        JasperExportManager.exportReportToPdfFile(jasperPrint, fileToSave.getAbsolutePath());
+                        
+                        JOptionIcon.showSuccessDialog(this, "Receipt saved as PDF:\n" + fileToSave.getAbsolutePath());
+                        
+                        // Open the PDF file
+                        if (Desktop.isDesktopSupported()) {
+                            Desktop.getDesktop().open(fileToSave);
+                        }
+                    }
+                    return;
+                    
+                } catch (Exception e) {
+                    System.out.println("JasperReports error: " + e.getMessage());
+                    // Fall back to simple receipt if JasperReports fails
+                }
+            }
+            
+            // Fallback to simple printable receipt dialog
+            printSimpleReceipt(receiptNo, studentId, studentName, feeType, amount, dueDate, paidDate, paymentMethod);
+            
+        } catch (Exception e) {
+            JOptionIcon.showErrorDialog(this, "Error printing receipt: " + e.getMessage());
+        }
+    }
+    
+    private void printSimpleReceipt(String receiptNo, String studentId, String studentName, String feeType, 
+                                   String amount, String dueDate, String paidDate, String paymentMethod) {
+        // Create a simple printable receipt dialog
+        JDialog printDialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Print Receipt", true);
+        printDialog.setSize(400, 500);
+        printDialog.setLayout(new BorderLayout(10, 10));
+        
+        JPanel receiptPanel = new JPanel(new GridBagLayout());
+        receiptPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.anchor = GridBagConstraints.WEST;
+        
+        // Title
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        JLabel titleLabel = new JLabel("FEE RECEIPT", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        receiptPanel.add(titleLabel, gbc);
+        
+        // School name
+        gbc.gridy = 1;
+        JLabel schoolLabel = new JLabel("Central College Anuradhapura", SwingConstants.CENTER);
+        schoolLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        receiptPanel.add(schoolLabel, gbc);
+        
+        // Separator
+        gbc.gridy = 2;
+        receiptPanel.add(new JLabel("--------------------------------------------------", SwingConstants.CENTER), gbc);
+        
+        // Receipt details
+        gbc.gridwidth = 1;
+        gbc.gridy = 3;
+        receiptPanel.add(new JLabel("Receipt No:"), gbc);
+        gbc.gridx = 1;
+        receiptPanel.add(new JLabel(receiptNo), gbc);
+        
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        receiptPanel.add(new JLabel("Student ID:"), gbc);
+        gbc.gridx = 1;
+        receiptPanel.add(new JLabel(studentId), gbc);
+        
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        receiptPanel.add(new JLabel("Student Name:"), gbc);
+        gbc.gridx = 1;
+        receiptPanel.add(new JLabel(studentName), gbc);
+        
+        gbc.gridx = 0;
+        gbc.gridy = 6;
+        receiptPanel.add(new JLabel("Fee Type:"), gbc);
+        gbc.gridx = 1;
+        receiptPanel.add(new JLabel(feeType), gbc);
+        
+        gbc.gridx = 0;
+        gbc.gridy = 7;
+        receiptPanel.add(new JLabel("Amount:"), gbc);
+        gbc.gridx = 1;
+        JLabel amountLabel = new JLabel(amount);
+        amountLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        receiptPanel.add(amountLabel, gbc);
+        
+        gbc.gridx = 0;
+        gbc.gridy = 8;
+        receiptPanel.add(new JLabel("Due Date:"), gbc);
+        gbc.gridx = 1;
+        receiptPanel.add(new JLabel(dueDate), gbc);
+        
+        gbc.gridx = 0;
+        gbc.gridy = 9;
+        receiptPanel.add(new JLabel("Paid Date:"), gbc);
+        gbc.gridx = 1;
+        receiptPanel.add(new JLabel(paidDate), gbc);
+        
+        gbc.gridx = 0;
+        gbc.gridy = 10;
+        receiptPanel.add(new JLabel("Payment Method:"), gbc);
+        gbc.gridx = 1;
+        receiptPanel.add(new JLabel(paymentMethod != null ? paymentMethod : "N/A"), gbc);
+        
+        // Separator
+        gbc.gridx = 0;
+        gbc.gridy = 11;
+        gbc.gridwidth = 2;
+        receiptPanel.add(new JLabel("--------------------------------------------------", SwingConstants.CENTER), gbc);
+        
+        // Footer
+        gbc.gridy = 12;
+        JLabel footerLabel = new JLabel("Thank you for your payment!", SwingConstants.CENTER);
+        footerLabel.setFont(new Font("Segoe UI", Font.ITALIC, 12));
+        receiptPanel.add(footerLabel, gbc);
+        
+        printDialog.add(receiptPanel, BorderLayout.CENTER);
+        
+        // Print button
+        JButton btnPrint = new JButton("Print");
+        btnPrint.addActionListener(e -> {
+            // Print the dialog content
+            PrinterJob job = PrinterJob.getPrinterJob();
+            job.setJobName("Fee Receipt - " + receiptNo);
+            
+            if (job.printDialog()) {
+                try {
+                    job.setPrintable(new Printable() {
+                        @Override
+                        public int print(Graphics graphics, PageFormat pageFormat, int pageIndex) throws PrinterException {
+                            if (pageIndex > 0) {
+                                return NO_SUCH_PAGE;
+                            }
+                            
+                            Graphics2D g2d = (Graphics2D) graphics;
+                            g2d.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
+                            
+                            receiptPanel.print(g2d);
+                            return PAGE_EXISTS;
+                        }
+                    });
+                    
+                    job.print();
+                    JOptionIcon.showSuccessDialog(printDialog, "Receipt sent to printer.");
+                    printDialog.dispose();
+                    
+                } catch (PrinterException ex) {
+                    JOptionIcon.showErrorDialog(printDialog, "Error printing: " + ex.getMessage());
+                }
+            }
+        });
+        
+        JButton btnCancel = new JButton("Cancel");
+        btnCancel.addActionListener(e -> printDialog.dispose());
+        
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        buttonPanel.add(btnPrint);
+        buttonPanel.add(btnCancel);
+        
+        printDialog.add(buttonPanel, BorderLayout.SOUTH);
+        
+        printDialog.setLocationRelativeTo(this);
+        printDialog.setVisible(true);
     }
 }

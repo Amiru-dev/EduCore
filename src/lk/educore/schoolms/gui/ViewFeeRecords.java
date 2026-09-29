@@ -7,8 +7,11 @@ import javax.swing.*;
 import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.*;
 import java.sql.*;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * View Fee Records
@@ -210,6 +213,55 @@ public class ViewFeeRecords extends JPanel {
     }
 
     private void exportToExcel() {
-        JOptionIcon.showInfoDialog(this, "Export to Excel - Coming Soon");
+        // Create file chooser
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Save Fee Records as CSV");
+        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("CSV Files", "csv"));
+        
+        // Set default file name
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+        String defaultFileName = "FeeRecords_" + sdf.format(new Date()) + ".csv";
+        fileChooser.setSelectedFile(new File(defaultFileName));
+        
+        int userSelection = fileChooser.showSaveDialog(this);
+        
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            File fileToSave = fileChooser.getSelectedFile();
+            
+            // Ensure .csv extension
+            if (!fileToSave.getName().toLowerCase().endsWith(".csv")) {
+                fileToSave = new File(fileToSave.getParent(), fileToSave.getName() + ".csv");
+            }
+            
+            try (PrintWriter writer = new PrintWriter(new FileWriter(fileToSave))) {
+                // Write headers
+                String[] headers = {"Receipt No", "Student ID", "Student Name", "Fee Type", "Amount", "Paid Date", "Payment Method"};
+                writer.println(String.join(",", headers));
+                
+                // Write data from table
+                for (int row = 0; row < tableModel.getRowCount(); row++) {
+                    StringBuilder rowBuilder = new StringBuilder();
+                    for (int col = 0; col < tableModel.getColumnCount(); col++) {
+                        Object value = tableModel.getValueAt(row, col);
+                        String cellValue = value != null ? value.toString() : "";
+                        // Escape commas and quotes for CSV
+                        cellValue = cellValue.replace("\"", "\"\"");
+                        if (cellValue.contains(",") || cellValue.contains("\"")) {
+                            cellValue = "\"" + cellValue + "\"";
+                        }
+                        rowBuilder.append(cellValue);
+                        if (col < tableModel.getColumnCount() - 1) {
+                            rowBuilder.append(",");
+                        }
+                    }
+                    writer.println(rowBuilder.toString());
+                }
+                
+                JOptionIcon.showSuccessDialog(this, "Fee records exported successfully to:\n" + fileToSave.getAbsolutePath());
+                
+            } catch (Exception e) {
+                JOptionIcon.showErrorDialog(this, "Error exporting to CSV: " + e.getMessage());
+            }
+        }
     }
 }
