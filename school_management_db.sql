@@ -281,12 +281,12 @@ CREATE TABLE IF NOT EXISTS exam_type (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Insert default exam types
+-- Insert default exam types for Central College Anuradhapura
+-- Only term tests that go into report cards
 INSERT IGNORE INTO exam_type (exam_type_name, description) VALUES 
-('Term Test', 'Monthly term examination'),
-('Mid Term', 'Mid-year examination'),
-('Final Exam', 'Final year examination'),
-('Practical', 'Practical examination');
+('1st Term', 'First term examination'),
+('2nd Term', 'Second term examination'),
+('3rd Term', 'Third term examination');
 
 -- Exam Table
 CREATE TABLE IF NOT EXISTS exam (
