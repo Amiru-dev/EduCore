@@ -28,6 +28,11 @@ public class FeeManagement extends JPanel {
     private JComboBox<String> cmbSearchBy;
     private JButton btnAddFee, btnMarkPaid, btnViewReceipt, btnRefresh, btnAnalytics, btnSendReceipt;
     private JTabbedPane tabbedPane;
+    
+    // Analytics components for refreshing
+    private JLabel lblTotalCollected, lblTotalPending, lblTotalOverdue, lblCollectionRate;
+    private DefaultTableModel breakdownModel;
+    private ViewFeeRecords viewFeeRecords;
 
     public FeeManagement() {
         initComponents();
@@ -159,7 +164,8 @@ public class FeeManagement extends JPanel {
     }
 
     private JPanel createHistoryPanel() {
-        return new ViewFeeRecords();
+        viewFeeRecords = new ViewFeeRecords();
+        return viewFeeRecords;
     }
 
     private JPanel createAnalyticsPanel() {
@@ -169,10 +175,10 @@ public class FeeManagement extends JPanel {
         JPanel statsPanel = new JPanel(new GridLayout(2, 2, 10, 10));
         statsPanel.setBorder(BorderFactory.createTitledBorder("Fee Collection Statistics"));
         
-        JLabel lblTotalCollected = new JLabel("Rs. 0.00", SwingConstants.CENTER);
-        JLabel lblTotalPending = new JLabel("Rs. 0.00", SwingConstants.CENTER);
-        JLabel lblTotalOverdue = new JLabel("Rs. 0.00", SwingConstants.CENTER);
-        JLabel lblCollectionRate = new JLabel("0%", SwingConstants.CENTER);
+        lblTotalCollected = new JLabel("Rs. 0.00", SwingConstants.CENTER);
+        lblTotalPending = new JLabel("Rs. 0.00", SwingConstants.CENTER);
+        lblTotalOverdue = new JLabel("Rs. 0.00", SwingConstants.CENTER);
+        lblCollectionRate = new JLabel("0%", SwingConstants.CENTER);
         
         // Style the labels
         Font statsFont = new Font("Segoe UI", Font.BOLD, 16);
@@ -201,7 +207,7 @@ public class FeeManagement extends JPanel {
         JPanel tablePanel = new JPanel(new BorderLayout(10, 10));
         tablePanel.setBorder(BorderFactory.createTitledBorder("Fee Type Breakdown"));
         
-        DefaultTableModel breakdownModel = new DefaultTableModel(
+        breakdownModel = new DefaultTableModel(
             new Object[]{"Fee Type", "Count", "Total Amount", "Avg Amount"}, 0
         ) {
             @Override
@@ -595,6 +601,9 @@ public class FeeManagement extends JPanel {
                 JOptionIcon.showSuccessDialog(this, "Fee marked as paid. Receipt No: " + receiptNo);
                 loadFeeData();
                 
+                // Refresh fee history and analytics
+                refreshAllTabs();
+                
             } catch (Exception e) {
                 JOptionIcon.showErrorDialog(this, "Error marking fee as paid: " + e.getMessage());
             }
@@ -715,5 +724,18 @@ public class FeeManagement extends JPanel {
 
     private void viewAnalytics() {
         tabbedPane.setSelectedIndex(2); // Switch to Analytics tab
+    }
+    
+    private void refreshAllTabs() {
+        // Refresh fee history tab
+        if (viewFeeRecords != null) {
+            viewFeeRecords.loadFeeRecords();
+        }
+        
+        // Refresh analytics tab
+        if (lblTotalCollected != null && breakdownModel != null) {
+            loadAnalytics(lblTotalCollected, lblTotalPending, lblTotalOverdue, 
+                         lblCollectionRate, breakdownModel);
+        }
     }
 }

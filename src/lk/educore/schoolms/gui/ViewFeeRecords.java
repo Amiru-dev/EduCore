@@ -115,7 +115,7 @@ public class ViewFeeRecords extends JPanel {
         return panel;
     }
 
-    private void loadFeeRecords() {
+    public void loadFeeRecords() {
         try {
             tableModel.setRowCount(0);
             
