@@ -227,7 +227,7 @@ public class ExamManagement extends JPanel {
                     examRs.close();
 
                     // Load students in the grade
-                    ResultSet studentRs = MySQL.executeSearch("SELECT student_id, first_name, last_name FROM student WHERE grade_id = '" + gradeId + "' AND status = 'Active' ORDER BY first_name, last_name");
+                    ResultSet studentRs = MySQL.executeSearch("SELECT student_id, first_name, last_name FROM student WHERE grade_id = '" + gradeId + "' AND is_active = 1 ORDER BY first_name, last_name");
                     while (studentRs.next()) {
                         String studentId = studentRs.getString("student_id");
                         String studentName = studentRs.getString("first_name") + " " + studentRs.getString("last_name");
@@ -958,7 +958,7 @@ public class ExamManagement extends JPanel {
                 examRs.close();
 
                 // Count total students in the grade
-                ResultSet studentRs = MySQL.executeSearch("SELECT COUNT(*) as total FROM student WHERE grade_id = '" + gradeId + "' AND status = 'Active'");
+                ResultSet studentRs = MySQL.executeSearch("SELECT COUNT(*) as total FROM student WHERE grade_id = '" + gradeId + "' AND is_active = 1");
                 int totalStudents = studentRs.next() ? studentRs.getInt("total") : 0;
                 studentRs.close();
 

@@ -47,10 +47,12 @@ public class ResultSheet extends JDialog {
         
         JLabel titleLabel = new JLabel("Results: " + examName);
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        headerPanel.add(titleLabel, BorderLayout.WEST);
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));
+        headerPanel.add(titleLabel, BorderLayout.NORTH);
 
         // Button panel
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 5));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 10));
         
         btnAddResult = new JButton("Add Result");
         btnAddResult.addActionListener(e -> addResult());
@@ -77,7 +79,7 @@ public class ResultSheet extends JDialog {
         buttonPanel.add(btnCalculateGrades);
         buttonPanel.add(btnPrintReport);
         
-        headerPanel.add(buttonPanel, BorderLayout.EAST);
+        headerPanel.add(buttonPanel, BorderLayout.CENTER);
         add(headerPanel, BorderLayout.NORTH);
 
         // Table
@@ -157,7 +159,7 @@ public class ResultSheet extends JDialog {
                 int gradeId = examRs.getInt("grade_id");
                 examRs.close();
 
-                ResultSet studentRs = MySQL.executeSearch("SELECT student_id, first_name, last_name FROM student WHERE grade_id = '" + gradeId + "' AND status = 'Active' ORDER BY first_name, last_name");
+                ResultSet studentRs = MySQL.executeSearch("SELECT student_id, first_name, last_name FROM student WHERE grade_id = '" + gradeId + "' AND is_active = 1 ORDER BY first_name, last_name");
                 while (studentRs.next()) {
                     String studentId = studentRs.getString("student_id");
                     String studentName = studentRs.getString("first_name") + " " + studentRs.getString("last_name");
