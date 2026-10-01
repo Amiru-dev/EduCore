@@ -145,6 +145,37 @@ public class AcademicPerformance extends JPanel {
         String grade = (String) cmbGrade.getSelectedItem();
         String subject = (String) cmbSubject.getSelectedItem();
         
-        JOptionIcon.showInfoDialog(this, "Analyzing performance for Grade: " + grade + ", Subject: " + subject + " - Coming Soon");
+        try {
+            tableModel.setRowCount(0);
+            
+            String query = "SELECT r.student_id, s.first_name, s.last_name, sub.subject_name, e.exam_name, " +
+                          "r.marks_obtained, r.grade_letter " +
+                          "FROM result r " +
+                          "JOIN student s ON r.student_id = s.student_id " +
+                          "JOIN exam e ON r.exam_id = e.exam_id " +
+                          "JOIN subject sub ON e.subject_id = sub.subject_id " +
+                          "JOIN grade g ON e.grade_id = g.grade_id " +
+                          "WHERE g.grade_name = '" + grade + "' AND sub.subject_name = '" + subject + "' " +
+                          "ORDER BY r.marks_obtained DESC " +
+                          "LIMIT 50";
+            
+            ResultSet rs = MySQL.executeSearch(query);
+            
+            while (rs.next()) {
+                String studentId = rs.getString("student_id");
+                String studentName = rs.getString("first_name") + " " + rs.getString("last_name");
+                String sub = rs.getString("subject_name");
+                String exam = rs.getString("exam_name");
+                double marks = rs.getDouble("marks_obtained");
+                String gradeLetter = rs.getString("grade_letter");
+                
+                tableModel.addRow(new Object[]{studentId, studentName, sub, exam, marks, gradeLetter, "N/A"});
+            }
+            
+            rs.close();
+            
+        } catch (Exception e) {
+            JOptionIcon.showErrorDialog(this, "Error analyzing performance data: " + e.getMessage());
+        }
     }
 }
