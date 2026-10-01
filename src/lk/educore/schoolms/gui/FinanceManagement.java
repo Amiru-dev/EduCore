@@ -4,14 +4,19 @@ import lk.educore.schoolms.model.MySQL;
 import lk.educore.schoolms.validate.JOptionIcon;
 import lk.educore.schoolms.charts.PieChart;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.table.*;
 import com.toedter.calendar.JDateChooser;
 import java.awt.*;
+import java.awt.event.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.*;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Level;
 
 /**
  * Finance Management Panel Income/expense tracking, salary processing, fee
@@ -189,7 +194,26 @@ public class FinanceManagement extends JPanel {
     }
 
     private void addTransaction() {
-        // Dialog components
+        // Build a proper JDialog 
+        Frame parentFrame = (Frame) SwingUtilities.getWindowAncestor(this);
+        JDialog dialog = new JDialog(parentFrame, "Add Finance Transaction", true);
+
+        // Set EduCore logo icon
+        try {
+            InputStream imgStream = getClass().getResourceAsStream("/lk/educore/schoolms/resources/logo.png");
+            if (imgStream != null) {
+                ImageIcon originalIcon = new ImageIcon(ImageIO.read(imgStream));
+                dialog.setIconImage(originalIcon.getImage());
+            } else {
+                SignIn.getLoggerObject().log(Level.WARNING, "EduCore logo not found at /lk/educore/schoolms/resources/logo.png");
+            }
+        } catch (IOException ex) {
+            SignIn.getLoggerObject().log(Level.WARNING, "Failed to load logo: " + ex.getMessage(), ex);
+        } catch (Exception ex) {
+            SignIn.getLoggerObject().log(Level.WARNING, "Unexpected error loading logo: " + ex.getMessage(), ex);
+        }
+
+        // Form fields
         JTextField txtDescription = new JTextField(20);
         JComboBox<String> cmbType = new JComboBox<>(new String[]{"Income", "Expense"});
         JTextField txtCategory = new JTextField(20);
@@ -200,19 +224,21 @@ public class FinanceManagement extends JPanel {
         dateChooser.setDate(new Date());
 
         JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 5, 15));
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.insets = new Insets(6, 6, 6, 6);
         gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.WEST;
 
         gbc.gridx = 0;
         gbc.gridy = 0;
-        formPanel.add(new JLabel("Description:"), gbc);
+        formPanel.add(new JLabel("Description: *"), gbc);
         gbc.gridx = 1;
         formPanel.add(txtDescription, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 1;
-        formPanel.add(new JLabel("Transaction Type:"), gbc);
+        formPanel.add(new JLabel("Transaction Type: *"), gbc);
         gbc.gridx = 1;
         formPanel.add(cmbType, gbc);
 
@@ -224,7 +250,7 @@ public class FinanceManagement extends JPanel {
 
         gbc.gridx = 0;
         gbc.gridy = 3;
-        formPanel.add(new JLabel("Amount (Rs.):"), gbc);
+        formPanel.add(new JLabel("Amount (Rs.): *"), gbc);
         gbc.gridx = 1;
         formPanel.add(txtAmount, gbc);
 
@@ -236,83 +262,111 @@ public class FinanceManagement extends JPanel {
 
         gbc.gridx = 0;
         gbc.gridy = 5;
-        formPanel.add(new JLabel("Transaction Date:"), gbc);
+        formPanel.add(new JLabel("Transaction Date: *"), gbc);
         gbc.gridx = 1;
         formPanel.add(dateChooser, gbc);
 
-        int result = JOptionPane.showConfirmDialog(
-                this, formPanel, "Add Finance Transaction",
-                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE
-        );
+        JLabel noteLabel = new JLabel("* Required fields");
+        noteLabel.setFont(new Font("Segoe UI", Font.ITALIC, 11));
+        noteLabel.setForeground(Color.GRAY);
+        gbc.gridx = 0;
+        gbc.gridy = 6;
+        gbc.gridwidth = 2;
+        formPanel.add(noteLabel, gbc);
 
-        if (result == JOptionPane.OK_OPTION) {
-            String description = txtDescription.getText().trim();
-            String type = (String) cmbType.getSelectedItem();
-            String category = txtCategory.getText().trim();
-            String amountStr = txtAmount.getText().trim();
-            String refNo = txtRefNo.getText().trim();
-            Date date = dateChooser.getDate();
+        // Buttons
+        boolean[] confirmed = {false};
+        JButton btnSave = new JButton("Save");
+        JButton btnCancel = new JButton("Cancel");
 
-            // Validation
-            if (description.isEmpty()) {
-                JOptionIcon.showWarningDialog(this, "Description is required.");
-                return;
-            }
-            if (amountStr.isEmpty()) {
-                JOptionIcon.showWarningDialog(this, "Amount is required.");
-                return;
-            }
-            double amount;
-            try {
-                amount = Double.parseDouble(amountStr);
-                if (amount <= 0) {
-                    throw new NumberFormatException();
-                }
-            } catch (NumberFormatException ex) {
-                JOptionIcon.showWarningDialog(this, "Please enter a valid positive amount.");
-                return;
-            }
-            if (date == null) {
-                JOptionIcon.showWarningDialog(this, "Transaction date is required.");
-                return;
-            }
+        btnSave.addActionListener(ev -> {
+            confirmed[0] = true;
+            dialog.dispose();
+        });
+        btnCancel.addActionListener(ev -> dialog.dispose());
 
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            String dateStr = sdf.format(date);
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+        btnPanel.add(btnCancel);
+        btnPanel.add(btnSave);
 
-            try {
-                // Get transaction_type_id
-                ResultSet rs = MySQL.executeSearch(
-                        "SELECT transaction_type_id FROM transaction_type WHERE type_name = '" + type + "'"
-                );
-                if (!rs.next()) {
-                    JOptionIcon.showErrorDialog(this, "Transaction type not found.");
-                    rs.close();
-                    return;
-                }
-                int typeId = rs.getInt("transaction_type_id");
+        dialog.setLayout(new BorderLayout());
+        dialog.add(formPanel, BorderLayout.CENTER);
+        dialog.add(btnPanel, BorderLayout.SOUTH);
+        dialog.pack();
+        dialog.setMinimumSize(new Dimension(380, dialog.getHeight()));
+        dialog.setLocationRelativeTo(parentFrame);
+        dialog.setVisible(true);
+
+        // Process after dialog closes
+        if (!confirmed[0]) {
+            return;
+        }
+
+        String description = txtDescription.getText().trim();
+        String type = (String) cmbType.getSelectedItem();
+        String category = txtCategory.getText().trim();
+        String amountStr = txtAmount.getText().trim();
+        String refNo = txtRefNo.getText().trim();
+        Date date = dateChooser.getDate();
+
+        // Validation
+        if (description.isEmpty()) {
+            JOptionIcon.showWarningDialog(this, "Description is required.");
+            return;
+        }
+        if (amountStr.isEmpty()) {
+            JOptionIcon.showWarningDialog(this, "Amount is required.");
+            return;
+        }
+        double amount;
+        try {
+            amount = Double.parseDouble(amountStr);
+            if (amount <= 0) {
+                throw new NumberFormatException();
+            }
+        } catch (NumberFormatException ex) {
+            JOptionIcon.showWarningDialog(this, "Please enter a valid positive amount.");
+            return;
+        }
+        if (date == null) {
+            JOptionIcon.showWarningDialog(this, "Transaction date is required.");
+            return;
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String dateStr = sdf.format(date);
+
+        try {
+            ResultSet rs = MySQL.executeSearch(
+                    "SELECT transaction_type_id FROM transaction_type WHERE type_name = '" + type + "'"
+            );
+            if (!rs.next()) {
+                JOptionIcon.showErrorDialog(this, "Transaction type not found.");
                 rs.close();
-
-                String categoryVal = category.isEmpty() ? "NULL" : "'" + category.replace("'", "''") + "'";
-                String refNoVal = refNo.isEmpty() ? "NULL" : "'" + refNo.replace("'", "''") + "'";
-
-                String sql = "INSERT INTO finance (description, amount, transaction_type_id, transaction_date, category, reference_no) VALUES ('"
-                        + description.replace("'", "''") + "', " + amount + ", " + typeId + ", '" + dateStr + "', "
-                        + categoryVal + ", " + refNoVal + ")";
-
-                int rows = MySQL.executeIUD(sql);
-
-                if (rows > 0) {
-                    loadFinanceData();
-                    loadFinanceChart();
-                    JOptionIcon.showSuccessDialog(this, "Transaction added successfully!");
-                } else {
-                    JOptionIcon.showErrorDialog(this, "Failed to add transaction.");
-                }
-
-            } catch (Exception ex) {
-                JOptionIcon.showErrorDialog(this, "Error adding transaction: " + ex.getMessage());
+                return;
             }
+            int typeId = rs.getInt("transaction_type_id");
+            rs.close();
+
+            String categoryVal = category.isEmpty() ? "NULL" : "'" + category.replace("'", "''") + "'";
+            String refNoVal = refNo.isEmpty() ? "NULL" : "'" + refNo.replace("'", "''") + "'";
+
+            String sql = "INSERT INTO finance (description, amount, transaction_type_id, transaction_date, category, reference_no) VALUES ('"
+                    + description.replace("'", "''") + "', " + amount + ", " + typeId + ", '" + dateStr + "', "
+                    + categoryVal + ", " + refNoVal + ")";
+
+            int rows = MySQL.executeIUD(sql);
+
+            if (rows > 0) {
+                loadFinanceData();
+                loadFinanceChart();
+                JOptionIcon.showSuccessDialog(this, "Transaction added successfully!");
+            } else {
+                JOptionIcon.showErrorDialog(this, "Failed to add transaction.");
+            }
+
+        } catch (Exception ex) {
+            JOptionIcon.showErrorDialog(this, "Error adding transaction: " + ex.getMessage());
         }
     }
 
@@ -376,7 +430,26 @@ public class FinanceManagement extends JPanel {
 
             double net = totalIncome - totalExpense;
 
-            // Build summary dialog
+            // Build a proper JDialog with icon
+            Frame parentFrame = (Frame) SwingUtilities.getWindowAncestor(this);
+            JDialog dialog = new JDialog(parentFrame, "Financial Summary", true);
+
+            // Set EduCore logo icon
+            try {
+                InputStream imgStream = getClass().getResourceAsStream("/lk/educore/schoolms/resources/logo.png");
+                if (imgStream != null) {
+                    ImageIcon originalIcon = new ImageIcon(ImageIO.read(imgStream));
+                    dialog.setIconImage(originalIcon.getImage());
+                } else {
+                    SignIn.getLoggerObject().log(Level.WARNING, "EduCore logo not found at /lk/educore/schoolms/resources/logo.png");
+                }
+            } catch (IOException ex) {
+                SignIn.getLoggerObject().log(Level.WARNING, "Failed to load logo: " + ex.getMessage(), ex);
+            } catch (Exception ex) {
+                SignIn.getLoggerObject().log(Level.WARNING, "Unexpected error loading logo: " + ex.getMessage(), ex);
+            }
+
+            // Build summary panel
             JPanel summaryPanel = new JPanel(new BorderLayout(10, 10));
             summaryPanel.setPreferredSize(new Dimension(550, 420));
 
@@ -403,7 +476,20 @@ public class FinanceManagement extends JPanel {
 
             summaryPanel.add(catScroll, BorderLayout.CENTER);
 
-            JOptionPane.showMessageDialog(this, summaryPanel, "Financial Summary", JOptionPane.PLAIN_MESSAGE);
+            // Close button
+            JButton btnClose = new JButton("Close");
+            btnClose.addActionListener(e -> dialog.dispose());
+
+            JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+            btnPanel.add(btnClose);
+
+            dialog.setLayout(new BorderLayout());
+            dialog.add(summaryPanel, BorderLayout.CENTER);
+            dialog.add(btnPanel, BorderLayout.SOUTH);
+            dialog.pack();
+            dialog.setMinimumSize(new Dimension(570, dialog.getHeight()));
+            dialog.setLocationRelativeTo(parentFrame);
+            dialog.setVisible(true);
 
         } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error loading financial summary: " + e.getMessage());
