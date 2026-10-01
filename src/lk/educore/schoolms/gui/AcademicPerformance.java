@@ -82,7 +82,7 @@ public class AcademicPerformance extends JPanel {
 
     private void loadGrades() {
         try {
-            ResultSet rs = MySQL.executeSearch("SELECT grade_name FROM grade ORDER BY grade_name");
+            ResultSet rs = MySQL.executeSearch("SELECT DISTINCT grade_name FROM grade ORDER BY grade_name");
             
             while (rs.next()) {
                 cmbGrade.addItem(rs.getString("grade_name"));

@@ -731,7 +731,7 @@ public class ExamManagement extends JPanel {
         gbc.weightx = 1.0;
         JComboBox<String> cmbGrade = new JComboBox<>();
         try {
-            ResultSet rs = MySQL.executeSearch("SELECT grade_name FROM grade ORDER BY grade_id");
+            ResultSet rs = MySQL.executeSearch("SELECT DISTINCT grade_name FROM grade ORDER BY grade_name");
             while (rs.next()) {
                 cmbGrade.addItem(rs.getString("grade_name"));
             }
