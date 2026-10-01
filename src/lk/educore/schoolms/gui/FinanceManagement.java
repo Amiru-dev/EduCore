@@ -99,7 +99,7 @@ public class FinanceManagement extends JPanel {
                           "JOIN transaction_type tt ON f.transaction_type_id = tt.transaction_type_id " +
                           "ORDER BY f.transaction_date DESC");
             
-            DecimalFormat df = new DecimalFormat("Rs. #,##0.00");
+            DecimalFormat df = new DecimalFormat("'Rs.' #,##0.00");
             
             while (rs.next()) {
                 int financeId = rs.getInt("finance_id");

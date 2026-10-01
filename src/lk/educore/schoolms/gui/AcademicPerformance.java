@@ -145,6 +145,11 @@ public class AcademicPerformance extends JPanel {
         String grade = (String) cmbGrade.getSelectedItem();
         String subject = (String) cmbSubject.getSelectedItem();
         
+        if (grade == null || subject == null) {
+            JOptionIcon.showWarningDialog(this, "Please select both grade and subject.");
+            return;
+        }
+        
         try {
             tableModel.setRowCount(0);
             
@@ -161,7 +166,9 @@ public class AcademicPerformance extends JPanel {
             
             ResultSet rs = MySQL.executeSearch(query);
             
+            boolean hasData = false;
             while (rs.next()) {
+                hasData = true;
                 String studentId = rs.getString("student_id");
                 String studentName = rs.getString("first_name") + " " + rs.getString("last_name");
                 String sub = rs.getString("subject_name");
@@ -173,6 +180,10 @@ public class AcademicPerformance extends JPanel {
             }
             
             rs.close();
+            
+            if (!hasData) {
+                JOptionIcon.showInfoDialog(this, "No performance records found for " + grade + " - " + subject);
+            }
             
         } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error analyzing performance data: " + e.getMessage());
