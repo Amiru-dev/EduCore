@@ -5,9 +5,13 @@ import lk.educore.schoolms.validate.JOptionIcon;
 import lk.educore.schoolms.validate.DataValidator;
 import lk.educore.schoolms.exceptions.ValidationException;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.*;
+import java.util.logging.Level;
 
 /**
  * Guardian Dialog
@@ -24,6 +28,22 @@ public class GuardianDialog extends JDialog {
     public GuardianDialog(Frame parent, int guardianId) {
         super(parent, "Guardian Details", true);
         this.guardianId = guardianId;
+
+        // Set EduCore logo icon
+        try {
+            InputStream imgStream = getClass().getResourceAsStream("/lk/educore/schoolms/resources/logo.png");
+            if (imgStream != null) {
+                ImageIcon originalIcon = new ImageIcon(ImageIO.read(imgStream));
+                setIconImage(originalIcon.getImage());
+            } else {
+                SignIn.getLoggerObject().log(Level.WARNING, "EduCore logo not found at /lk/educore/schoolms/resources/logo.png");
+            }
+        } catch (IOException ex) {
+            SignIn.getLoggerObject().log(Level.WARNING, "Failed to load logo: " + ex.getMessage(), ex);
+        } catch (Exception ex) {
+            SignIn.getLoggerObject().log(Level.WARNING, "Unexpected error loading logo: " + ex.getMessage(), ex);
+        }
+
         initComponents();
         loadGuardianDetails();
         setLocationRelativeTo(parent);
@@ -150,8 +170,8 @@ public class GuardianDialog extends JDialog {
     private void loadGuardianDetails() {
         try {
             ResultSet rs = MySQL.executeSearch("SELECT first_name, last_name, nic, relationship, phone, email, address, occupation " +
-                          "FROM guardian WHERE guardian_id = '" + guardianId + "'");
-            
+                          "FROM guardian WHERE guardian_id = " + guardianId);
+
             if (rs.next()) {
                 txtFirstName.setText(rs.getString("first_name"));
                 txtLastName.setText(rs.getString("last_name"));
@@ -162,9 +182,9 @@ public class GuardianDialog extends JDialog {
                 txtOccupation.setText(rs.getString("occupation"));
                 txtAddress.setText(rs.getString("address"));
             }
-            
+
             rs.close();
-            
+
         } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error loading guardian details: " + e.getMessage());
         }
@@ -180,27 +200,31 @@ public class GuardianDialog extends JDialog {
             String email = txtEmail.getText().trim();
             String occupation = txtOccupation.getText().trim();
             String address = txtAddress.getText().trim();
-            
+
             DataValidator.isRequired(firstName, "First Name");
             DataValidator.isRequired(lastName, "Last Name");
             DataValidator.isRequired(phone, "Phone");
             DataValidator.isRequired(address, "Address");
-            
+
             if (!nic.isEmpty()) {
                 DataValidator.isValidNIC(nic);
             }
-            
+
             if (!email.isEmpty()) {
                 DataValidator.isValidEmail(email);
             }
-            
-            String query = "UPDATE guardian SET first_name = '" + firstName + "', last_name = '" + lastName + "', nic = " + (nic.isEmpty() ? "NULL" : "'" + nic + "'") + ", relationship = '" + relationship + "', " +
-                          "phone = '" + phone + "', email = " + (email.isEmpty() ? "NULL" : "'" + email + "'") + ", occupation = " + (occupation.isEmpty() ? "NULL" : "'" + occupation + "'") + ", address = '" + address + "' WHERE guardian_id = '" + guardianId + "'";
+
+            String nicVal = nic.isEmpty() ? "NULL" : "'" + nic.replace("'", "''") + "'";
+            String emailVal = email.isEmpty() ? "NULL" : "'" + email.replace("'", "''") + "'";
+            String occupationVal = occupation.isEmpty() ? "NULL" : "'" + occupation.replace("'", "''") + "'";
+
+            String query = "UPDATE guardian SET first_name = '" + firstName.replace("'", "''") + "', last_name = '" + lastName.replace("'", "''") + "', nic = " + nicVal + ", relationship = '" + relationship + "', " +
+                          "phone = '" + phone + "', email = " + emailVal + ", occupation = " + occupationVal + ", address = '" + address.replace("'", "''") + "' WHERE guardian_id = " + guardianId;
             MySQL.executeIUD(query);
-            
+
             JOptionIcon.showSuccessDialog(this, "Guardian details updated successfully!");
             dispose();
-            
+
         } catch (ValidationException e) {
             JOptionIcon.showWarningDialog(this, e.getUserFriendlyMessage());
         } catch (Exception e) {
