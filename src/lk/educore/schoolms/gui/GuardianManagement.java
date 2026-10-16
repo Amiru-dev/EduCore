@@ -254,13 +254,57 @@ public class GuardianManagement extends JPanel {
         formPanel.add(noteLabel, gbc);
 
         // Buttons
-        boolean[] confirmed = {false};
         JButton btnSave = new JButton("Save");
         JButton btnCancel = new JButton("Cancel");
 
         btnSave.addActionListener(ev -> {
-            confirmed[0] = true;
-            dialog.dispose();
+            String firstName = txtFirstName.getText().trim();
+            String lastName = txtLastName.getText().trim();
+            String nic = txtNIC.getText().trim();
+            String relationship = (String) cmbRelationship.getSelectedItem();
+            String phone = txtPhone.getText().trim();
+            String email = txtEmail.getText().trim();
+            String occupation = txtOccupation.getText().trim();
+            String address = txtAddress.getText().trim();
+
+            // Validation
+            try {
+                DataValidator.isRequired(firstName, "First Name");
+                DataValidator.isRequired(lastName, "Last Name");
+                DataValidator.isRequired(phone, "Phone");
+                DataValidator.isRequired(address, "Address");
+
+                if (!nic.isEmpty()) {
+                    DataValidator.isValidNIC(nic);
+                }
+
+                if (!email.isEmpty()) {
+                    DataValidator.isValidEmail(email);
+                }
+
+                String nicVal = nic.isEmpty() ? "NULL" : "'" + nic.replace("'", "''") + "'";
+                String emailVal = email.isEmpty() ? "NULL" : "'" + email.replace("'", "''") + "'";
+                String occupationVal = occupation.isEmpty() ? "NULL" : "'" + occupation.replace("'", "''") + "'";
+
+                String sql = "INSERT INTO guardian (first_name, last_name, nic, relationship, phone, email, address, occupation) VALUES ('"
+                        + firstName.replace("'", "''") + "', '" + lastName.replace("'", "''") + "', " + nicVal + ", '"
+                        + relationship + "', '" + phone + "', " + emailVal + ", '" + address.replace("'", "''") + "', " + occupationVal + ")";
+
+                int rows = MySQL.executeIUD(sql);
+
+                if (rows > 0) {
+                    loadGuardianData();
+                    JOptionIcon.showSuccessDialog(dialog, "Guardian added successfully!");
+                    dialog.dispose();
+                } else {
+                    JOptionIcon.showErrorDialog(dialog, "Failed to add guardian.");
+                }
+
+            } catch (ValidationException e) {
+                JOptionIcon.showWarningDialog(dialog, e.getUserFriendlyMessage());
+            } catch (Exception ex) {
+                JOptionIcon.showErrorDialog(dialog, "Error adding guardian: " + ex.getMessage());
+            }
         });
         btnCancel.addActionListener(ev -> dialog.dispose());
 
@@ -275,58 +319,6 @@ public class GuardianManagement extends JPanel {
         dialog.setMinimumSize(new Dimension(450, dialog.getHeight()));
         dialog.setLocationRelativeTo(parentFrame);
         dialog.setVisible(true);
-
-        // Process after dialog closes
-        if (!confirmed[0]) {
-            return;
-        }
-
-        String firstName = txtFirstName.getText().trim();
-        String lastName = txtLastName.getText().trim();
-        String nic = txtNIC.getText().trim();
-        String relationship = (String) cmbRelationship.getSelectedItem();
-        String phone = txtPhone.getText().trim();
-        String email = txtEmail.getText().trim();
-        String occupation = txtOccupation.getText().trim();
-        String address = txtAddress.getText().trim();
-
-        // Validation
-        try {
-            DataValidator.isRequired(firstName, "First Name");
-            DataValidator.isRequired(lastName, "Last Name");
-            DataValidator.isRequired(phone, "Phone");
-            DataValidator.isRequired(address, "Address");
-
-            if (!nic.isEmpty()) {
-                DataValidator.isValidNIC(nic);
-            }
-
-            if (!email.isEmpty()) {
-                DataValidator.isValidEmail(email);
-            }
-
-            String nicVal = nic.isEmpty() ? "NULL" : "'" + nic.replace("'", "''") + "'";
-            String emailVal = email.isEmpty() ? "NULL" : "'" + email.replace("'", "''") + "'";
-            String occupationVal = occupation.isEmpty() ? "NULL" : "'" + occupation.replace("'", "''") + "'";
-
-            String sql = "INSERT INTO guardian (first_name, last_name, nic, relationship, phone, email, address, occupation) VALUES ('"
-                    + firstName.replace("'", "''") + "', '" + lastName.replace("'", "''") + "', " + nicVal + ", '"
-                    + relationship + "', '" + phone + "', " + emailVal + ", '" + address.replace("'", "''") + "', " + occupationVal + ")";
-
-            int rows = MySQL.executeIUD(sql);
-
-            if (rows > 0) {
-                loadGuardianData();
-                JOptionIcon.showSuccessDialog(this, "Guardian added successfully!");
-            } else {
-                JOptionIcon.showErrorDialog(this, "Failed to add guardian.");
-            }
-
-        } catch (ValidationException e) {
-            JOptionIcon.showWarningDialog(this, e.getUserFriendlyMessage());
-        } catch (Exception ex) {
-            JOptionIcon.showErrorDialog(this, "Error adding guardian: " + ex.getMessage());
-        }
     }
 
     private void editGuardian() {
