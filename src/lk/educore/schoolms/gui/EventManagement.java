@@ -251,6 +251,23 @@ public class EventManagement extends JPanel {
         JButton btnCancel = new JButton("Cancel");
 
         btnSave.addActionListener(ev -> {
+            String eventName = txtEventName.getText().trim();
+            Date startDate = startDateChooser.getDate();
+            Date endDate = endDateChooser.getDate();
+
+            if (eventName.isEmpty()) {
+                JOptionIcon.showWarningDialog(dialog, "Event name is required.");
+                return;
+            }
+            if (startDate == null) {
+                JOptionIcon.showWarningDialog(dialog, "Start date is required.");
+                return;
+            }
+            if (endDate != null && endDate.before(startDate)) {
+                JOptionIcon.showWarningDialog(dialog, "End date cannot come before start date.");
+                return;
+            }
+
             confirmed[0] = true;
             dialog.dispose();
         });
@@ -287,6 +304,10 @@ public class EventManagement extends JPanel {
         }
         if (startDate == null) {
             JOptionIcon.showWarningDialog(this, "Start date is required.");
+            return;
+        }
+        if (endDate != null && endDate.before(startDate)) {
+            JOptionIcon.showWarningDialog(this, "End date cannot come before start date.");
             return;
         }
 
@@ -444,6 +465,23 @@ public class EventManagement extends JPanel {
         JButton btnCancel = new JButton("Cancel");
 
         btnSave.addActionListener(ev -> {
+            String newEventName = txtEventName.getText().trim();
+            Date newStartDate = startDateChooser.getDate();
+            Date newEndDate = endDateChooser.getDate();
+
+            if (newEventName.isEmpty()) {
+                JOptionIcon.showWarningDialog(dialog, "Event name is required.");
+                return;
+            }
+            if (newStartDate == null) {
+                JOptionIcon.showWarningDialog(dialog, "Start date is required.");
+                return;
+            }
+            if (newEndDate != null && newEndDate.before(newStartDate)) {
+                JOptionIcon.showWarningDialog(dialog, "End date cannot come before start date.");
+                return;
+            }
+
             confirmed[0] = true;
             dialog.dispose();
         });
@@ -480,6 +518,10 @@ public class EventManagement extends JPanel {
         }
         if (newStartDate == null) {
             JOptionIcon.showWarningDialog(this, "Start date is required.");
+            return;
+        }
+        if (newEndDate != null && newEndDate.before(newStartDate)) {
+            JOptionIcon.showWarningDialog(this, "End date cannot come before start date.");
             return;
         }
 

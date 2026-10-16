@@ -294,6 +294,16 @@ public class DataValidator {
     }
 
     /**
+     * Validate date range (end date cannot come before start date)
+     */
+    public static boolean isValidDateRange(java.util.Date startDate, java.util.Date endDate) throws ValidationException {
+        if (startDate != null && endDate != null && endDate.before(startDate)) {
+            throw new ValidationException("End date cannot come before start date", "endDate", endDate.toString());
+        }
+        return true;
+    }
+
+    /**
      * Generic validation without throwing exception
      */
     public static boolean validate(String text, String pattern) {
