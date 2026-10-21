@@ -57,9 +57,9 @@ public class LibraryManagement extends JPanel {
         // Tabbed pane
         tabbedPane = new JTabbedPane();
 
-        tabbedPane.addTab("📚 Books", createBooksPanel());
-        tabbedPane.addTab("📋 Issue / Return", createIssuePanel());
-        tabbedPane.addTab("📦 Inventory", createInventoryPanel());
+        tabbedPane.addTab("Books", createBooksPanel());
+        tabbedPane.addTab("Issue / Return", createIssuePanel());
+        tabbedPane.addTab("Inventory", createInventoryPanel());
 
         // Refresh data on tab switch
         tabbedPane.addChangeListener(e -> {
