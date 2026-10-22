@@ -28,7 +28,6 @@ lk.educore.schoolms
 
 ### Encrypted Credentials
 - Database credentials are AES-128 encrypted in `MySQL.java`
-- Default encryption key: "EduCoreSchool2025" (change in production)
 - Use SetupConnection.java to configure database connection
 
 ## Build Instructions
@@ -97,34 +96,30 @@ ant jar
 - **ResultSheet.java** - Result sheet generation
 - **ResultDialog.java** - Individual result viewing
 
-### 7. Transport Management (2 screens)
-- **TransportManagement.java** - Vehicle and route management
-- **VehicleTypeDialog.java** - Vehicle type configuration
-
-### 8. Academic Performance (1 screen)
+### 7. Academic Performance (1 screen)
 - **AcademicPerformance.java** - Performance analytics and charts
 
-### 9. Finance Management (1 screen)
+### 8. Finance Management (1 screen)
 - **FinanceManagement.java** - Financial transactions and reporting
 
-### 10. Events & Notices (1 screen)
+### 9. Events & Notices (1 screen)
 - **EventManagement.java** - School events and notice board
 
-### 11. Parents/Guardians (3 screens)
+### 10. Parents/Guardians (3 screens)
 - **GuardianManagement.java** - Guardian list and management
 - **GuardianAddressView.java** - Guardian address management
 - **GuardianDialog.java** - Guardian details dialog
 
-### 12. Library & Inventory (1 screen)
+### 11. Library & Inventory (1 screen)
 - **LibraryManagement.java** - Book inventory and issue tracking
 
-### 13. Utility Screens (4 screens)
+### 12. Utility Screens (4 screens)
 - **BackupUtility.java** - Database backup and restore
 - **AboutDialog.java** - Application information
 - **HelpDialog.java** - Help documentation
 - **SettingsDialog.java** - Application settings
 
-### 14. Student Dashboard (1 screen)
+### 13. Student Dashboard (1 screen)
 - **StudentDashboard.java** - Student-specific view with profile, attendance, fees, results
 
 ## Key Features
@@ -132,7 +127,6 @@ ant jar
 ### Security
 - AES-128 encrypted database credentials
 - Role-based access control
-- Password hashing (SHA-256)
 - Session management
 
 ### Email Integration
@@ -275,10 +269,10 @@ Contains build configuration with manifest attributes for JAR creation.
 - Support: amirupekw@gmail.com
 
 ## License
-Proprietary - Copyright (C) 2025 EduCore Software. All rights reserved.
+Proprietary - Copyright (C) 2026 EduCore Software. All rights reserved.
 
 ## Version History
-- v1.0.0 - Initial release (2025)
+- v1.0.0 - Initial release (2026)
   - Complete module implementation
   - Role-based authentication
   - Email integration
