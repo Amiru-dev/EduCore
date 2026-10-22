@@ -346,12 +346,11 @@ public class ExamManagement extends JPanel {
     }
 
     private String calculateGrade(double marks, double maxMarks) {
-        double percentage = (marks / maxMarks) * 100;
-        if (percentage >= 75) return "A";
-        if (percentage >= 65) return "B";
-        if (percentage >= 50) return "C";
-        if (percentage >= 35) return "S";
-        return "W";
+        try {
+            return lk.educore.schoolms.service.AcademicService.calculateGrade(marks, maxMarks);
+        } catch (Exception e) {
+            return "W";
+        }
     }
 
     private JPanel createResultsPanel() {

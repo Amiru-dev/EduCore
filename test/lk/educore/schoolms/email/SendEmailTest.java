@@ -1,57 +1,57 @@
 package lk.educore.schoolms.email;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import lk.educore.schoolms.exceptions.EmailException;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
+/**
+ * Unit tests for SendEmail service parameter validation and error handling.
+ * Avoids live network socket connections during unit testing.
+ *
+ * @author EduCore Software Team
+ * @version 1.0.0
+ */
 public class SendEmailTest {
 
-    public SendEmailTest() {
-    }
-
-    @BeforeClass
-    public static void setUpClass() {
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-    }
-
-    @Before
-    public void setUp() {
-    }
-
-    @After
-    public void tearDown() {
-    }
-
-    /**
-     * Test of sendEmail method, of class SendEmail.
-     */
     @Test
-    public void testSendEmail() throws Exception {
-        System.out.println("sendEmail");
-        // Note: This test requires valid email credentials configured in SendEmail class
-        // It will fail if credentials are invalid or network is unavailable
-        // For production, this should be mocked with a testing framework
-
-        String to = "test@example.com";
-        String subject = "Test Email";
-        String content = "This is a test email content";
-
+    public void testSendEmail_NullRecipientThrowsException() {
         try {
-            SendEmail.sendEmail(to, subject, content);
-            // If we reach here, email was sent successfully
-            assertTrue(true);
-        } catch (Exception e) {
-            // Email sending failed - this is expected in test environment
-            // without proper credentials
-            System.out.println("Email sending failed (expected in test environment): " + e.getMessage());
-            // We still pass the test as we've tested the method execution
-            assertTrue(true);
+            SendEmail.sendEmail(null, "Subject", "Message");
+            fail("Expected EmailException for null recipient");
+        } catch (EmailException e) {
+            assertEquals(EmailException.ErrorType.INVALID_RECIPIENT, e.getErrorType());
+            assertTrue(e.getUserFriendlyMessage().contains("Invalid email recipient"));
+        }
+    }
+
+    @Test
+    public void testSendEmail_EmptyRecipientThrowsException() {
+        try {
+            SendEmail.sendEmail("   ", "Subject", "Message");
+            fail("Expected EmailException for blank recipient");
+        } catch (EmailException e) {
+            assertEquals(EmailException.ErrorType.INVALID_RECIPIENT, e.getErrorType());
+        }
+    }
+
+    @Test
+    public void testSendHTMLEmail_NullRecipientThrowsException() {
+        try {
+            SendEmail.sendHTMLEmail(null, "Subject", "<h1>Content</h1>");
+            fail("Expected EmailException for null recipient");
+        } catch (EmailException e) {
+            assertEquals(EmailException.ErrorType.INVALID_RECIPIENT, e.getErrorType());
+        }
+    }
+
+    @Test
+    public void testSendHTMLEmail_EmptyRecipientThrowsException() {
+        try {
+            SendEmail.sendHTMLEmail("", "Subject", "<h1>Content</h1>");
+            fail("Expected EmailException for empty recipient");
+        } catch (EmailException e) {
+            assertEquals(EmailException.ErrorType.INVALID_RECIPIENT, e.getErrorType());
         }
     }
 }

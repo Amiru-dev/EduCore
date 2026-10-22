@@ -35,16 +35,16 @@ public class SetupConnection extends JFrame {
         try {
             InputStream imgStream = getClass().getResourceAsStream("/lk/educore/schoolms/resources/logo.png");
             if (imgStream == null) {
-                SignIn.getLoggerObject().log(Level.WARNING, "Fruit shop logo image resource not found at /lk/educore/schoolms/resources/logo.png");
+                SignIn.getLoggerObject().log(Level.WARNING, "School logo image resource not found at /lk/educore/schoolms/resources/logo.png");
                 return;
             }
             ImageIcon originalIcon = new ImageIcon(ImageIO.read(imgStream));
             this.setIconImage(originalIcon.getImage());
 
         } catch (IOException e) {
-            SignIn.getLoggerObject().log(Level.WARNING, "Failed to load fruit shop logo image: " + e.getMessage(), e);
+            SignIn.getLoggerObject().log(Level.WARNING, "Failed to load school logo image: " + e.getMessage(), e);
         } catch (Exception e) {
-            SignIn.getLoggerObject().log(Level.WARNING, "Unexpected error loading fruit shop logo image: " + e.getMessage(), e);
+            SignIn.getLoggerObject().log(Level.WARNING, "Unexpected error loading school logo image: " + e.getMessage(), e);
         }
     }
 

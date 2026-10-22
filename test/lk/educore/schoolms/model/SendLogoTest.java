@@ -1,84 +1,83 @@
 package lk.educore.schoolms.model;
 
-import javax.swing.ImageIcon;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
+
+import javax.swing.ImageIcon;
+
 import static org.junit.Assert.*;
 
 /**
- * Unit tests for SendLogo class which handles logo and icon resource loading.
+ * Unit tests for SendLogo resource and image loading utility.
+ * Verifies logo retrieval, status icons, navigation scaling, and null safety.
  *
  * @author EduCore Software Team
  * @version 1.0.0
- * @see SendLogo
  */
 public class SendLogoTest {
 
-    public SendLogoTest() {
-    }
-
-    @BeforeClass
-    public static void setUpClass() {
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-    }
-
-    @Before
-    public void setUp() {
-    }
-
-    @After
-    public void tearDown() {
-    }
-
-    /**
-     * Test of getLogo method, of class SendLogo.
-     */
     @Test
-    public void testGetLogo() throws Exception {
-        System.out.println("getLogo");
-        ImageIcon result = SendLogo.getLogo();
-        // The method should return an ImageIcon (may be null if file not found)
-        // Don't fail if null - resource files may not exist in test environment
-        assertTrue("Logo test completed", true);
+    public void testGetLogo() {
+        ImageIcon logo = SendLogo.getLogo();
+        assertNotNull("Main logo must be loaded from resources", logo);
+        assertTrue("Logo width must be positive", logo.getIconWidth() > 0);
+        assertTrue("Logo height must be positive", logo.getIconHeight() > 0);
     }
 
-    /**
-     * Test of getSuccessIcon method, of class SendLogo.
-     */
     @Test
-    public void testGetSuccessIcon() throws Exception {
-        System.out.println("getSuccessIcon");
-        ImageIcon result = SendLogo.getSuccessIcon();
-        // The method should return an ImageIcon (may be null if file not found)
-        assertTrue("Success icon test completed", true);
+    public void testGetSchoolLogo() {
+        ImageIcon schoolLogo = SendLogo.getSchoolLogo();
+        // school-logo.png is optional; if present, verify dimensions, otherwise safely null
+        if (schoolLogo != null) {
+            assertTrue("School logo width must be positive", schoolLogo.getIconWidth() > 0);
+        }
     }
 
-    /**
-     * Test of getErrorIcon method, of class SendLogo.
-     */
     @Test
-    public void testGetErrorIcon() throws Exception {
-        System.out.println("getErrorIcon");
-        ImageIcon result = SendLogo.getErrorIcon();
-        // The method should return an ImageIcon (may be null if file not found)
-        assertTrue("Error icon test completed", true);
+    public void testStatusIcons() {
+        ImageIcon success = SendLogo.getSuccessIcon();
+        assertNotNull("Success icon should be loaded", success);
+        assertTrue(success.getIconWidth() > 0);
+
+        ImageIcon warning = SendLogo.getWarningIcon();
+        assertNotNull("Warning icon should be loaded", warning);
+        assertTrue(warning.getIconWidth() > 0);
+
+        ImageIcon error = SendLogo.getErrorIcon();
+        assertNotNull("Error icon should be loaded", error);
+        assertTrue(error.getIconWidth() > 0);
+
+        ImageIcon info = SendLogo.getInfoIcon();
+        assertNotNull("Info icon should be loaded", info);
+        assertTrue(info.getIconWidth() > 0);
     }
 
-    /**
-     * Test of getInfoIcon method, of class SendLogo.
-     */
     @Test
-    public void testGetInfoIcon() throws Exception {
-        System.out.println("getInfoIcon");
-        ImageIcon result = SendLogo.getInfoIcon();
-        // The method should return an ImageIcon (may be null if file not found)
-        assertTrue("Info icon test completed", true);
+    public void testGetProfileIcon() {
+        ImageIcon profile = SendLogo.getProfileIcon();
+        assertNotNull("Profile icon should be loaded", profile);
+        assertTrue(profile.getIconWidth() > 0);
     }
 
+    @Test
+    public void testGetNavIcon() {
+        // Nav icon should be scaled to 20x20
+        ImageIcon navIcon = SendLogo.getNavIcon("student.png");
+        assertNotNull("Nav icon student.png should be loaded", navIcon);
+        assertEquals("Nav icon should have width 20", 20, navIcon.getIconWidth());
+        assertEquals("Nav icon should have height 20", 20, navIcon.getIconHeight());
+    }
+
+    @Test
+    public void testScaleIcon() {
+        ImageIcon original = SendLogo.getLogo();
+        assertNotNull(original);
+
+        ImageIcon scaled = SendLogo.scaleIcon(original, 48, 48);
+        assertNotNull(scaled);
+        assertEquals(48, scaled.getIconWidth());
+        assertEquals(48, scaled.getIconHeight());
+
+        // Null safety
+        assertNull(SendLogo.scaleIcon(null, 48, 48));
+    }
 }

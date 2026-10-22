@@ -13,8 +13,9 @@ lk.educore.schoolms
 ├── email/            # Email services (SendEmail, SendFileEmail, SendQREmail)
 ├── exceptions/       # Custom exceptions (DatabaseException, EmailException, ValidationException, BusinessException)
 ├── gui/              # GUI screens (48+ screens)
-├── model/            # Data models (MySQL, SendLogo, QRCodeGenerator, BarcodeGenerator)
+├── model/            # Domain and data models (Student, Teacher, Book, BookIssue, FeeRecord, ExamResult, MySQL, etc.)
 ├── resources/        # Image resources (icons, logos)
+├── service/          # Business logic services (AcademicService, LibraryService, FeeService, AttendanceService)
 ├── theme/            # Look and feel themes (FlatMacLightLaf.properties)
 └── validate/         # Validation utilities (DataValidator, JOptionIcon)
 ```

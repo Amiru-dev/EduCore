@@ -173,7 +173,7 @@ public class FinanceManagement extends JPanel {
                 JLabel expenseLabel = new JLabel("Total Expense: " + df.format(expense));
                 expenseLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
                 expenseLabel.setForeground(new Color(244, 67, 54));
-                double net = income - expense;
+                double net = lk.educore.schoolms.service.FeeService.calculateNetFinance(income, expense);
                 JLabel netLabel = new JLabel("Net: " + df.format(net));
                 netLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
                 netLabel.setForeground(net >= 0 ? new Color(33, 150, 243) : new Color(244, 67, 54));

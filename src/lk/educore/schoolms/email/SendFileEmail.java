@@ -89,6 +89,8 @@ public class SendFileEmail {
             // Send email
             Transport.send(mimeMessage);
 
+        } catch (EmailException e) {
+            throw e;
         } catch (AuthenticationFailedException e) {
             throw new EmailException("Email authentication failed", EmailException.ErrorType.AUTHENTICATION_FAILED, to, e);
         } catch (MessagingException e) {

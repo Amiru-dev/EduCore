@@ -823,11 +823,7 @@ public class LibraryManagement extends JPanel {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             Date dueDate = sdf.parse(dueDateStr);
             Date today = new Date();
-            if (today.after(dueDate)) {
-                long diffMs = today.getTime() - dueDate.getTime();
-                long overdueDays = diffMs / (1000L * 60 * 60 * 24);
-                fine = overdueDays * 10.0; // LKR 10 per day
-            }
+            fine = lk.educore.schoolms.service.LibraryService.calculateFine(dueDate, today);
         } catch (Exception e) {
             // Ignore date parse error
         }

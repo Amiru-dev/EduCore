@@ -1,20 +1,20 @@
 Manifest-Version: 1.0
 X-COMMENT: Main-Class will be added automatically by build
-Implementation-Title: Fruit Farm Management System
+Implementation-Title: School Management System
 Implementation-Version: 1.0.0
-Implementation-Vendor: CoreVision Software
-Implementation-Vendor-Id: CoreVision Software
-Implementation-URL: https://github.com/CoreVision-Software
-Built-By: CoreVision Software Team
-Built-Date: 2025-06-09
-Specification-Title: Fruit Farm Management System
+Implementation-Vendor: EduCore Software
+Implementation-Vendor-Id: EduCore Software
+Implementation-URL: https://github.com/EduCore-Software
+Built-By: EduCore Software Team
+Built-Date: 2026-08-18
+Specification-Title: School Management System
 Specification-Version: 1.0
-Specification-Vendor: CoreVision Software
+Specification-Vendor: EduCore Software
 Developer-Team: Sheshan Danuksha,Rashintha Jerom,Dulasha Perera,Dulangana Dhamsara,Yomal Kavinda,Amiru Upek
 Lead-Developer: Sheshan Danuksha
 Contact-Email: sheshandanuksha19@gmail.com
 Support-Email: sheshandanuksha19@gmail.com
-Application-Name: FruitShop App
-Application-Category: Fruit Farm Management
+Application-Name: EduCore School Management System
+Application-Category: School Management
 License: Proprietary
-Copyright: Copyright (C) 2025 CoreVision Software. All rights reserved.
+Copyright: Copyright (C) 2026 EduCore Software. All rights reserved.

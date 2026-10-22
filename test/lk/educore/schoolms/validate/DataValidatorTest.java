@@ -1,248 +1,362 @@
 package lk.educore.schoolms.validate;
 
 import lk.educore.schoolms.exceptions.ValidationException;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.util.Calendar;
+import java.util.Date;
+
 import static org.junit.Assert.*;
 
 /**
- * Unit tests for DataValidator class. Tests cover all validation methods
- * for email, phone, password, NIC, letters, numbers, and amount validation.
+ * Exhaustive unit tests for DataValidator class.
+ * Covers all 15 validation methods, regex rules, boundaries, and exception handling.
  *
  * @author EduCore Software Team
  * @version 1.0.0
- * @see DataValidator
  */
 public class DataValidatorTest {
 
-    public DataValidatorTest() {
-    }
-
-    @BeforeClass
-    public static void setUpClass() {
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-    }
-
-    @Before
-    public void setUp() {
-    }
-
-    @After
-    public void tearDown() {
-    }
-
-    /**
-     * Test of isValidEmail method, of class DataValidator.
-     */
     @Test
-    public void testIsValidEmail() {
-        System.out.println("isValidEmail");
-        String email = "amirupekw@gmail.com";
-        // Valid email should return true
+    public void testIsValidEmail_Valid() throws ValidationException {
+        assertTrue(DataValidator.isValidEmail("amirupekw@gmail.com"));
+        assertTrue(DataValidator.isValidEmail("user.name+tag@example.co.uk"));
+        assertTrue(DataValidator.isValidEmail("admin@educore.org"));
+    }
+
+    @Test
+    public void testIsValidEmail_Invalid() {
+        String[] invalidEmails = {
+                null, "", "   ", "invalid-email", "user@", "@domain.com",
+                "user@domain", "user@.com", "user space@domain.com"
+        };
+        for (String email : invalidEmails) {
+            try {
+                DataValidator.isValidEmail(email);
+                fail("Expected ValidationException for email: " + email);
+            } catch (ValidationException e) {
+                assertTrue(e.isEmailError());
+            }
+        }
+    }
+
+    @Test
+    public void testIsValidNIC_Valid() throws ValidationException {
+        // Old format: 9 digits + V/v/X/x
+        assertTrue(DataValidator.isValidNIC("200403110V"));
+        assertTrue(DataValidator.isValidNIC("200403110v"));
+        assertTrue(DataValidator.isValidNIC("200403110X"));
+        assertTrue(DataValidator.isValidNIC("200403110x"));
+
+        // New format: 12 digits
+        assertTrue(DataValidator.isValidNIC("200403110370"));
+        assertTrue(DataValidator.isValidNIC("198512345678"));
+    }
+
+    @Test
+    public void testIsValidNIC_Invalid() {
+        String[] invalidNICs = {
+                null, "", "   ", "12345", "123456789", "12345678901",
+                "1234567890123", "200403110A", "20040311037V"
+        };
+        for (String nic : invalidNICs) {
+            try {
+                DataValidator.isValidNIC(nic);
+                fail("Expected ValidationException for NIC: " + nic);
+            } catch (ValidationException e) {
+                assertTrue(e.isNICError());
+            }
+        }
+    }
+
+    @Test
+    public void testIsValidPhone_Valid() throws ValidationException {
+        // 10 digits starting with 0
+        assertTrue(DataValidator.isValidPhone("0715916293"));
+        assertTrue(DataValidator.isValidPhone("0112345678"));
+        assertTrue(DataValidator.isValidPhone("0770000000"));
+    }
+
+    @Test
+    public void testIsValidPhone_Invalid() {
+        String[] invalidPhones = {
+                null, "", "   ", "12345", "071591629", "07159162933",
+                "7159162930", "071591629a", "+94715916293"
+        };
+        for (String phone : invalidPhones) {
+            try {
+                DataValidator.isValidPhone(phone);
+                fail("Expected ValidationException for phone: " + phone);
+            } catch (ValidationException e) {
+                assertTrue(e.isPhoneError());
+            }
+        }
+    }
+
+    @Test
+    public void testIsValidPassword_Valid() throws ValidationException {
+        assertTrue(DataValidator.isValidPassword("Psd@1234"));
+        assertTrue(DataValidator.isValidPassword("123456")); // exactly 6 chars
+        assertTrue(DataValidator.isValidPassword("VeryLongSecurePassword123!"));
+    }
+
+    @Test
+    public void testIsValidPassword_Invalid() {
+        String[] invalidPasswords = {null, "", "   ", "12345", "a"};
+        for (String pwd : invalidPasswords) {
+            try {
+                DataValidator.isValidPassword(pwd);
+                fail("Expected ValidationException for password: " + pwd);
+            } catch (ValidationException e) {
+                assertNotNull(e.getMessage());
+            }
+        }
+    }
+
+    @Test
+    public void testIsValidStudentID_Valid() throws ValidationException {
+        assertTrue(DataValidator.isValidStudentID("STU-0001"));
+        assertTrue(DataValidator.isValidStudentID("STU-1234"));
+        assertTrue(DataValidator.isValidStudentID("STU-9999"));
+    }
+
+    @Test
+    public void testIsValidStudentID_Invalid() {
+        String[] invalidStudentIDs = {
+                null, "", "   ", "STU-01", "STU-12345", "STD-1234",
+                "stu-1234", "1234", "STU-ABCD"
+        };
+        for (String id : invalidStudentIDs) {
+            try {
+                DataValidator.isValidStudentID(id);
+                fail("Expected ValidationException for student ID: " + id);
+            } catch (ValidationException e) {
+                assertNotNull(e.getMessage());
+            }
+        }
+    }
+
+    @Test
+    public void testIsLettersOnly_Valid() throws ValidationException {
+        assertTrue(DataValidator.isLettersOnly("Amiru"));
+        assertTrue(DataValidator.isLettersOnly("Amiru Upek"));
+        assertTrue(DataValidator.isLettersOnly("John Doe"));
+    }
+
+    @Test
+    public void testIsLettersOnly_Invalid() {
+        String[] invalidNames = {null, "", "   ", "Amiru123", "User!", "12345"};
+        for (String name : invalidNames) {
+            try {
+                DataValidator.isLettersOnly(name);
+                fail("Expected ValidationException for letters only: " + name);
+            } catch (ValidationException e) {
+                assertNotNull(e.getMessage());
+            }
+        }
+    }
+
+    @Test
+    public void testIsNumbersOnly_Valid() throws ValidationException {
+        assertTrue(DataValidator.isNumbersOnly("0"));
+        assertTrue(DataValidator.isNumbersOnly("12345"));
+        assertTrue(DataValidator.isNumbersOnly("999999999"));
+    }
+
+    @Test
+    public void testIsNumbersOnly_Invalid() {
+        String[] invalidNumbers = {null, "", "   ", "123a", "-123", "12.34", "abc"};
+        for (String num : invalidNumbers) {
+            try {
+                DataValidator.isNumbersOnly(num);
+                fail("Expected ValidationException for numbers only: " + num);
+            } catch (ValidationException e) {
+                assertNotNull(e.getMessage());
+            }
+        }
+    }
+
+    @Test
+    public void testIsDecimal_Valid() throws ValidationException {
+        assertTrue(DataValidator.isDecimal("100"));
+        assertTrue(DataValidator.isDecimal("100.5"));
+        assertTrue(DataValidator.isDecimal("100.50"));
+        assertTrue(DataValidator.isDecimal("0.75"));
+    }
+
+    @Test
+    public void testIsDecimal_Invalid() {
+        String[] invalidDecimals = {null, "", "   ", "100.5.5", "abc", "-100"};
+        for (String dec : invalidDecimals) {
+            try {
+                DataValidator.isDecimal(dec);
+                fail("Expected ValidationException for decimal: " + dec);
+            } catch (ValidationException e) {
+                assertNotNull(e.getMessage());
+            }
+        }
+    }
+
+    @Test
+    public void testIsRequired() throws ValidationException {
+        assertTrue(DataValidator.isRequired("Some text"));
+        assertTrue(DataValidator.isRequired("Some text", "Field Label"));
+
         try {
-            boolean result = DataValidator.isValidEmail(email);
-            assertTrue(result);
+            DataValidator.isRequired(null);
+            fail("Expected ValidationException for null");
         } catch (ValidationException e) {
-            fail("Valid email should not throw exception: " + e.getMessage());
+            assertTrue(e.isRequiredFieldError());
         }
 
-        // Test invalid email
-        String invalidEmail = "invalid-email";
         try {
-            boolean result = DataValidator.isValidEmail(invalidEmail);
-            fail("Invalid email should throw ValidationException");
+            DataValidator.isRequired("   ", "CustomField");
+            fail("Expected ValidationException for blank string");
         } catch (ValidationException e) {
-            // Expected exception
+            assertTrue(e.getUserFriendlyMessage().contains("CustomField"));
+        }
+    }
+
+    @Test
+    public void testIsValidLength_Valid() throws ValidationException {
+        assertTrue(DataValidator.isValidLength("123", 2, 5));
+        assertTrue(DataValidator.isValidLength("12", 2, 5));
+        assertTrue(DataValidator.isValidLength("12345", 2, 5));
+    }
+
+    @Test
+    public void testIsValidLength_Invalid() {
+        // Below min length
+        try {
+            DataValidator.isValidLength("1", 2, 5);
+            fail("Expected ValidationException for string below min length");
+        } catch (ValidationException e) {
+            assertNotNull(e.getMessage());
+        }
+
+        // Above max length
+        try {
+            DataValidator.isValidLength("123456", 2, 5);
+            fail("Expected ValidationException for string above max length");
+        } catch (ValidationException e) {
             assertNotNull(e.getMessage());
         }
     }
 
-    /**
-     * Test of isValidPhone method, of class DataValidator.
-     */
     @Test
-    public void testIsValidPhone() {
-        System.out.println("isValidPhone");
-        String phone = "0715916293";
-        // Valid phone should return true
+    public void testIsPositiveNumber_Valid() throws ValidationException {
+        assertTrue(DataValidator.isPositiveNumber("500"));
+        assertTrue(DataValidator.isPositiveNumber("0.01"));
+        assertTrue(DataValidator.isPositiveNumber("1500.50", "Amount"));
+    }
+
+    @Test
+    public void testIsPositiveNumber_Invalid() {
+        String[] invalid = {null, "", "0", "-5", "-0.01", "abc"};
+        for (String num : invalid) {
+            try {
+                DataValidator.isPositiveNumber(num);
+                fail("Expected ValidationException for positive number: " + num);
+            } catch (ValidationException e) {
+                assertNotNull(e.getMessage());
+            }
+        }
+    }
+
+    @Test
+    public void testIsValidDOB_Valid() throws ValidationException {
+        assertTrue(DataValidator.isValidDOB("2004-01-15"));
+        assertTrue(DataValidator.isValidDOB("2015-12-31"));
+    }
+
+    @Test
+    public void testIsValidDOB_Invalid() {
+        // Future date
         try {
-            boolean result = DataValidator.isValidPhone(phone);
-            assertTrue(result);
+            DataValidator.isValidDOB("2099-01-01");
+            fail("Expected ValidationException for future DOB");
         } catch (ValidationException e) {
-            fail("Valid phone should not throw exception: " + e.getMessage());
+            assertTrue(e.getMessage().contains("future"));
         }
 
-        // Test invalid phone
-        String invalidPhone = "12345";
+        // > 120 years ago
         try {
-            boolean result = DataValidator.isValidPhone(invalidPhone);
-            fail("Invalid phone should throw ValidationException");
+            DataValidator.isValidDOB("1800-01-01");
+            fail("Expected ValidationException for DOB > 120 years ago");
         } catch (ValidationException e) {
-            // Expected exception
+            assertNotNull(e.getMessage());
+        }
+
+        // Malformed format
+        String[] malformed = {null, "", "15-01-2004", "2004/01/15", "invalid-date"};
+        for (String dob : malformed) {
+            try {
+                DataValidator.isValidDOB(dob);
+                fail("Expected ValidationException for malformed DOB: " + dob);
+            } catch (ValidationException e) {
+                assertNotNull(e.getMessage());
+            }
+        }
+    }
+
+    @Test
+    public void testIsValidAmount_Valid() throws ValidationException {
+        assertTrue(DataValidator.isValidAmount("100"));
+        assertTrue(DataValidator.isValidAmount("100.5"));
+        assertTrue(DataValidator.isValidAmount("100.55"));
+    }
+
+    @Test
+    public void testIsValidAmount_Invalid() {
+        // More than 2 decimal places
+        try {
+            DataValidator.isValidAmount("100.555");
+            fail("Expected ValidationException for amount with 3 decimal places");
+        } catch (ValidationException e) {
+            assertTrue(e.getMessage().contains("maximum 2 decimal places"));
+        }
+
+        // Zero or negative
+        try {
+            DataValidator.isValidAmount("0");
+            fail("Expected ValidationException for 0 amount");
+        } catch (ValidationException e) {
+            assertNotNull(e.getMessage());
+        }
+
+        try {
+            DataValidator.isValidAmount("-50.00");
+            fail("Expected ValidationException for negative amount");
+        } catch (ValidationException e) {
             assertNotNull(e.getMessage());
         }
     }
 
-    /**
-     * Test of isValidPassword method, of class DataValidator.
-     */
     @Test
-    public void testIsValidPassword() {
-        System.out.println("isValidPassword");
-        String password = "Psd@1234";
-        // Valid password should return true
-        try {
-            boolean result = DataValidator.isValidPassword(password);
-            assertTrue(result);
-        } catch (ValidationException e) {
-            fail("Valid password should not throw exception: " + e.getMessage());
-        }
+    public void testIsValidDateRange() throws ValidationException {
+        Calendar cal = Calendar.getInstance();
+        Date start = cal.getTime();
+        cal.add(Calendar.DAY_OF_YEAR, 5);
+        Date end = cal.getTime();
 
-        // Test invalid password (too short)
-        String invalidPassword = "12345";
+        assertTrue(DataValidator.isValidDateRange(start, end));
+        assertTrue(DataValidator.isValidDateRange(start, start)); // Same date is valid
+        assertTrue(DataValidator.isValidDateRange(null, end));
+
+        // End before start throws exception
         try {
-            boolean result = DataValidator.isValidPassword(invalidPassword);
-            fail("Invalid password should throw ValidationException");
+            DataValidator.isValidDateRange(end, start);
+            fail("Expected ValidationException when end date is before start date");
         } catch (ValidationException e) {
-            // Expected exception
-            assertNotNull(e.getMessage());
+            assertTrue(e.getMessage().contains("End date cannot come before start date"));
         }
     }
 
-    /**
-     * Test of isValidNIC method, of class DataValidator.
-     */
     @Test
-    public void testIsValidNIC() {
-        System.out.println("isValidNIC");
-        String nic = "200403110370";
-        // Valid NIC should return true
-        try {
-            boolean result = DataValidator.isValidNIC(nic);
-            assertTrue(result);
-        } catch (ValidationException e) {
-            fail("Valid NIC should not throw exception: " + e.getMessage());
-        }
-
-        // Test invalid NIC
-        String invalidNIC = "12345";
-        try {
-            boolean result = DataValidator.isValidNIC(invalidNIC);
-            fail("Invalid NIC should throw ValidationException");
-        } catch (ValidationException e) {
-            // Expected exception
-            assertNotNull(e.getMessage());
-        }
+    public void testValidateRegex() {
+        assertTrue(DataValidator.validate("12345", "^[0-9]+$"));
+        assertFalse(DataValidator.validate("abc123", "^[0-9]+$"));
+        assertFalse(DataValidator.validate(null, "^[0-9]+$"));
+        assertFalse(DataValidator.validate("", "^[0-9]+$"));
     }
-
-    /**
-     * Test of isLettersOnly method, of class DataValidator.
-     */
-    @Test
-    public void testIsLettersOnly() {
-        System.out.println("isLettersOnly");
-        String letters = "dsf";
-        // Valid letters should return true
-        try {
-            boolean result = DataValidator.isLettersOnly(letters);
-            assertTrue(result);
-        } catch (ValidationException e) {
-            fail("Valid letters should not throw exception: " + e.getMessage());
-        }
-
-        // Test invalid letters (contains numbers)
-        String invalidLetters = "abc123";
-        try {
-            boolean result = DataValidator.isLettersOnly(invalidLetters);
-            fail("Invalid letters should throw ValidationException");
-        } catch (ValidationException e) {
-            // Expected exception
-            assertNotNull(e.getMessage());
-        }
-    }
-
-    /**
-     * Test of isNumbersOnly method, of class DataValidator.
-     */
-    @Test
-    public void testIsNumbersOnly() {
-        System.out.println("isNumbersOnly");
-        String numbers = "12345";
-        // Valid numbers should return true
-        try {
-            boolean result = DataValidator.isNumbersOnly(numbers);
-            assertTrue(result);
-        } catch (ValidationException e) {
-            fail("Valid numbers should not throw exception: " + e.getMessage());
-        }
-
-        // Test invalid numbers (contains letters)
-        String invalidNumbers = "abc123";
-        try {
-            boolean result = DataValidator.isNumbersOnly(invalidNumbers);
-            fail("Invalid numbers should throw ValidationException");
-        } catch (ValidationException e) {
-            // Expected exception
-            assertNotNull(e.getMessage());
-        }
-    }
-
-    /**
-     * Test of isPositiveNumber method, of class DataValidator.
-     */
-    @Test
-    public void testIsPositiveNumber() {
-        System.out.println("isPositiveNumber");
-        String number = "500";
-        // Valid positive number should return true
-        try {
-            boolean result = DataValidator.isPositiveNumber(number);
-            assertTrue(result);
-        } catch (ValidationException e) {
-            fail("Valid positive number should not throw exception: " + e.getMessage());
-        }
-
-        // Test invalid number (zero)
-        String invalidNumber = "0";
-        try {
-            boolean result = DataValidator.isPositiveNumber(invalidNumber);
-            fail("Zero should throw ValidationException");
-        } catch (ValidationException e) {
-            // Expected exception
-            assertNotNull(e.getMessage());
-        }
-    }
-
-    /**
-     * Test of isRequired method, of class DataValidator.
-     */
-    @Test
-    public void testIsRequired() {
-        System.out.println("isRequired");
-        String text = "Some text";
-        // Non-empty text should return true
-        try {
-            boolean result = DataValidator.isRequired(text);
-            assertTrue(result);
-        } catch (ValidationException e) {
-            fail("Non-empty text should not throw exception: " + e.getMessage());
-        }
-
-        // Test empty text
-        String emptyText = "";
-        try {
-            boolean result = DataValidator.isRequired(emptyText);
-            fail("Empty text should throw ValidationException");
-        } catch (ValidationException e) {
-            // Expected exception
-            assertNotNull(e.getMessage());
-        }
-    }
-
 }

@@ -1,138 +1,97 @@
 package lk.educore.schoolms.model;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.sql.Connection;
+
 import static org.junit.Assert.*;
 
 /**
- * Unit tests for MySQL database connection and operations. Tests cover
- * connection management, query execution, and error handling. These tests
- * require a valid database configuration file (dbinfor.ser) to run completely,
- * but will skip gracefully if the configuration is not available.
+ * Unit tests for MySQL database configuration and manager.
+ * Tests configuration serialization, AES encryption/decryption round-trip,
+ * getters, connection verification, and cleanup.
  *
  * @author EduCore Software Team
  * @version 1.0.0
- * @see MySQL
  */
 public class MySQLTest {
 
-    public MySQLTest() {
-    }
+    private static File originalConfig = new File("dbinfor.ser");
+    private static File backupConfig = new File("dbinfor.ser.backup");
+    private static boolean hadOriginalConfig = false;
 
     @BeforeClass
-    public static void setUpClass() {
+    public static void setUpClass() throws Exception {
+        if (originalConfig.exists()) {
+            hadOriginalConfig = true;
+            Files.copy(originalConfig.toPath(), backupConfig.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        }
     }
 
     @AfterClass
-    public static void tearDownClass() {
-    }
-
-    @Before
-    public void setUp() {
-    }
-
-    @After
-    public void tearDown() {
-    }
-
-    /**
-     * Test of initConfig method, of class MySQL.
-     */
-    @Test
-    public void testInitConfig() throws Exception {
-        System.out.println("initConfig");
-        // This test requires a valid database configuration file (dbinfor.ser)
-        // Skip test if configuration file doesn't exist
-        java.io.File file = new java.io.File("dbinfor.ser");
-        if (file.exists() && file.isFile()) {
-            try {
-                MySQL.initConfig();
-                assertNotNull(MySQL.getConnection());
-                System.out.println("Database connection test PASSED");
-            } catch (Exception e) {
-                System.out.println("Database connection test failed: " + e.getMessage());
-                // Don't fail the test - just log the error
-                assertTrue("Database connection failed (expected if database not running)", true);
-            }
+    public static void tearDownClass() throws Exception {
+        if (hadOriginalConfig && backupConfig.exists()) {
+            Files.copy(backupConfig.toPath(), originalConfig.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            backupConfig.delete();
+            MySQL.initConfig(); // reload original
         } else {
-            System.out.println("Skipping test - database configuration file not found");
-            assertTrue("Test skipped - no database configuration", true);
+            MySQL.deleteConfig();
+            if (backupConfig.exists()) backupConfig.delete();
         }
     }
 
-    /**
-     * Test of getConnection method, of class MySQL.
-     */
     @Test
-    public void testGetConnection() throws Exception {
-        System.out.println("getConnection");
-        // This test requires a valid database configuration file (dbinfor.ser)
-        java.io.File file = new java.io.File("dbinfor.ser");
-        if (file.exists() && file.isFile()) {
-            try {
-                Connection result = MySQL.getConnection();
-                assertNotNull(result);
-                assertTrue(result.isValid(5)); // Check if connection is valid
-                System.out.println("Get connection test PASSED");
-            } catch (Exception e) {
-                System.out.println("Get connection test failed: " + e.getMessage());
-                assertTrue("Get connection failed (expected if database not running)", true);
-            }
-        } else {
-            System.out.println("Skipping test - database configuration file not found");
-            assertTrue("Test skipped - no database configuration", true);
-        }
+    public void testSaveAndInitConfig_EncryptionRoundTrip() {
+        String testHost = "127.0.0.1";
+        String testPort = "3306";
+        String testName = "school_test_db";
+        String testUser = "test_user";
+        String testPass = "secret_pass_123";
+        String testDump = "/usr/bin/mysqldump";
+        String testBackup = "/backups";
+
+        // Save configuration (encrypts internally with AES-128)
+        MySQL.saveConfig(testHost, testPort, testName, testUser, testPass, testDump, testBackup);
+        assertTrue("Config file must exist after saveConfig", MySQL.configExists());
+
+        // Re-initialize from encrypted file (decrypts internally)
+        MySQL.initConfig();
+
+        // Verify decrypted properties match exactly
+        assertEquals(testHost, MySQL.getDbHost());
+        assertEquals(testPort, MySQL.getDbPort());
+        assertEquals(testName, MySQL.getDbName());
+        assertEquals(testUser, MySQL.getDbUser());
+        assertEquals(testPass, MySQL.getDbPassword());
+        assertEquals(testDump, MySQL.getDumpPath());
+        assertEquals(testBackup, MySQL.getBackupPath());
     }
 
-    /**
-     * Test of executeSearch method, of class MySQL.
-     * Note: This method doesn't exist in current MySQL class - test disabled
-     */
     @Test
-    public void testExecuteSearch() throws Exception {
-        System.out.println("executeSearch - DISABLED (method not available in current MySQL class)");
-        assertTrue("Test disabled - method not available", true);
+    public void testDeleteConfig() {
+        MySQL.saveConfig("host", "3306", "db", "u", "p", "d", "b");
+        assertTrue(MySQL.configExists());
+
+        MySQL.deleteConfig();
+        assertFalse(MySQL.configExists());
     }
 
-    /**
-     * Test of executeIUD method, of class MySQL.
-     * Note: This method doesn't exist in current MySQL class - test disabled
-     */
     @Test
-    public void testExecuteIUD() throws Exception {
-        System.out.println("executeIUD - DISABLED (method not available in current MySQL class)");
-        assertTrue("Test disabled - method not available", true);
+    public void testTestConnection_InvalidHostReturnsFalse() {
+        // Unreachable fake database should return false without crashing
+        boolean result = MySQL.testConnection("192.0.2.1", "3306", "nonexistent_db", "wrong_user", "wrong_pass");
+        assertFalse("Unreachable database connection test should return false", result);
     }
 
-    /**
-     * Test of closeConnection method, of class MySQL.
-     */
     @Test
-    public void testCloseConnection() throws Exception {
-        System.out.println("closeConnection");
-        // This test requires a valid database configuration file (dbinfor.ser)
-        java.io.File file = new java.io.File("dbinfor.ser");
-        if (file.exists() && file.isFile()) {
-            try {
-                MySQL.initConfig();
-                MySQL.closeConnection();
-                // Connection should be closed, next call should create new connection
-                MySQL.initConfig();
-                assertNotNull(MySQL.getConnection());
-                System.out.println("Close connection test PASSED");
-            } catch (Exception e) {
-                System.out.println("Close connection test failed: " + e.getMessage());
-                assertTrue("Close connection failed (expected if database not running)", true);
-            }
-        } else {
-            System.out.println("Skipping test - database configuration file not found");
-            assertTrue("Test skipped - no database configuration", true);
-        }
+    public void testCloseConnection_SafeWhenClosedOrNull() {
+        // Calling closeConnection multiple times should be safe and idempotent
+        MySQL.closeConnection();
+        MySQL.closeConnection();
     }
-
 }

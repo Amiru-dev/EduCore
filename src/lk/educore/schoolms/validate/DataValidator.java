@@ -259,6 +259,8 @@ public class DataValidator {
                 throw new ValidationException("Invalid date of birth", "dob", dob);
             }
             
+        } catch (ValidationException e) {
+            throw e;
         } catch (Exception e) {
             throw new ValidationException("Invalid date format (use YYYY-MM-DD)", "dob", dob);
         }

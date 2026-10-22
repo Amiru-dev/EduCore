@@ -293,8 +293,7 @@ public class FeeManagement extends JPanel {
             lblTotalPending.setText(df.format(pending));
             lblTotalOverdue.setText(df.format(overdue));
 
-            double totalFees = collected + pending + overdue;
-            double collectionRate = totalFees > 0 ? (collected / totalFees) * 100 : 0;
+            double collectionRate = lk.educore.schoolms.service.FeeService.calculateCollectionRate(collected, pending, overdue);
             lblCollectionRate.setText(String.format("%.1f%%", collectionRate));
 
             // Load fee type breakdown
