@@ -266,16 +266,13 @@ Contains build configuration with manifest attributes for JAR creation.
 ## Team Information
 
 ### Development Team
-- Sheshan Danuksha (Lead Developer)
-- Rashintha Jerom
-- Dulasha Perera
-- Dulangana Dhamsara
-- Yomal Kavinda
-- Amiru Upek
+- Amiru Upek (Lead Developer)
+- Amaya Y.G.N. 
+- Sandeni Nisadara 
 
 ### Contact
-- Email: sheshandanuksha19@gmail.com
-- Support: sheshandanuksha19@gmail.com
+- Email: amirupekw@gmail.com
+- Support: amirupekw@gmail.com
 
 ## License
 Proprietary - Copyright (C) 2025 EduCore Software. All rights reserved.
