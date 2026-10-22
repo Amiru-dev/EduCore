@@ -29,17 +29,14 @@ public class ExamResultAndFeeRecordTest {
         ExamResult resDistinction = new ExamResult(1, 10, "STU-0001", "Mathematics", 85.0, 100.0);
         assertEquals("A", resDistinction.getGradeLetter());
         assertEquals(85.0, resDistinction.calculatePercentage(), 0.001);
-        assertEquals(4.0, resDistinction.getGradePoint(), 0.001);
         assertTrue(resDistinction.isPassed());
 
         ExamResult resCredit = new ExamResult(2, 10, "STU-0002", "Mathematics", 55.0, 100.0);
         assertEquals("C", resCredit.getGradeLetter());
-        assertEquals(2.0, resCredit.getGradePoint(), 0.001);
         assertTrue(resCredit.isPassed());
 
         ExamResult resFail = new ExamResult(3, 10, "STU-0003", "Mathematics", 25.0, 100.0);
         assertEquals("W", resFail.getGradeLetter());
-        assertEquals(0.0, resFail.getGradePoint(), 0.001);
         assertFalse(resFail.isPassed());
     }
 

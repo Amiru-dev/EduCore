@@ -46,10 +46,6 @@ public class ExamResult {
         this.gradeLetter = AcademicService.calculateGrade(marksObtained, maxMarks);
     }
 
-    public double getGradePoint() {
-        return AcademicService.calculateGradePoint(gradeLetter);
-    }
-
     public boolean isPassed() {
         return AcademicService.isPassingGrade(gradeLetter);
     }

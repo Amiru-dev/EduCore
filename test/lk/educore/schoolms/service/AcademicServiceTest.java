@@ -1,11 +1,9 @@
 package lk.educore.schoolms.service;
 
-import lk.educore.schoolms.exceptions.BusinessException;
 import lk.educore.schoolms.exceptions.ValidationException;
 import org.junit.Test;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -13,7 +11,7 @@ import static org.junit.Assert.*;
 
 /**
  * Unit tests for AcademicService business logic.
- * Tests grading scales, boundaries, GPA, pass rates, and class statistics.
+ * Tests grading scales, boundaries, pass rates, honors, and class statistics.
  *
  * @author EduCore Software Team
  * @version 1.0.0
@@ -78,18 +76,6 @@ public class AcademicServiceTest {
     }
 
     @Test
-    public void testCalculateGradePoint() {
-        assertEquals(4.0, AcademicService.calculateGradePoint("A"), 0.001);
-        assertEquals(4.0, AcademicService.calculateGradePoint("a"), 0.001);
-        assertEquals(3.0, AcademicService.calculateGradePoint("B"), 0.001);
-        assertEquals(2.0, AcademicService.calculateGradePoint("C"), 0.001);
-        assertEquals(1.0, AcademicService.calculateGradePoint("S"), 0.001);
-        assertEquals(0.0, AcademicService.calculateGradePoint("W"), 0.001);
-        assertEquals(0.0, AcademicService.calculateGradePoint(null), 0.001);
-        assertEquals(0.0, AcademicService.calculateGradePoint("Invalid"), 0.001);
-    }
-
-    @Test
     public void testIsPassingGrade() {
         assertTrue(AcademicService.isPassingGrade("A"));
         assertTrue(AcademicService.isPassingGrade("B"));
@@ -99,36 +85,6 @@ public class AcademicServiceTest {
         assertFalse(AcademicService.isPassingGrade(null));
         assertFalse(AcademicService.isPassingGrade(""));
         assertFalse(AcademicService.isPassingGrade("F"));
-    }
-
-    @Test
-    public void testCalculateGPA() {
-        List<String> grades = Arrays.asList("A", "B", "C"); // (4.0 + 3.0 + 2.0) / 3 = 3.0
-        assertEquals(3.0, AcademicService.calculateGPA(grades), 0.01);
-
-        List<String> allA = Arrays.asList("A", "A", "A", "A");
-        assertEquals(4.0, AcademicService.calculateGPA(allA), 0.01);
-
-        List<String> mixed = Arrays.asList("A", "S", "W"); // (4.0 + 1.0 + 0.0) / 3 = 1.67
-        assertEquals(1.67, AcademicService.calculateGPA(mixed), 0.01);
-
-        assertEquals(0.0, AcademicService.calculateGPA(Collections.emptyList()), 0.01);
-        assertEquals(0.0, AcademicService.calculateGPA(null), 0.01);
-    }
-
-    @Test
-    public void testCalculateWeightedGPA() throws BusinessException {
-        List<Double> points = Arrays.asList(4.0, 3.0); // A and B
-        List<Double> credits = Arrays.asList(3.0, 1.0); // 3 credits and 1 credit
-        // Total points: (4*3) + (3*1) = 15; Total credits = 4. GPA = 15 / 4 = 3.75
-        assertEquals(3.75, AcademicService.calculateWeightedGPA(points, credits), 0.01);
-
-        assertEquals(0.0, AcademicService.calculateWeightedGPA(Collections.emptyList(), Collections.emptyList()), 0.01);
-    }
-
-    @Test(expected = BusinessException.class)
-    public void testCalculateWeightedGPA_MismatchedLists() throws BusinessException {
-        AcademicService.calculateWeightedGPA(Arrays.asList(4.0, 3.0), Collections.singletonList(3.0));
     }
 
     @Test
@@ -159,11 +115,11 @@ public class AcademicServiceTest {
 
     @Test
     public void testIsHonorsEligible() {
-        assertTrue(AcademicService.isHonorsEligible(3.70));
-        assertTrue(AcademicService.isHonorsEligible(3.95));
-        assertTrue(AcademicService.isHonorsEligible(4.0));
-        assertFalse(AcademicService.isHonorsEligible(3.69));
-        assertFalse(AcademicService.isHonorsEligible(2.50));
+        assertTrue(AcademicService.isHonorsEligible(75.0));
+        assertTrue(AcademicService.isHonorsEligible(85.5));
+        assertTrue(AcademicService.isHonorsEligible(100.0));
+        assertFalse(AcademicService.isHonorsEligible(74.9));
+        assertFalse(AcademicService.isHonorsEligible(50.0));
     }
 
     @Test

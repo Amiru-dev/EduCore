@@ -10,7 +10,7 @@ import java.sql.*;
 
 /**
  * Academic Performance Panel
- * Subject-wise analysis, student performance tracking, and GPA charts
+ * Subject-wise analysis, student performance tracking, and academic reports
  */
 public class AcademicPerformance extends JPanel {
 
@@ -63,7 +63,7 @@ public class AcademicPerformance extends JPanel {
 
         // Table
         tableModel = new DefaultTableModel(
-            new Object[]{"Student ID", "Student Name", "Subject", "Exam", "Marks", "Grade", "GPA"}, 0
+            new Object[]{"Student ID", "Student Name", "Subject", "Exam", "Marks", "Grade"}, 0
         ) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -131,7 +131,7 @@ public class AcademicPerformance extends JPanel {
                 double marks = rs.getDouble("marks_obtained");
                 String grade = rs.getString("grade_letter");
                 
-                tableModel.addRow(new Object[]{studentId, studentName, subject, exam, marks, grade, "N/A"});
+                tableModel.addRow(new Object[]{studentId, studentName, subject, exam, marks, grade});
             }
             
             rs.close();
@@ -176,7 +176,7 @@ public class AcademicPerformance extends JPanel {
                 double marks = rs.getDouble("marks_obtained");
                 String gradeLetter = rs.getString("grade_letter");
                 
-                tableModel.addRow(new Object[]{studentId, studentName, sub, exam, marks, gradeLetter, "N/A"});
+                tableModel.addRow(new Object[]{studentId, studentName, sub, exam, marks, gradeLetter});
             }
             
             rs.close();
