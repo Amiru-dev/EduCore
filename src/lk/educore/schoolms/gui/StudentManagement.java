@@ -1,6 +1,7 @@
 package lk.educore.schoolms.gui;
 
 import lk.educore.schoolms.model.MySQL;
+import lk.educore.schoolms.model.UserSession;
 import lk.educore.schoolms.validate.JOptionIcon;
 
 import javax.swing.*;
@@ -122,6 +123,12 @@ public class StudentManagement extends JPanel {
         buttonPanel.add(btnAttendance);
         buttonPanel.add(btnQRCode);
 
+        if (UserSession.get() != null && UserSession.get().isTeacher()) {
+            btnAdd.setVisible(false);
+            btnEdit.setVisible(false);
+            btnDelete.setVisible(false);
+        }
+
         panel.add(buttonPanel, BorderLayout.NORTH);
 
         // Table
@@ -185,12 +192,18 @@ public class StudentManagement extends JPanel {
         ActionListener loadAction = e -> {
             try {
                 attendanceModel.setRowCount(0);
-                ResultSet rs = MySQL.executeSearch("SELECT a.attendance_id, a.student_id, "
+                String attQuery = "SELECT a.attendance_id, a.student_id, "
                         + "CONCAT(s.first_name, ' ', s.last_name) as name, "
                         + "a.attendance_date, a.status, a.check_in_time, a.check_out_time "
                         + "FROM student_attendance a "
-                        + "INNER JOIN student s ON a.student_id = s.student_id "
-                        + "ORDER BY a.attendance_date DESC LIMIT 100");
+                        + "INNER JOIN student s ON a.student_id = s.student_id ";
+                if (UserSession.get() != null && UserSession.get().isTeacher()) {
+                    attQuery += "INNER JOIN teacher_class tc ON s.grade_id = tc.grade_id "
+                             + "WHERE tc.teacher_NIC = '" + UserSession.get().getTeacherNIC() + "' ";
+                }
+                attQuery += "ORDER BY a.attendance_date DESC LIMIT 100";
+
+                ResultSet rs = MySQL.executeSearch(attQuery);
 
                 while (rs.next()) {
                     attendanceModel.addRow(new Object[]{
@@ -243,7 +256,11 @@ public class StudentManagement extends JPanel {
         
         ActionListener loadAction = e -> {
             try {
-                ResultSet rs = MySQL.executeSearch("SELECT COUNT(*) as total, SUM(IF(is_active=1, 1, 0)) as active, SUM(IF(gender='Male', 1, 0)) as male, SUM(IF(gender='Female', 1, 0)) as female FROM student");
+                String chartQuery = "SELECT COUNT(*) as total, SUM(IF(s.is_active=1, 1, 0)) as active, SUM(IF(s.gender='Male', 1, 0)) as male, SUM(IF(s.gender='Female', 1, 0)) as female FROM student s";
+                if (UserSession.get() != null && UserSession.get().isTeacher()) {
+                    chartQuery += " JOIN teacher_class tc ON s.grade_id = tc.grade_id WHERE tc.teacher_NIC = '" + UserSession.get().getTeacherNIC() + "'";
+                }
+                ResultSet rs = MySQL.executeSearch(chartQuery);
                 if (rs.next()) {
                     ((JLabel) cardTotal.getComponent(1)).setText(rs.getString("total") == null ? "0" : rs.getString("total"));
                     ((JLabel) cardActive.getComponent(1)).setText(rs.getString("active") == null ? "0" : rs.getString("active"));
@@ -288,10 +305,16 @@ public class StudentManagement extends JPanel {
         try {
             tableModel.setRowCount(0);
 
-            ResultSet rs = MySQL.executeSearch("SELECT s.student_id, s.first_name, s.last_name, g.grade_name, s.nic, s.phone, s.email, s.is_active "
+            String query = "SELECT s.student_id, s.first_name, s.last_name, g.grade_name, s.nic, s.phone, s.email, s.is_active "
                     + "FROM student s "
-                    + "JOIN grade g ON s.grade_id = g.grade_id "
-                    + "ORDER BY s.student_id");
+                    + "JOIN grade g ON s.grade_id = g.grade_id ";
+            if (UserSession.get() != null && UserSession.get().isTeacher()) {
+                query += "JOIN teacher_class tc ON s.grade_id = tc.grade_id "
+                       + "WHERE tc.teacher_NIC = '" + UserSession.get().getTeacherNIC() + "' ";
+            }
+            query += "ORDER BY s.student_id";
+
+            ResultSet rs = MySQL.executeSearch(query);
 
             while (rs.next()) {
                 String studentId = rs.getString("student_id");
@@ -324,6 +347,11 @@ public class StudentManagement extends JPanel {
 
             tableModel.setRowCount(0);
 
+            boolean isTeacher = UserSession.get() != null && UserSession.get().isTeacher();
+            String teacherJoin = isTeacher ? " JOIN teacher_class tc ON s.grade_id = tc.grade_id " : "";
+            String teacherFilter = isTeacher ? " AND tc.teacher_NIC = '" + UserSession.get().getTeacherNIC() + "' " : "";
+            String teacherWhere = isTeacher ? " WHERE tc.teacher_NIC = '" + UserSession.get().getTeacherNIC() + "' " : "";
+
             String query;
 
             switch (searchBy) {
@@ -331,34 +359,44 @@ public class StudentManagement extends JPanel {
                     query = "SELECT s.student_id, s.first_name, s.last_name, g.grade_name, s.nic, s.phone, s.email, s.is_active "
                             + "FROM student s "
                             + "JOIN grade g ON s.grade_id = g.grade_id "
+                            + teacherJoin
                             + "WHERE s.student_id LIKE '%" + searchTerm + "%' "
+                            + teacherFilter
                             + "ORDER BY s.student_id";
                     break;
                 case "Name":
                     query = "SELECT s.student_id, s.first_name, s.last_name, g.grade_name, s.nic, s.phone, s.email, s.is_active "
                             + "FROM student s "
                             + "JOIN grade g ON s.grade_id = g.grade_id "
-                            + "WHERE s.first_name LIKE '%" + searchTerm + "%' OR s.last_name LIKE '%" + searchTerm + "%' "
+                            + teacherJoin
+                            + "WHERE (s.first_name LIKE '%" + searchTerm + "%' OR s.last_name LIKE '%" + searchTerm + "%') "
+                            + teacherFilter
                             + "ORDER BY s.student_id";
                     break;
                 case "NIC":
                     query = "SELECT s.student_id, s.first_name, s.last_name, g.grade_name, s.nic, s.phone, s.email, s.is_active "
                             + "FROM student s "
                             + "JOIN grade g ON s.grade_id = g.grade_id "
+                            + teacherJoin
                             + "WHERE s.nic LIKE '%" + searchTerm + "%' "
+                            + teacherFilter
                             + "ORDER BY s.student_id";
                     break;
                 case "Grade":
                     query = "SELECT s.student_id, s.first_name, s.last_name, g.grade_name, s.nic, s.phone, s.email, s.is_active "
                             + "FROM student s "
                             + "JOIN grade g ON s.grade_id = g.grade_id "
+                            + teacherJoin
                             + "WHERE g.grade_name LIKE '%" + searchTerm + "%' "
+                            + teacherFilter
                             + "ORDER BY s.student_id";
                     break;
                 default:
                     query = "SELECT s.student_id, s.first_name, s.last_name, g.grade_name, s.nic, s.phone, s.email, s.is_active "
                             + "FROM student s "
                             + "JOIN grade g ON s.grade_id = g.grade_id "
+                            + teacherJoin
+                            + teacherWhere
                             + "ORDER BY s.student_id";
             }
 

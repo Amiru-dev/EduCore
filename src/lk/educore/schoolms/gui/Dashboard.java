@@ -2,6 +2,7 @@ package lk.educore.schoolms.gui;
 
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import lk.educore.schoolms.model.SendLogo;
+import lk.educore.schoolms.model.UserSession;
 import lk.educore.schoolms.validate.JOptionIcon;
 
 import javax.swing.*;
@@ -114,36 +115,52 @@ public class Dashboard extends JFrame {
         List<String> iconBasesList = new ArrayList<>();
         List<Integer> indexMapping = new ArrayList<>();
 
-        // 0: Dashboard
-        navItemsList.add("Dashboard"); iconBasesList.add("dashboard"); indexMapping.add(0);
-        // 1: Students
-        navItemsList.add("Students"); iconBasesList.add("students"); indexMapping.add(1);
-        
-        if ("Admin".equals(role)) {
+        boolean isTeacherRole = "Teacher".equalsIgnoreCase(role) || 
+                                (UserSession.get() != null && UserSession.get().isTeacher());
+
+        if (isTeacherRole) {
+            // Teacher navigation structure
+            // 0: Dashboard
+            navItemsList.add("Dashboard"); iconBasesList.add("dashboard"); indexMapping.add(0);
+            // 11: My Profile
+            navItemsList.add("My Profile"); iconBasesList.add("teachers"); indexMapping.add(11);
+            // 1: My Classes
+            navItemsList.add("My Classes"); iconBasesList.add("students"); indexMapping.add(1);
+            // 4: Exams & Marks
+            navItemsList.add("Exams & Marks"); iconBasesList.add("exams"); indexMapping.add(4);
+            // 6: Academic
+            navItemsList.add("Academic"); iconBasesList.add("academic"); indexMapping.add(6);
+            // 12: My Attendance
+            navItemsList.add("My Attendance"); iconBasesList.add("events"); indexMapping.add(12);
+            // 13: My Leaves
+            navItemsList.add("My Leaves"); iconBasesList.add("teachers"); indexMapping.add(13);
+            // 8: Events
+            navItemsList.add("Events"); iconBasesList.add("events"); indexMapping.add(8);
+            // 10: Library
+            navItemsList.add("Library"); iconBasesList.add("library"); indexMapping.add(10);
+        } else {
+            // Admin (and other roles) navigation structure
+            // 0: Dashboard
+            navItemsList.add("Dashboard"); iconBasesList.add("dashboard"); indexMapping.add(0);
+            // 1: Students
+            navItemsList.add("Students"); iconBasesList.add("students"); indexMapping.add(1);
             // 2: Teachers
             navItemsList.add("Teachers"); iconBasesList.add("teachers"); indexMapping.add(2);
             // 3: Fees
             navItemsList.add("Fees"); iconBasesList.add("fees"); indexMapping.add(3);
-        }
-        
-        // 4: Exams
-        navItemsList.add("Exams"); iconBasesList.add("exams"); indexMapping.add(4);
-
-        
-        // 6: Academic
-        navItemsList.add("Academic"); iconBasesList.add("academic"); indexMapping.add(6);
-        
-        if ("Admin".equals(role)) {
+            // 4: Exams
+            navItemsList.add("Exams"); iconBasesList.add("exams"); indexMapping.add(4);
+            // 6: Academic
+            navItemsList.add("Academic"); iconBasesList.add("academic"); indexMapping.add(6);
             // 7: Finance
             navItemsList.add("Finance"); iconBasesList.add("finance"); indexMapping.add(7);
+            // 8: Events
+            navItemsList.add("Events"); iconBasesList.add("events"); indexMapping.add(8);
+            // 9: Guardians
+            navItemsList.add("Guardians"); iconBasesList.add("guardians"); indexMapping.add(9);
+            // 10: Library
+            navItemsList.add("Library"); iconBasesList.add("library"); indexMapping.add(10);
         }
-        
-        // 8: Events
-        navItemsList.add("Events"); iconBasesList.add("events"); indexMapping.add(8);
-        // 9: Guardians
-        navItemsList.add("Guardians"); iconBasesList.add("guardians"); indexMapping.add(9);
-        // 10: Library
-        navItemsList.add("Library"); iconBasesList.add("library"); indexMapping.add(10);
 
         JPanel navPanel = new JPanel(new GridLayout(navItemsList.size(), 1, 0, 2));
         navPanel.setBackground(new Color(44, 62, 80));
@@ -268,7 +285,7 @@ public class Dashboard extends JFrame {
             case 0: // Dashboard
                 contentPanel.add(new DashboardPanel(role), BorderLayout.CENTER);
                 break;
-            case 1: // Students
+            case 1: // Students / My Classes
                 contentPanel.add(new StudentManagement(), BorderLayout.CENTER);
                 break;
             case 2: // Teachers
@@ -280,7 +297,6 @@ public class Dashboard extends JFrame {
             case 4: // Exams
                 contentPanel.add(new ExamManagement(), BorderLayout.CENTER);
                 break;
-
             case 6: // Academic
                 contentPanel.add(new AcademicPerformance(), BorderLayout.CENTER);
                 break;
@@ -296,6 +312,15 @@ public class Dashboard extends JFrame {
             case 10: // Library
                 contentPanel.add(new LibraryManagement(), BorderLayout.CENTER);
                 break;
+            case 11: // My Profile (Teacher self-service)
+                contentPanel.add(new MyProfilePanel(), BorderLayout.CENTER);
+                break;
+            case 12: // My Attendance (Teacher self-service)
+                contentPanel.add(new MyAttendancePanel(), BorderLayout.CENTER);
+                break;
+            case 13: // My Leaves (Teacher self-service)
+                contentPanel.add(new MyLeavePanel(), BorderLayout.CENTER);
+                break;
         }
 
         contentPanel.revalidate();
@@ -305,6 +330,7 @@ public class Dashboard extends JFrame {
     private void handleLogout() {
         int confirm = JOptionIcon.showConfirmDialog(this, "Are you sure you want to logout?");
         if (confirm == JOptionPane.YES_OPTION) {
+            UserSession.clear();
             dispose();
             new SignIn().setVisible(true);
         }
@@ -342,8 +368,11 @@ public class Dashboard extends JFrame {
             System.exit(0);
         });
         
-        fileMenu.add(setupDatabaseMenu);
-        fileMenu.add(backupMenu);
+        boolean isAdmin = "Admin".equals(role) || (UserSession.get() != null && UserSession.get().isAdmin());
+        if (isAdmin) {
+            fileMenu.add(setupDatabaseMenu);
+            fileMenu.add(backupMenu);
+        }
         fileMenu.add(logOutMenu);
         fileMenu.add(exitMenu);
         
@@ -352,17 +381,21 @@ public class Dashboard extends JFrame {
         
         JMenuItem updateLogoMenu = new JMenuItem("Update Logo");
         updateLogoMenu.addActionListener(e -> {
-            if ("Admin".equals(role)) {
+            if (isAdmin) {
                 updateLogo();
             } else {
                 JOptionIcon.showWarningDialog(this, "Access blocked for role: " + role);
             }
         });
         
-        editMenu.add(updateLogoMenu);
+        if (isAdmin) {
+            editMenu.add(updateLogoMenu);
+        }
         
         menuBar.add(fileMenu);
-        menuBar.add(editMenu);
+        if (isAdmin) {
+            menuBar.add(editMenu);
+        }
         
         return menuBar;
     }

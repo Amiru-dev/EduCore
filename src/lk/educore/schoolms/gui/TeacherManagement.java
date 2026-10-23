@@ -61,6 +61,10 @@ public class TeacherManagement extends JPanel {
         JPanel chartsPanel = createChartsPanel();
         tabbedPane.addTab("Analytics", chartsPanel);
 
+        // Class & Subject Assignment Tab (Phase 1.3 Admin UI)
+        JPanel assignmentPanel = createAssignmentPanel();
+        tabbedPane.addTab("Assignments", assignmentPanel);
+
         add(tabbedPane, BorderLayout.CENTER);
     }
 
@@ -724,5 +728,311 @@ public class TeacherManagement extends JPanel {
         } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error generating QR code: " + e.getMessage());
         }
+    }
+
+    private JPanel createAssignmentPanel() {
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Top bar for selecting a teacher
+        JPanel topBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        topBar.add(new JLabel("Select Teacher:"));
+
+        JComboBox<String> cmbTeacher = new JComboBox<>();
+        cmbTeacher.setPreferredSize(new Dimension(280, 28));
+        topBar.add(cmbTeacher);
+
+        JButton btnRefreshTeachers = new JButton("Refresh");
+        topBar.add(btnRefreshTeachers);
+        panel.add(topBar, BorderLayout.NORTH);
+
+        // Split container: Left = Class Assignments, Right = Subject Assignments
+        JPanel splitContainer = new JPanel(new GridLayout(1, 2, 10, 10));
+
+        // --- Left: Class Assignments Panel ---
+        JPanel classPanel = new JPanel(new BorderLayout(5, 5));
+        classPanel.setBorder(BorderFactory.createTitledBorder("Assigned Classes (teacher_class)"));
+
+        DefaultTableModel classModel = new DefaultTableModel(
+                new Object[]{"ID", "Grade", "Class Teacher?", "Year"}, 0
+        ) {
+            @Override
+            public boolean isCellEditable(int row, int col) { return false; }
+        };
+        JTable classTable = new JTable(classModel);
+        classTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        classTable.setRowHeight(24);
+        classPanel.add(new JScrollPane(classTable), BorderLayout.CENTER);
+
+        // Class Controls
+        JPanel classControlPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
+        JComboBox<String> cmbClassGrade = new JComboBox<>();
+        JCheckBox chkClassTeacher = new JCheckBox("Class Teacher");
+        JSpinner spinClassYear = new JSpinner(new SpinnerNumberModel(2026, 2020, 2050, 1));
+        JButton btnAssignClass = new JButton("Assign Class");
+        JButton btnRemoveClass = new JButton("Remove Selected");
+        btnRemoveClass.setForeground(new Color(220, 53, 69));
+
+        classControlPanel.add(new JLabel("Grade:"));
+        classControlPanel.add(cmbClassGrade);
+        classControlPanel.add(chkClassTeacher);
+        classControlPanel.add(new JLabel("Year:"));
+        classControlPanel.add(spinClassYear);
+        classControlPanel.add(btnAssignClass);
+        classControlPanel.add(btnRemoveClass);
+        classPanel.add(classControlPanel, BorderLayout.SOUTH);
+
+        // --- Right: Subject Assignments Panel ---
+        JPanel subjectPanel = new JPanel(new BorderLayout(5, 5));
+        subjectPanel.setBorder(BorderFactory.createTitledBorder("Assigned Subjects (teacher_subject)"));
+
+        DefaultTableModel subjectModel = new DefaultTableModel(
+                new Object[]{"ID", "Grade", "Subject", "Year"}, 0
+        ) {
+            @Override
+            public boolean isCellEditable(int row, int col) { return false; }
+        };
+        JTable subjectTable = new JTable(subjectModel);
+        subjectTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        subjectTable.setRowHeight(24);
+        subjectPanel.add(new JScrollPane(subjectTable), BorderLayout.CENTER);
+
+        // Subject Controls
+        JPanel subControlPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
+        JComboBox<String> cmbSubGrade = new JComboBox<>();
+        JComboBox<String> cmbSubSubject = new JComboBox<>();
+        JSpinner spinSubYear = new JSpinner(new SpinnerNumberModel(2026, 2020, 2050, 1));
+        JButton btnAssignSub = new JButton("Assign Subject");
+        JButton btnRemoveSub = new JButton("Remove Selected");
+        btnRemoveSub.setForeground(new Color(220, 53, 69));
+
+        subControlPanel.add(new JLabel("Grade:"));
+        subControlPanel.add(cmbSubGrade);
+        subControlPanel.add(new JLabel("Subject:"));
+        subControlPanel.add(cmbSubSubject);
+        subControlPanel.add(new JLabel("Year:"));
+        subControlPanel.add(spinSubYear);
+        subControlPanel.add(btnAssignSub);
+        subControlPanel.add(btnRemoveSub);
+        subjectPanel.add(subControlPanel, BorderLayout.SOUTH);
+
+        splitContainer.add(classPanel);
+        splitContainer.add(subjectPanel);
+        panel.add(splitContainer, BorderLayout.CENTER);
+
+        // Helper: get selected teacher NIC
+        java.util.function.Supplier<String> getSelectedNIC = () -> {
+            String sel = (String) cmbTeacher.getSelectedItem();
+            if (sel == null || !sel.contains(" - ")) return null;
+            return sel.split(" - ")[0].trim();
+        };
+
+        // Load tables
+        Runnable reloadAssignments = () -> {
+            String nic = getSelectedNIC.get();
+            classModel.setRowCount(0);
+            subjectModel.setRowCount(0);
+            if (nic == null) return;
+
+            try {
+                // Load classes
+                ResultSet rsClass = MySQL.executeSearch(
+                        "SELECT tc.id, g.grade_name, tc.is_class_teacher, tc.academic_year "
+                        + "FROM teacher_class tc JOIN grade g ON tc.grade_id = g.grade_id "
+                        + "WHERE tc.teacher_NIC = '" + nic + "' ORDER BY tc.academic_year DESC, g.grade_name"
+                );
+                while (rsClass.next()) {
+                    classModel.addRow(new Object[]{
+                        rsClass.getInt("id"),
+                        rsClass.getString("grade_name"),
+                        rsClass.getBoolean("is_class_teacher") ? "Yes" : "No",
+                        rsClass.getInt("academic_year")
+                    });
+                }
+                rsClass.close();
+
+                // Load subjects
+                ResultSet rsSub = MySQL.executeSearch(
+                        "SELECT ts.id, g.grade_name, s.subject_name, ts.academic_year "
+                        + "FROM teacher_subject ts "
+                        + "JOIN grade g ON ts.grade_id = g.grade_id "
+                        + "JOIN subject s ON ts.subject_id = s.subject_id "
+                        + "WHERE ts.teacher_NIC = '" + nic + "' ORDER BY ts.academic_year DESC, g.grade_name, s.subject_name"
+                );
+                while (rsSub.next()) {
+                    subjectModel.addRow(new Object[]{
+                        rsSub.getInt("id"),
+                        rsSub.getString("grade_name"),
+                        rsSub.getString("subject_name"),
+                        rsSub.getInt("academic_year")
+                    });
+                }
+                rsSub.close();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        };
+
+        // Load teacher dropdown
+        Runnable reloadTeacherDropdown = () -> {
+            cmbTeacher.removeAllItems();
+            try {
+                ResultSet rs = MySQL.executeSearch("SELECT NIC, first_name, last_name FROM teacher ORDER BY first_name, last_name");
+                while (rs.next()) {
+                    cmbTeacher.addItem(rs.getString("NIC") + " - " + rs.getString("first_name") + " " + rs.getString("last_name"));
+                }
+                rs.close();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        };
+
+        // Load grades & subjects dropdowns
+        Runnable reloadGradeSubjectDropdowns = () -> {
+            cmbClassGrade.removeAllItems();
+            cmbSubGrade.removeAllItems();
+            cmbSubSubject.removeAllItems();
+            try {
+                ResultSet rsG = MySQL.executeSearch("SELECT grade_name FROM grade ORDER BY grade_name");
+                while (rsG.next()) {
+                    String g = rsG.getString("grade_name");
+                    cmbClassGrade.addItem(g);
+                    cmbSubGrade.addItem(g);
+                }
+                rsG.close();
+
+                ResultSet rsS = MySQL.executeSearch("SELECT subject_name FROM subject ORDER BY subject_name");
+                while (rsS.next()) {
+                    cmbSubSubject.addItem(rsS.getString("subject_name"));
+                }
+                rsS.close();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        };
+
+        cmbTeacher.addActionListener(e -> reloadAssignments.run());
+        btnRefreshTeachers.addActionListener(e -> {
+            reloadTeacherDropdown.run();
+            reloadGradeSubjectDropdowns.run();
+            reloadAssignments.run();
+        });
+
+        // Assign Class Action
+        btnAssignClass.addActionListener(e -> {
+            String nic = getSelectedNIC.get();
+            String grade = (String) cmbClassGrade.getSelectedItem();
+            if (nic == null || grade == null) {
+                JOptionIcon.showWarningDialog(this, "Please select both a Teacher and a Grade.");
+                return;
+            }
+            int year = (Integer) spinClassYear.getValue();
+            boolean isClassTeacher = chkClassTeacher.isSelected();
+
+            try {
+                ResultSet rs = MySQL.executeSearch("SELECT grade_id FROM grade WHERE grade_name = '" + grade + "'");
+                if (rs.next()) {
+                    int gradeId = rs.getInt("grade_id");
+                    rs.close();
+
+                    MySQL.executeIUD(
+                            "INSERT INTO teacher_class (teacher_NIC, grade_id, is_class_teacher, academic_year) "
+                            + "VALUES ('" + nic + "', " + gradeId + ", " + (isClassTeacher ? 1 : 0) + ", " + year + ") "
+                            + "ON DUPLICATE KEY UPDATE is_class_teacher = VALUES(is_class_teacher)"
+                    );
+                    JOptionIcon.showSuccessDialog(this, "Class assigned successfully!");
+                    reloadAssignments.run();
+                } else {
+                    rs.close();
+                }
+            } catch (Exception ex) {
+                JOptionIcon.showErrorDialog(this, "Error assigning class: " + ex.getMessage());
+            }
+        });
+
+        // Remove Class Action
+        btnRemoveClass.addActionListener(e -> {
+            int row = classTable.getSelectedRow();
+            if (row == -1) {
+                JOptionIcon.showWarningDialog(this, "Please select a class assignment to remove.");
+                return;
+            }
+            int id = (Integer) classModel.getValueAt(row, 0);
+            int confirm = JOptionPane.showConfirmDialog(this, "Remove this class assignment?", "Confirm", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                try {
+                    MySQL.executeIUD("DELETE FROM teacher_class WHERE id = " + id);
+                    JOptionIcon.showSuccessDialog(this, "Assignment removed.");
+                    reloadAssignments.run();
+                } catch (Exception ex) {
+                    JOptionIcon.showErrorDialog(this, "Error removing class assignment: " + ex.getMessage());
+                }
+            }
+        });
+
+        // Assign Subject Action
+        btnAssignSub.addActionListener(e -> {
+            String nic = getSelectedNIC.get();
+            String grade = (String) cmbSubGrade.getSelectedItem();
+            String subject = (String) cmbSubSubject.getSelectedItem();
+            if (nic == null || grade == null || subject == null) {
+                JOptionIcon.showWarningDialog(this, "Please select Teacher, Grade, and Subject.");
+                return;
+            }
+            int year = (Integer) spinSubYear.getValue();
+
+            try {
+                int gradeId = -1;
+                ResultSet rsG = MySQL.executeSearch("SELECT grade_id FROM grade WHERE grade_name = '" + grade + "'");
+                if (rsG.next()) gradeId = rsG.getInt("grade_id");
+                rsG.close();
+
+                int subjectId = -1;
+                ResultSet rsS = MySQL.executeSearch("SELECT subject_id FROM subject WHERE subject_name = '" + subject + "'");
+                if (rsS.next()) subjectId = rsS.getInt("subject_id");
+                rsS.close();
+
+                if (gradeId != -1 && subjectId != -1) {
+                    MySQL.executeIUD(
+                            "INSERT INTO teacher_subject (teacher_NIC, subject_id, grade_id, academic_year) "
+                            + "VALUES ('" + nic + "', " + subjectId + ", " + gradeId + ", " + year + ") "
+                            + "ON DUPLICATE KEY UPDATE academic_year = VALUES(academic_year)"
+                    );
+                    JOptionIcon.showSuccessDialog(this, "Subject assigned successfully!");
+                    reloadAssignments.run();
+                }
+            } catch (Exception ex) {
+                JOptionIcon.showErrorDialog(this, "Error assigning subject: " + ex.getMessage());
+            }
+        });
+
+        // Remove Subject Action
+        btnRemoveSub.addActionListener(e -> {
+            int row = subjectTable.getSelectedRow();
+            if (row == -1) {
+                JOptionIcon.showWarningDialog(this, "Please select a subject assignment to remove.");
+                return;
+            }
+            int id = (Integer) subjectModel.getValueAt(row, 0);
+            int confirm = JOptionPane.showConfirmDialog(this, "Remove this subject assignment?", "Confirm", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                try {
+                    MySQL.executeIUD("DELETE FROM teacher_subject WHERE id = " + id);
+                    JOptionIcon.showSuccessDialog(this, "Assignment removed.");
+                    reloadAssignments.run();
+                } catch (Exception ex) {
+                    JOptionIcon.showErrorDialog(this, "Error removing subject assignment: " + ex.getMessage());
+                }
+            }
+        });
+
+        // Initial populate
+        SwingUtilities.invokeLater(() -> {
+            reloadTeacherDropdown.run();
+            reloadGradeSubjectDropdowns.run();
+            reloadAssignments.run();
+        });
+
+        return panel;
     }
 }

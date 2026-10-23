@@ -22,6 +22,8 @@ DROP TABLE IF EXISTS fee;
 DROP TABLE IF EXISTS result;
 DROP TABLE IF EXISTS exam;
 DROP TABLE IF EXISTS subject;
+DROP TABLE IF EXISTS teacher_subject;
+DROP TABLE IF EXISTS teacher_class;
 DROP TABLE IF EXISTS teacher_leave;
 DROP TABLE IF EXISTS teacher_attendance;
 DROP TABLE IF EXISTS teacher;
@@ -258,6 +260,43 @@ CREATE TABLE IF NOT EXISTS teacher_leave (
     FOREIGN KEY (teacher_NIC) REFERENCES teacher(NIC) ON DELETE CASCADE,
     FOREIGN KEY (leave_type_id) REFERENCES leave_type(leave_type_id) ON DELETE CASCADE
 );
+
+-- ============================================
+-- TEACHER ↔ CLASS / SUBJECT ASSIGNMENT TABLES
+-- ============================================
+
+-- Teacher ↔ Class assignment (which grades a teacher is responsible for)
+CREATE TABLE IF NOT EXISTS teacher_class (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    teacher_NIC VARCHAR(20) NOT NULL,
+    grade_id INT NOT NULL,
+    is_class_teacher BOOLEAN DEFAULT FALSE,
+    academic_year INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (teacher_NIC) REFERENCES teacher(NIC) ON DELETE CASCADE,
+    FOREIGN KEY (grade_id) REFERENCES grade(grade_id) ON DELETE CASCADE,
+    UNIQUE KEY unique_teacher_class (teacher_NIC, grade_id, academic_year)
+);
+
+CREATE INDEX idx_teacher_class_nic ON teacher_class(teacher_NIC);
+CREATE INDEX idx_teacher_class_grade ON teacher_class(grade_id);
+
+-- Teacher ↔ Subject assignment (which subjects a teacher teaches in a grade)
+CREATE TABLE IF NOT EXISTS teacher_subject (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    teacher_NIC VARCHAR(20) NOT NULL,
+    subject_id INT NOT NULL,
+    grade_id INT NOT NULL,
+    academic_year INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (teacher_NIC) REFERENCES teacher(NIC) ON DELETE CASCADE,
+    FOREIGN KEY (subject_id) REFERENCES subject(subject_id) ON DELETE CASCADE,
+    FOREIGN KEY (grade_id) REFERENCES grade(grade_id) ON DELETE CASCADE,
+    UNIQUE KEY unique_teacher_subject (teacher_NIC, subject_id, grade_id, academic_year)
+);
+
+CREATE INDEX idx_teacher_subject_nic ON teacher_subject(teacher_NIC);
+CREATE INDEX idx_teacher_subject_subject ON teacher_subject(subject_id);
 
 -- ============================================
 -- EXAM & RESULTS TABLES
@@ -541,6 +580,16 @@ INSERT IGNORE INTO student (student_id, first_name, last_name, dob, gender, nic,
 -- Insert sample teacher
 INSERT IGNORE INTO teacher (NIC, first_name, last_name, dob, gender, email, phone, address, teacher_type_id, username, password, salary, hire_date, status_id, user_id) VALUES 
 ('801234567V', 'Dr. Sarah', 'Smith', '1985-03-20', 'Female', 'sarah.smith@educore.com', '0771234569', '456 School Road, Anuradhapura', 1, 'teacher1', 'teacher123', 75000.00, '2020-01-15', 1, 2);
+
+-- Assign sample teacher to Grade 6A (class teacher) and Grade 6B
+INSERT IGNORE INTO teacher_class (teacher_NIC, grade_id, is_class_teacher, academic_year) VALUES 
+('801234567V', 1, TRUE, YEAR(CURDATE())),
+('801234567V', 2, FALSE, YEAR(CURDATE()));
+
+-- Assign sample teacher to teach Mathematics and Science in Grade 6
+INSERT IGNORE INTO teacher_subject (teacher_NIC, subject_id, grade_id, academic_year) VALUES 
+('801234567V', 1, 1, YEAR(CURDATE())),
+('801234567V', 2, 1, YEAR(CURDATE()));
 
 -- Insert sample subject
 INSERT IGNORE INTO subject (subject_name, grade_id, description) VALUES 

@@ -1,6 +1,7 @@
 package lk.educore.schoolms.gui;
 
 import lk.educore.schoolms.model.MySQL;
+import lk.educore.schoolms.model.UserSession;
 import lk.educore.schoolms.validate.JOptionIcon;
 
 import javax.swing.*;
@@ -112,6 +113,11 @@ public class ExamManagement extends JPanel {
         buttonPanel.add(btnPublishResults);
         buttonPanel.add(btnRefresh);
 
+        if (UserSession.get() != null && UserSession.get().isTeacher()) {
+            btnAddExam.setVisible(false);
+            btnPublishResults.setVisible(false);
+        }
+
         panel.add(buttonPanel, BorderLayout.NORTH);
 
         // Table
@@ -193,11 +199,17 @@ public class ExamManagement extends JPanel {
 
         // Load exams into dropdown
         try {
-            ResultSet rs = MySQL.executeSearch("SELECT e.exam_id, e.exam_name, sub.subject_name, g.grade_name " +
+            String cmbQuery = "SELECT e.exam_id, e.exam_name, sub.subject_name, g.grade_name " +
                     "FROM exam e " +
                     "JOIN subject sub ON e.subject_id = sub.subject_id " +
-                    "JOIN grade g ON e.grade_id = g.grade_id " +
-                    "ORDER BY e.exam_date DESC");
+                    "JOIN grade g ON e.grade_id = g.grade_id ";
+            if (UserSession.get() != null && UserSession.get().isTeacher()) {
+                cmbQuery += "JOIN teacher_subject ts ON e.subject_id = ts.subject_id AND e.grade_id = ts.grade_id " +
+                            "WHERE ts.teacher_NIC = '" + UserSession.get().getTeacherNIC() + "' ";
+            }
+            cmbQuery += "ORDER BY e.exam_date DESC";
+
+            ResultSet rs = MySQL.executeSearch(cmbQuery);
             while (rs.next()) {
                 String examInfo = rs.getString("exam_name") + " - " + rs.getString("subject_name") + " (" + rs.getString("grade_name") + ")";
                 cmbExam.addItem(examInfo);
@@ -434,11 +446,17 @@ public class ExamManagement extends JPanel {
 
         // Load exams into dropdown
         try {
-            ResultSet rs = MySQL.executeSearch("SELECT e.exam_id, e.exam_name, sub.subject_name, g.grade_name " +
+            String analyticsQuery = "SELECT e.exam_id, e.exam_name, sub.subject_name, g.grade_name " +
                     "FROM exam e " +
                     "JOIN subject sub ON e.subject_id = sub.subject_id " +
-                    "JOIN grade g ON e.grade_id = g.grade_id " +
-                    "ORDER BY e.exam_date DESC");
+                    "JOIN grade g ON e.grade_id = g.grade_id ";
+            if (UserSession.get() != null && UserSession.get().isTeacher()) {
+                analyticsQuery += "JOIN teacher_subject ts ON e.subject_id = ts.subject_id AND e.grade_id = ts.grade_id " +
+                                  "WHERE ts.teacher_NIC = '" + UserSession.get().getTeacherNIC() + "' ";
+            }
+            analyticsQuery += "ORDER BY e.exam_date DESC";
+
+            ResultSet rs = MySQL.executeSearch(analyticsQuery);
             while (rs.next()) {
                 String examInfo = rs.getString("exam_name") + " - " + rs.getString("subject_name") + " (" + rs.getString("grade_name") + ")";
                 cmbExam.addItem(examInfo);
@@ -565,13 +583,19 @@ public class ExamManagement extends JPanel {
         try {
             tableModel.setRowCount(0);
             
-            ResultSet rs = MySQL.executeSearch("SELECT e.exam_id, e.exam_name, sub.subject_name, g.grade_name, " +
+            String query = "SELECT e.exam_id, e.exam_name, sub.subject_name, g.grade_name, " +
                           "et.exam_type_name, e.exam_date, e.max_marks " +
                           "FROM exam e " +
                           "JOIN subject sub ON e.subject_id = sub.subject_id " +
                           "JOIN grade g ON e.grade_id = g.grade_id " +
-                          "JOIN exam_type et ON e.exam_type_id = et.exam_type_id " +
-                          "ORDER BY e.exam_date DESC");
+                          "JOIN exam_type et ON e.exam_type_id = et.exam_type_id ";
+            if (UserSession.get() != null && UserSession.get().isTeacher()) {
+                query += "JOIN teacher_subject ts ON e.subject_id = ts.subject_id AND e.grade_id = ts.grade_id " +
+                         "WHERE ts.teacher_NIC = '" + UserSession.get().getTeacherNIC() + "' ";
+            }
+            query += "ORDER BY e.exam_date DESC";
+
+            ResultSet rs = MySQL.executeSearch(query);
             
             while (rs.next()) {
                 int examId = rs.getInt("exam_id");
@@ -604,6 +628,11 @@ public class ExamManagement extends JPanel {
             
             tableModel.setRowCount(0);
             
+            boolean isTeacher = UserSession.get() != null && UserSession.get().isTeacher();
+            String teacherJoin = isTeacher ? "JOIN teacher_subject ts ON e.subject_id = ts.subject_id AND e.grade_id = ts.grade_id " : "";
+            String teacherFilter = isTeacher ? "AND ts.teacher_NIC = '" + UserSession.get().getTeacherNIC() + "' " : "";
+            String teacherWhere = isTeacher ? "WHERE ts.teacher_NIC = '" + UserSession.get().getTeacherNIC() + "' " : "";
+
             String query;
             
             switch (searchBy) {
@@ -614,7 +643,9 @@ public class ExamManagement extends JPanel {
                             "JOIN subject sub ON e.subject_id = sub.subject_id " +
                             "JOIN grade g ON e.grade_id = g.grade_id " +
                             "JOIN exam_type et ON e.exam_type_id = et.exam_type_id " +
+                            teacherJoin +
                             "WHERE e.exam_name LIKE '%" + searchTerm + "%' " +
+                            teacherFilter +
                             "ORDER BY e.exam_date DESC";
                     break;
                 case "Subject":
@@ -624,7 +655,9 @@ public class ExamManagement extends JPanel {
                             "JOIN subject sub ON e.subject_id = sub.subject_id " +
                             "JOIN grade g ON e.grade_id = g.grade_id " +
                             "JOIN exam_type et ON e.exam_type_id = et.exam_type_id " +
+                            teacherJoin +
                             "WHERE sub.subject_name LIKE '%" + searchTerm + "%' " +
+                            teacherFilter +
                             "ORDER BY e.exam_date DESC";
                     break;
                 case "Grade":
@@ -634,7 +667,9 @@ public class ExamManagement extends JPanel {
                             "JOIN subject sub ON e.subject_id = sub.subject_id " +
                             "JOIN grade g ON e.grade_id = g.grade_id " +
                             "JOIN exam_type et ON e.exam_type_id = et.exam_type_id " +
+                            teacherJoin +
                             "WHERE g.grade_name LIKE '%" + searchTerm + "%' " +
+                            teacherFilter +
                             "ORDER BY e.exam_date DESC";
                     break;
                 case "Exam Type":
@@ -644,7 +679,9 @@ public class ExamManagement extends JPanel {
                             "JOIN subject sub ON e.subject_id = sub.subject_id " +
                             "JOIN grade g ON e.grade_id = g.grade_id " +
                             "JOIN exam_type et ON e.exam_type_id = et.exam_type_id " +
+                            teacherJoin +
                             "WHERE et.exam_type_name LIKE '%" + searchTerm + "%' " +
+                            teacherFilter +
                             "ORDER BY e.exam_date DESC";
                     break;
                 default:
@@ -654,6 +691,8 @@ public class ExamManagement extends JPanel {
                             "JOIN subject sub ON e.subject_id = sub.subject_id " +
                             "JOIN grade g ON e.grade_id = g.grade_id " +
                             "JOIN exam_type et ON e.exam_type_id = et.exam_type_id " +
+                            teacherJoin +
+                            teacherWhere +
                             "ORDER BY e.exam_date DESC";
             }
             

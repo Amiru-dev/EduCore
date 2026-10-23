@@ -1,6 +1,7 @@
 package lk.educore.schoolms.gui;
 
 import lk.educore.schoolms.model.MySQL;
+import lk.educore.schoolms.model.UserSession;
 import lk.educore.schoolms.validate.JOptionIcon;
 
 import javax.swing.*;
@@ -82,7 +83,14 @@ public class AcademicPerformance extends JPanel {
 
     private void loadGrades() {
         try {
-            ResultSet rs = MySQL.executeSearch("SELECT DISTINCT grade_name FROM grade ORDER BY grade_name");
+            String query = "SELECT DISTINCT g.grade_name FROM grade g ";
+            if (UserSession.get() != null && UserSession.get().isTeacher()) {
+                query += "JOIN teacher_class tc ON g.grade_id = tc.grade_id " +
+                         "WHERE tc.teacher_NIC = '" + UserSession.get().getTeacherNIC() + "' ";
+            }
+            query += "ORDER BY g.grade_name";
+
+            ResultSet rs = MySQL.executeSearch(query);
             
             while (rs.next()) {
                 cmbGrade.addItem(rs.getString("grade_name"));
@@ -97,7 +105,14 @@ public class AcademicPerformance extends JPanel {
 
     private void loadSubjects() {
         try {
-            ResultSet rs = MySQL.executeSearch("SELECT DISTINCT subject_name FROM subject ORDER BY subject_name");
+            String query = "SELECT DISTINCT s.subject_name FROM subject s ";
+            if (UserSession.get() != null && UserSession.get().isTeacher()) {
+                query += "JOIN teacher_subject ts ON s.subject_id = ts.subject_id " +
+                         "WHERE ts.teacher_NIC = '" + UserSession.get().getTeacherNIC() + "' ";
+            }
+            query += "ORDER BY s.subject_name";
+
+            ResultSet rs = MySQL.executeSearch(query);
             
             while (rs.next()) {
                 cmbSubject.addItem(rs.getString("subject_name"));
@@ -114,14 +129,20 @@ public class AcademicPerformance extends JPanel {
         try {
             tableModel.setRowCount(0);
             
-            ResultSet rs = MySQL.executeSearch("SELECT r.student_id, s.first_name, s.last_name, sub.subject_name, e.exam_name, " +
+            String query = "SELECT r.student_id, s.first_name, s.last_name, sub.subject_name, e.exam_name, " +
                           "r.marks_obtained, r.grade_letter " +
                           "FROM result r " +
                           "JOIN student s ON r.student_id = s.student_id " +
                           "JOIN exam e ON r.exam_id = e.exam_id " +
-                          "JOIN subject sub ON e.subject_id = sub.subject_id " +
-                          "ORDER BY r.marks_obtained DESC " +
-                          "LIMIT 50");
+                          "JOIN subject sub ON e.subject_id = sub.subject_id ";
+            if (UserSession.get() != null && UserSession.get().isTeacher()) {
+                query += "JOIN teacher_subject ts ON e.subject_id = ts.subject_id AND e.grade_id = ts.grade_id " +
+                         "WHERE ts.teacher_NIC = '" + UserSession.get().getTeacherNIC() + "' ";
+            }
+            query += "ORDER BY r.marks_obtained DESC " +
+                     "LIMIT 50";
+
+            ResultSet rs = MySQL.executeSearch(query);
             
             while (rs.next()) {
                 String studentId = rs.getString("student_id");

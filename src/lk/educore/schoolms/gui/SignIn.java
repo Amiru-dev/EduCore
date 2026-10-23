@@ -267,8 +267,26 @@ public class SignIn extends javax.swing.JFrame {
             if (rs.next()) {
                 String storedPassword = rs.getString("password");
                 String actualRole = rs.getString("type_name");
+                int userId = rs.getInt("user_id");
 
                 if (password.equals(storedPassword)) {
+                    // Populate UserSession
+                    String teacherNIC = null;
+                    int teacherId = -1;
+
+                    if ("Teacher".equals(actualRole)) {
+                        ResultSet trs = MySQL.executeSearch(
+                            "SELECT NIC, teacher_id FROM teacher WHERE user_id = " + userId);
+                        if (trs.next()) {
+                            teacherNIC = trs.getString("NIC");
+                            teacherId = trs.getInt("teacher_id");
+                        }
+                        trs.close();
+                    }
+
+                    lk.educore.schoolms.model.UserSession.init(
+                        userId, username, actualRole, teacherNIC, teacherId);
+
                     // Route to appropriate dashboard based on role
                     dispose();
                     if ("Student".equals(actualRole)) {

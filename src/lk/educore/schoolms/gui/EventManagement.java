@@ -1,6 +1,7 @@
 package lk.educore.schoolms.gui;
 
 import lk.educore.schoolms.model.MySQL;
+import lk.educore.schoolms.model.UserSession;
 import lk.educore.schoolms.validate.JOptionIcon;
 
 import javax.imageio.ImageIO;
@@ -71,6 +72,12 @@ public class EventManagement extends JPanel {
         rightPanel.add(btnEditEvent);
         rightPanel.add(btnDeleteEvent);
         rightPanel.add(btnRefresh);
+
+        if (UserSession.get() != null && UserSession.get().isTeacher()) {
+            btnAddEvent.setVisible(false);
+            btnEditEvent.setVisible(false);
+            btnDeleteEvent.setVisible(false);
+        }
         
         headerPanel.add(rightPanel, BorderLayout.EAST);
         add(headerPanel, BorderLayout.NORTH);
@@ -161,6 +168,11 @@ public class EventManagement extends JPanel {
     }
 
     private void addEvent() {
+        if (UserSession.get() != null && UserSession.get().isTeacher()) {
+            JOptionIcon.showWarningDialog(this, "Access denied: Teachers have view-only access to Events.");
+            return;
+        }
+
         // Build a proper JDialog
         Frame parentFrame = (Frame) SwingUtilities.getWindowAncestor(this);
         JDialog dialog = new JDialog(parentFrame, "Add Event", true);
@@ -349,6 +361,11 @@ public class EventManagement extends JPanel {
     }
 
     private void editEvent() {
+        if (UserSession.get() != null && UserSession.get().isTeacher()) {
+            JOptionIcon.showWarningDialog(this, "Access denied: Teachers have view-only access to Events.");
+            return;
+        }
+
         int selectedRow = eventTable.getSelectedRow();
         if (selectedRow == -1) {
             JOptionIcon.showWarningDialog(this, "Please select an event to edit.");
@@ -567,6 +584,11 @@ public class EventManagement extends JPanel {
     }
 
     private void deleteEvent() {
+        if (UserSession.get() != null && UserSession.get().isTeacher()) {
+            JOptionIcon.showWarningDialog(this, "Access denied: Teachers have view-only access to Events.");
+            return;
+        }
+
         int selectedRow = eventTable.getSelectedRow();
         if (selectedRow == -1) {
             JOptionIcon.showWarningDialog(this, "Please select an event to delete.");
