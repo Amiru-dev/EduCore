@@ -1,6 +1,7 @@
 package lk.educore.schoolms.gui;
 
 import lk.educore.schoolms.model.MySQL;
+import lk.educore.schoolms.model.UserSession;
 import lk.educore.schoolms.validate.JOptionIcon;
 
 import javax.swing.*;
@@ -10,6 +11,7 @@ import java.awt.print.*;
 import java.io.File;
 import java.sql.*;
 import java.util.*;
+import java.util.logging.Level;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.engine.JasperCompileManager;
@@ -44,7 +46,7 @@ public class ResultSheet extends JDialog {
 
         // Header panel
         JPanel headerPanel = new JPanel(new BorderLayout(10, 10));
-        
+
         JLabel titleLabel = new JLabel("Results: " + examName);
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
         titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));
@@ -53,32 +55,38 @@ public class ResultSheet extends JDialog {
         // Button panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 10));
-        
+
         btnAddResult = new JButton("Add Result");
         btnAddResult.addActionListener(e -> addResult());
-        
+
         btnEditResult = new JButton("Edit Result");
         btnEditResult.addActionListener(e -> editResult());
-        
+
         btnDeleteResult = new JButton("Delete Result");
         btnDeleteResult.addActionListener(e -> deleteResult());
-        
+
         btnRefresh = new JButton("Refresh");
         btnRefresh.addActionListener(e -> loadResults());
-        
+
         btnCalculateGrades = new JButton("Calculate Grades");
         btnCalculateGrades.addActionListener(e -> calculateGrades());
-        
+
         btnPrintReport = new JButton("Print Report");
         btnPrintReport.addActionListener(e -> printReport());
 
         buttonPanel.add(btnAddResult);
         buttonPanel.add(btnEditResult);
-        buttonPanel.add(btnDeleteResult);
+
+        // Only show delete button for Admin users
+        UserSession session = UserSession.get();
+        if (session != null && session.isAdmin()) {
+            buttonPanel.add(btnDeleteResult);
+        }
+
         buttonPanel.add(btnRefresh);
         buttonPanel.add(btnCalculateGrades);
         buttonPanel.add(btnPrintReport);
-        
+
         headerPanel.add(buttonPanel, BorderLayout.CENTER);
         add(headerPanel, BorderLayout.NORTH);
 
@@ -409,26 +417,45 @@ public class ResultSheet extends JDialog {
     }
 
     private void deleteResult() {
+        // Check if user is Admin
+        UserSession session = UserSession.get();
+        if (session == null || !session.isAdmin()) {
+            JOptionIcon.showErrorDialog(this, "Access denied. Only Admin users can delete results.");
+            return;
+        }
+
         int selectedRow = resultTable.getSelectedRow();
         if (selectedRow == -1) {
             JOptionIcon.showWarningDialog(this, "Please select a result to delete.");
             return;
         }
-        
+
         String studentId = tableModel.getValueAt(selectedRow, 0).toString();
         String studentName = tableModel.getValueAt(selectedRow, 1).toString();
-        
-        int confirm = JOptionIcon.showConfirmDialog(this, 
+
+        int confirm = JOptionIcon.showConfirmDialog(this,
             "Delete result for " + studentName + " (" + studentId + ")?");
-        
+
         if (confirm == JOptionPane.YES_OPTION) {
             try {
                 MySQL.executeIUD("DELETE FROM result WHERE exam_id = '" + examId + "' AND student_id = '" + studentId + "'");
-                
+
+                // Log the deletion
+                SignIn.getLoggerObject().log(Level.INFO,
+                    "Result deleted by Admin: " + session.getUsername() +
+                    " | Exam ID: " + examId +
+                    " | Exam Name: " + examName +
+                    " | Student ID: " + studentId +
+                    " | Student Name: " + studentName);
+
                 JOptionIcon.showSuccessDialog(this, "Result deleted successfully.");
                 loadResults();
-                
+
             } catch (Exception e) {
+                SignIn.getLoggerObject().log(Level.SEVERE,
+                    "Error deleting result by Admin: " + (session != null ? session.getUsername() : "unknown") +
+                    " | Exam ID: " + examId +
+                    " | Student ID: " + studentId, e);
                 JOptionIcon.showErrorDialog(this, "Error deleting result: " + e.getMessage());
             }
         }
