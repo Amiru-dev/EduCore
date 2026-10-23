@@ -3,55 +3,81 @@ package lk.educore.schoolms.model;
 import lk.educore.schoolms.exceptions.BusinessException;
 import lk.educore.schoolms.exceptions.ValidationException;
 import lk.educore.schoolms.service.FeeService;
-import lk.educore.schoolms.validate.DataValidator;
-
-import java.util.Objects;
 
 /**
- * Teacher Domain Model
- * Represents a teacher in the EduCore School Management System.
+ * Teacher Domain Model — extends {@link Person}.
+ * <p>
+ * Inherits common personal attributes (name, email, phone, NIC, DOB, address,
+ * status) from the {@link Person} abstract class and adds teacher-specific
+ * fields: teacher type and salary components. Overrides the three abstract
+ * methods defined by {@link Person} to provide teacher-specific identity,
+ * validation, and role description (polymorphism).
+ * </p>
  *
  * @author EduCore Software Team
  * @version 1.0.0
  */
-public class Teacher {
+public class Teacher extends Person {
 
-    private String nic;
-    private String firstName;
-    private String lastName;
-    private String email;
-    private String phone;
+    // Teacher-specific fields (not shared with Student)
     private String teacherType;
     private double basicSalary;
     private double allowance;
     private double bonus;
-    private String status; // "Active", "Inactive", "On Leave"
 
     public Teacher() {
-        this.status = "Active";
+        super();
+        setStatus("Active");
     }
 
     public Teacher(String nic, String firstName, String lastName, String email, String phone,
-                   String teacherType, double basicSalary, double allowance, double bonus) {
-        this.nic = nic;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.phone = phone;
+            String teacherType, double basicSalary, double allowance, double bonus) {
+        super(firstName, lastName, email, phone, nic, null, null, "Active");
         this.teacherType = teacherType;
         this.basicSalary = basicSalary;
         this.allowance = allowance;
         this.bonus = bonus;
-        this.status = "Active";
     }
 
-    public String getFullName() {
-        if (firstName == null && lastName == null) return "";
-        if (firstName == null) return lastName.trim();
-        if (lastName == null) return firstName.trim();
-        return firstName.trim() + " " + lastName.trim();
+    // -------------------------------------------------------------------------
+    // Abstract method implementations (polymorphism)
+    // -------------------------------------------------------------------------
+    /**
+     * {@inheritDoc} For a Teacher, the unique identifier is the NIC.
+     */
+    @Override
+    public String getPersonId() {
+        return getNic();
     }
 
+    /**
+     * {@inheritDoc} Validates teacher-specific fields in addition to the common
+     * fields validated by {@link Person#validateCommonFields()}.
+     */
+    @Override
+    public boolean validate() throws ValidationException {
+        // Delegate common field validation to the superclass
+        validateCommonFields();
+
+        if (basicSalary < 0) {
+            throw new ValidationException("Basic salary cannot be negative", "basicSalary", String.valueOf(basicSalary));
+        }
+
+        return true;
+    }
+
+    /**
+     * {@inheritDoc} Returns a description like "Teacher – Permanent" or
+     * "Teacher – Visiting".
+     */
+    @Override
+    public String getRoleDescription() {
+        return "Teacher – " + (teacherType != null ? teacherType : "N/A");
+    }
+
+    // -------------------------------------------------------------------------
+    // Teacher-specific business methods
+    // -------------------------------------------------------------------------
     /**
      * Calculate gross salary for the teacher.
      */
@@ -66,85 +92,48 @@ public class Teacher {
         return FeeService.calculateNetSalary(basicSalary, allowance, bonus, 0.0, epfRate);
     }
 
-    /**
-     * Validate teacher fields against EduCore business rules.
-     */
-    public boolean validate() throws ValidationException {
-        DataValidator.isRequired(nic, "NIC");
-        DataValidator.isValidNIC(nic);
-
-        DataValidator.isRequired(firstName, "First Name");
-        DataValidator.isLettersOnly(firstName);
-
-        DataValidator.isRequired(lastName, "Last Name");
-        DataValidator.isLettersOnly(lastName);
-
-        if (email != null && !email.trim().isEmpty()) {
-            DataValidator.isValidEmail(email);
-        }
-
-        if (phone != null && !phone.trim().isEmpty()) {
-            DataValidator.isValidPhone(phone);
-        }
-
-        if (basicSalary < 0) {
-            throw new ValidationException("Basic salary cannot be negative", "basicSalary", String.valueOf(basicSalary));
-        }
-
-        return true;
+    // -------------------------------------------------------------------------
+    // Teacher-specific getters & setters
+    // -------------------------------------------------------------------------
+    public String getTeacherType() {
+        return teacherType;
     }
 
-    // Getters and Setters
-    public String getNic() { return nic; }
-    public void setNic(String nic) { this.nic = nic; }
-
-    public String getFirstName() { return firstName; }
-    public void setFirstName(String firstName) { this.firstName = firstName; }
-
-    public String getLastName() { return lastName; }
-    public void setLastName(String lastName) { this.lastName = lastName; }
-
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-
-    public String getPhone() { return phone; }
-    public void setPhone(String phone) { this.phone = phone; }
-
-    public String getTeacherType() { return teacherType; }
-    public void setTeacherType(String teacherType) { this.teacherType = teacherType; }
-
-    public double getBasicSalary() { return basicSalary; }
-    public void setBasicSalary(double basicSalary) { this.basicSalary = basicSalary; }
-
-    public double getAllowance() { return allowance; }
-    public void setAllowance(double allowance) { this.allowance = allowance; }
-
-    public double getBonus() { return bonus; }
-    public void setBonus(double bonus) { this.bonus = bonus; }
-
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Teacher teacher = (Teacher) o;
-        return Objects.equals(nic, teacher.nic);
+    public void setTeacherType(String teacherType) {
+        this.teacherType = teacherType;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(nic);
+    public double getBasicSalary() {
+        return basicSalary;
+    }
+
+    public void setBasicSalary(double basicSalary) {
+        this.basicSalary = basicSalary;
+    }
+
+    public double getAllowance() {
+        return allowance;
+    }
+
+    public void setAllowance(double allowance) {
+        this.allowance = allowance;
+    }
+
+    public double getBonus() {
+        return bonus;
+    }
+
+    public void setBonus(double bonus) {
+        this.bonus = bonus;
     }
 
     @Override
     public String toString() {
-        return "Teacher{" +
-                "nic='" + nic + '\'' +
-                ", fullName='" + getFullName() + '\'' +
-                ", type='" + teacherType + '\'' +
-                ", basicSalary=" + basicSalary +
-                '}';
+        return "Teacher{"
+                + "nic='" + getNic() + '\''
+                + ", fullName='" + getFullName() + '\''
+                + ", type='" + teacherType + '\''
+                + ", basicSalary=" + basicSalary
+                + '}';
     }
 }
