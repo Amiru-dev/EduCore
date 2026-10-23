@@ -2187,7 +2187,7 @@ public class StudentDashboard extends JFrame {
             catalogTableModel.setRowCount(0);
 
             StringBuilder sql = new StringBuilder(
-                "SELECT b.isbn, b.title, b.author, c.category_name, b.available_quantity, b.quantity " +
+                "SELECT b.isbn, b.title, b.author, c.category_name, b.available_qty, b.quantity " +
                 "FROM book b " +
                 "LEFT JOIN book_category c ON b.category_id = c.category_id WHERE 1=1 "
             );
@@ -2205,7 +2205,7 @@ public class StudentDashboard extends JFrame {
 
             ResultSet rs = MySQL.executeSearch(sql.toString());
             while (rs.next()) {
-                int avail = rs.getInt("available_quantity");
+                int avail = rs.getInt("available_qty");
                 int total = rs.getInt("quantity");
                 catalogTableModel.addRow(new Object[]{
                     rs.getString("isbn"),
