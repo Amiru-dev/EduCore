@@ -36,17 +36,24 @@ public class DataValidator {
      * Validate email address
      */
     public static boolean isValidEmail(String email) throws ValidationException {
+        return isValidEmail(email, "Email");
+    }
+
+    /**
+     * Validate email address with field label
+     */
+    public static boolean isValidEmail(String email, String fieldLabel) throws ValidationException {
         if (email == null || email.trim().isEmpty()) {
-            throw new ValidationException("Email is required", "email", email);
+            throw new ValidationException(fieldLabel + " is required", fieldLabel, email);
         }
-        
+
         Pattern pattern = Pattern.compile(EMAIL_PATTERN);
         Matcher matcher = pattern.matcher(email);
-        
+
         if (!matcher.matches()) {
-            throw new ValidationException("Invalid email format", "email", email, EMAIL_PATTERN);
+            throw new ValidationException("Invalid " + fieldLabel + " format", fieldLabel, email, EMAIL_PATTERN);
         }
-        
+
         return true;
     }
 
@@ -54,17 +61,24 @@ public class DataValidator {
      * Validate Sri Lankan NIC
      */
     public static boolean isValidNIC(String nic) throws ValidationException {
+        return isValidNIC(nic, "NIC");
+    }
+
+    /**
+     * Validate Sri Lankan NIC with field label
+     */
+    public static boolean isValidNIC(String nic, String fieldLabel) throws ValidationException {
         if (nic == null || nic.trim().isEmpty()) {
-            throw new ValidationException("NIC is required", "nic", nic);
+            throw new ValidationException(fieldLabel + " is required", fieldLabel, nic);
         }
-        
+
         Pattern oldPattern = Pattern.compile(NIC_OLD_PATTERN);
         Pattern newPattern = Pattern.compile(NIC_NEW_PATTERN);
-        
+
         if (!oldPattern.matcher(nic).matches() && !newPattern.matcher(nic).matches()) {
-            throw new ValidationException("Invalid NIC format (use 9 digits + V/X or 12 digits)", "nic", nic);
+            throw new ValidationException("Invalid " + fieldLabel + " format (use 9 digits + V/X or 12 digits)", fieldLabel, nic);
         }
-        
+
         return true;
     }
 
@@ -72,17 +86,24 @@ public class DataValidator {
      * Validate phone number
      */
     public static boolean isValidPhone(String phone) throws ValidationException {
+        return isValidPhone(phone, "Phone number");
+    }
+
+    /**
+     * Validate phone number with field label
+     */
+    public static boolean isValidPhone(String phone, String fieldLabel) throws ValidationException {
         if (phone == null || phone.trim().isEmpty()) {
-            throw new ValidationException("Phone number is required", "phone", phone);
+            throw new ValidationException(fieldLabel + " is required", fieldLabel, phone);
         }
-        
+
         Pattern pattern = Pattern.compile(PHONE_PATTERN);
         Matcher matcher = pattern.matcher(phone);
-        
+
         if (!matcher.matches()) {
-            throw new ValidationException("Invalid phone number format (use 10 digits starting with 0)", "phone", phone, PHONE_PATTERN);
+            throw new ValidationException("Invalid " + fieldLabel + " format (use 10 digits starting with 0)", fieldLabel, phone, PHONE_PATTERN);
         }
-        
+
         return true;
     }
 

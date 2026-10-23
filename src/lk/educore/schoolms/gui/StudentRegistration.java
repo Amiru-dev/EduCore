@@ -410,13 +410,17 @@ public class StudentRegistration extends JDialog {
 
             DataValidator.isRequired(firstName, "First Name");
             DataValidator.isRequired(lastName, "Last Name");
-            DataValidator.isValidNIC(nic);
-            DataValidator.isValidEmail(email);
-            DataValidator.isValidPhone(phone);
+            DataValidator.isValidNIC(nic, "Student NIC");
+            DataValidator.isValidEmail(email, "Student Email");
+            DataValidator.isValidPhone(phone, "Student Phone");
             DataValidator.isRequired(address, "Address");
             DataValidator.isRequired(guardianFirstName, "Guardian First Name");
             DataValidator.isRequired(guardianLastName, "Guardian Last Name");
-            DataValidator.isRequired(guardianPhone, "Guardian Phone");
+            DataValidator.isValidNIC(guardianNIC, "Guardian NIC");
+            DataValidator.isValidEmail(guardianEmail, "Guardian Email");
+            DataValidator.isValidPhone(guardianPhone, "Guardian Phone");
+            DataValidator.isRequired(guardianAddress, "Guardian Address");
+            DataValidator.isRequired(guardianOccupation, "Guardian Occupation");
             
             java.util.Date dobDate = dateChooserDOB.getDate();
             if (dobDate == null) {
@@ -431,14 +435,14 @@ public class StudentRegistration extends JDialog {
 
             try {
                 // Insert guardian
-                String guardianQuery = "INSERT INTO guardian (first_name, last_name, nic, relationship, phone, email, address, occupation) VALUES ('" 
-                        + guardianFirstName + "', '" 
-                        + guardianLastName + "', " 
-                        + (guardianNIC.isEmpty() ? "NULL" : "'" + guardianNIC + "'") + ", '" 
-                        + relationship + "', '" 
-                        + guardianPhone + "', " 
-                        + (guardianEmail.isEmpty() ? "NULL" : "'" + guardianEmail + "'") + ", '" 
-                        + guardianAddress + "', '" 
+                String guardianQuery = "INSERT INTO guardian (first_name, last_name, nic, relationship, phone, email, address, occupation) VALUES ('"
+                        + guardianFirstName + "', '"
+                        + guardianLastName + "', '"
+                        + guardianNIC + "', '"
+                        + relationship + "', '"
+                        + guardianPhone + "', '"
+                        + guardianEmail + "', '"
+                        + guardianAddress + "', '"
                         + guardianOccupation + "')";
                 Statement guardianStmt = conn.createStatement();
                 guardianStmt.executeUpdate(guardianQuery, Statement.RETURN_GENERATED_KEYS);
