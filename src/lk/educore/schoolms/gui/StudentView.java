@@ -473,6 +473,11 @@ public class StudentView extends JDialog {
     }
 
     private void generateQRCode() {
+        if (studentId == null || studentId.trim().isEmpty()) {
+            JOptionIcon.showErrorDialog(this, "Student ID is missing. Cannot generate QR code.");
+            return;
+        }
+
         try {
             ResultSet rs = MySQL.executeSearch("SELECT first_name, last_name FROM student WHERE student_id = '" + studentId + "'");
             if (rs.next()) {

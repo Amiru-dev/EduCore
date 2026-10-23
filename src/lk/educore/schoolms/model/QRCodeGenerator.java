@@ -25,6 +25,11 @@ public class QRCodeGenerator {
      * @return Path to generated QR code image
      */
     public static String generateStudentQR(String studentId, String studentName) {
+        if (studentId == null || studentId.trim().isEmpty()) {
+            System.err.println("Cannot generate QR code: student ID is null or empty");
+            return null;
+        }
+
         try {
             // Create QR directory if it doesn't exist
             File qrDir = new File(QR_OUTPUT_DIR);
@@ -33,7 +38,7 @@ public class QRCodeGenerator {
             }
 
             // QR code content: student ID and name
-            String qrContent = "StudentID:" + studentId + "|Name:" + studentName;
+            String qrContent = "StudentID:" + studentId + "|Name:" + (studentName != null ? studentName : "Unknown");
 
             // Configure QR code
             Hashtable<EncodeHintType, ErrorCorrectionLevel> hintMap = new Hashtable<>();
@@ -62,6 +67,11 @@ public class QRCodeGenerator {
      * @return Path to generated QR code image
      */
     public static String generateTeacherQR(String teacherNIC, String teacherName) {
+        if (teacherNIC == null || teacherNIC.trim().isEmpty()) {
+            System.err.println("Cannot generate QR code: teacher NIC is null or empty");
+            return null;
+        }
+
         try {
             // Create QR directory if it doesn't exist
             File qrDir = new File(QR_OUTPUT_DIR);
@@ -70,7 +80,7 @@ public class QRCodeGenerator {
             }
 
             // QR code content: teacher NIC and name
-            String qrContent = "TeacherNIC:" + teacherNIC + "|Name:" + teacherName;
+            String qrContent = "TeacherNIC:" + teacherNIC + "|Name:" + (teacherName != null ? teacherName : "Unknown");
 
             // Configure QR code
             Hashtable<EncodeHintType, ErrorCorrectionLevel> hintMap = new Hashtable<>();

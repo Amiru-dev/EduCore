@@ -497,8 +497,16 @@ public class StudentManagement extends JPanel {
             return;
         }
 
-        String studentId = tableModel.getValueAt(selectedRow, 0).toString();
-        String studentName = tableModel.getValueAt(selectedRow, 1).toString();
+        Object idObj = tableModel.getValueAt(selectedRow, 0);
+        Object nameObj = tableModel.getValueAt(selectedRow, 1);
+
+        if (idObj == null || idObj.toString().trim().isEmpty()) {
+            JOptionIcon.showErrorDialog(this, "Student ID is missing. Cannot generate QR code.");
+            return;
+        }
+
+        String studentId = idObj.toString();
+        String studentName = nameObj != null ? nameObj.toString() : "Unknown";
 
         try {
             lk.educore.schoolms.model.QRCodeGenerator.generateStudentQR(studentId, studentName);

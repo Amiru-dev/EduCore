@@ -718,10 +718,18 @@ public class TeacherManagement extends JPanel {
             JOptionIcon.showWarningDialog(this, "Please select a teacher to generate QR code.");
             return;
         }
-        
-        String nic = tableModel.getValueAt(selectedRow, 0).toString();
-        String teacherName = tableModel.getValueAt(selectedRow, 1).toString();
-        
+
+        Object nicObj = tableModel.getValueAt(selectedRow, 0);
+        Object nameObj = tableModel.getValueAt(selectedRow, 1);
+
+        if (nicObj == null || nicObj.toString().trim().isEmpty()) {
+            JOptionIcon.showErrorDialog(this, "Teacher NIC is missing. Cannot generate QR code.");
+            return;
+        }
+
+        String nic = nicObj.toString();
+        String teacherName = nameObj != null ? nameObj.toString() : "Unknown";
+
         try {
             lk.educore.schoolms.model.QRCodeGenerator.generateTeacherQR(nic, teacherName);
             JOptionIcon.showSuccessDialog(this, "QR code generated successfully for " + teacherName);
