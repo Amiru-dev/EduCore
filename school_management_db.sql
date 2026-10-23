@@ -21,8 +21,8 @@ DROP TABLE IF EXISTS vehicle;
 DROP TABLE IF EXISTS fee;
 DROP TABLE IF EXISTS result;
 DROP TABLE IF EXISTS exam;
-DROP TABLE IF EXISTS subject;
 DROP TABLE IF EXISTS teacher_subject;
+DROP TABLE IF EXISTS subject;
 DROP TABLE IF EXISTS teacher_class;
 DROP TABLE IF EXISTS teacher_leave;
 DROP TABLE IF EXISTS teacher_attendance;
@@ -262,6 +262,20 @@ CREATE TABLE IF NOT EXISTS teacher_leave (
 );
 
 -- ============================================
+-- EXAM & RESULTS TABLES
+-- ============================================
+
+-- Subject Table
+CREATE TABLE IF NOT EXISTS subject (
+    subject_id INT PRIMARY KEY AUTO_INCREMENT,
+    subject_name VARCHAR(100) NOT NULL UNIQUE,
+    grade_id INT NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (grade_id) REFERENCES grade(grade_id) ON DELETE CASCADE
+);
+
+-- ============================================
 -- TEACHER ↔ CLASS / SUBJECT ASSIGNMENT TABLES
 -- ============================================
 
@@ -297,20 +311,6 @@ CREATE TABLE IF NOT EXISTS teacher_subject (
 
 CREATE INDEX idx_teacher_subject_nic ON teacher_subject(teacher_NIC);
 CREATE INDEX idx_teacher_subject_subject ON teacher_subject(subject_id);
-
--- ============================================
--- EXAM & RESULTS TABLES
--- ============================================
-
--- Subject Table
-CREATE TABLE IF NOT EXISTS subject (
-    subject_id INT PRIMARY KEY AUTO_INCREMENT,
-    subject_name VARCHAR(100) NOT NULL UNIQUE,
-    grade_id INT NOT NULL,
-    description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (grade_id) REFERENCES grade(grade_id) ON DELETE CASCADE
-);
 
 -- Exam Type Lookup Table
 CREATE TABLE IF NOT EXISTS exam_type (
@@ -581,6 +581,12 @@ INSERT IGNORE INTO student (student_id, first_name, last_name, dob, gender, nic,
 INSERT IGNORE INTO teacher (NIC, first_name, last_name, dob, gender, email, phone, address, teacher_type_id, username, password, salary, hire_date, status_id, user_id) VALUES 
 ('801234567V', 'Dr. Sarah', 'Smith', '1985-03-20', 'Female', 'sarah.smith@educore.com', '0771234569', '456 School Road, Anuradhapura', 1, 'teacher1', 'teacher123', 75000.00, '2020-01-15', 1, 2);
 
+-- Insert sample subject
+INSERT IGNORE INTO subject (subject_name, grade_id, description) VALUES 
+('Mathematics', 1, 'Mathematics for Grade 6'),
+('Science', 1, 'Science for Grade 6'),
+('English', 1, 'English Language for Grade 6');
+
 -- Assign sample teacher to Grade 6A (class teacher) and Grade 6B
 INSERT IGNORE INTO teacher_class (teacher_NIC, grade_id, is_class_teacher, academic_year) VALUES 
 ('801234567V', 1, TRUE, YEAR(CURDATE())),
@@ -590,12 +596,6 @@ INSERT IGNORE INTO teacher_class (teacher_NIC, grade_id, is_class_teacher, acade
 INSERT IGNORE INTO teacher_subject (teacher_NIC, subject_id, grade_id, academic_year) VALUES 
 ('801234567V', 1, 1, YEAR(CURDATE())),
 ('801234567V', 2, 1, YEAR(CURDATE()));
-
--- Insert sample subject
-INSERT IGNORE INTO subject (subject_name, grade_id, description) VALUES 
-('Mathematics', 1, 'Mathematics for Grade 6'),
-('Science', 1, 'Science for Grade 6'),
-('English', 1, 'English Language for Grade 6');
 
 -- Insert sample exam
 INSERT IGNORE INTO exam (exam_name, exam_type_id, subject_id, grade_id, exam_date, max_marks, duration_minutes, description) VALUES 
