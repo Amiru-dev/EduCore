@@ -245,8 +245,9 @@ public class StudentDashboard extends JFrame {
         button.setForeground(Color.WHITE);
         button.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         button.setFocusPainted(false);
-        button.setBorder(BorderFactory.createEmptyBorder(5, 12, 5, 12));
-        button.setHorizontalAlignment(SwingConstants.LEFT);
+        button.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        button.setHorizontalAlignment(SwingConstants.CENTER);
+        button.setHorizontalTextPosition(SwingConstants.RIGHT);
         button.setPreferredSize(new Dimension(180, 36));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
