@@ -455,10 +455,47 @@ public class StudentView extends JDialog {
     }
 
     private void deleteStudent() {
-        int confirm = JOptionIcon.showConfirmDialog(this, "Are you sure you want to delete this student?");
+        int confirm = JOptionIcon.showConfirmDialog(this,
+                "Are you sure you want to delete this student?\n"
+                + "This will also remove the student's user account.\n"
+                + "The guardian record will only be removed if no other students share the same guardian.");
         if (confirm == JOptionPane.YES_OPTION) {
             try {
+                // 1. Fetch linked user_id and guardian_id before deleting the student row
+                ResultSet rs = MySQL.executeSearch(
+                        "SELECT user_id, guardian_id FROM student WHERE student_id = '" + studentId + "'");
+                int userId = -1;
+                int guardianId = -1;
+                if (rs.next()) {
+                    userId = rs.getInt("user_id");
+                    if (rs.wasNull()) userId = -1;
+                    guardianId = rs.getInt("guardian_id");
+                    if (rs.wasNull()) guardianId = -1;
+                }
+                rs.close();
+
+                // 2. Delete student first (drops FK references to guardian and user)
                 MySQL.executeIUD("DELETE FROM student WHERE student_id = '" + studentId + "'");
+
+                // 3. Only delete guardian if no other student still references it
+                if (guardianId > 0) {
+                    ResultSet guardianCheck = MySQL.executeSearch(
+                            "SELECT COUNT(*) AS cnt FROM student WHERE guardian_id = " + guardianId);
+                    int othersWithSameGuardian = 0;
+                    if (guardianCheck.next()) {
+                        othersWithSameGuardian = guardianCheck.getInt("cnt");
+                    }
+                    guardianCheck.close();
+                    if (othersWithSameGuardian == 0) {
+                        MySQL.executeIUD("DELETE FROM guardian WHERE guardian_id = " + guardianId);
+                    }
+                }
+
+                // 4. Delete linked user account
+                if (userId > 0) {
+                    MySQL.executeIUD("DELETE FROM user WHERE user_id = " + userId);
+                }
+
                 JOptionIcon.showSuccessDialog(this, "Student deleted successfully.");
                 dispose();
             } catch (Exception e) {
