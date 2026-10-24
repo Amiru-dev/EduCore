@@ -59,8 +59,12 @@ public class StudentManagement extends JPanel {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
 
-        // Title
-        JLabel titleLabel = new JLabel("Student Management");
+        // Title - Change to "My Classes" for teachers
+        String titleText = "Student Management";
+        if (UserSession.get() != null && UserSession.get().isTeacher()) {
+            titleText = "My Classes";
+        }
+        JLabel titleLabel = new JLabel(titleText);
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
         panel.add(titleLabel, BorderLayout.WEST);
 
@@ -128,6 +132,7 @@ public class StudentManagement extends JPanel {
             btnAdd.setVisible(false);
             btnEdit.setVisible(false);
             btnDelete.setVisible(false);
+            btnQRCode.setVisible(false);
         }
 
         panel.add(buttonPanel, BorderLayout.NORTH);

@@ -187,7 +187,7 @@ public class MyProfilePanel extends JPanel {
                 while (rs.next()) {
                     String entry = rs.getString("grade_name") + " " + rs.getString("section");
                     if (rs.getBoolean("is_class_teacher")) {
-                        entry += "  ★ Class Teacher";
+                        entry += "  - Class Teacher";
                     }
                     classListModel.addElement(entry);
                 }
@@ -207,7 +207,7 @@ public class MyProfilePanel extends JPanel {
                     + "ORDER BY g.grade_name, sub.subject_name");
                 while (rs2.next()) {
                     subjectListModel.addElement(
-                        rs2.getString("subject_name") + " — " +
+                        rs2.getString("subject_name") + " - " +
                         rs2.getString("grade_name") + " " + rs2.getString("section"));
                 }
                 rs2.close();

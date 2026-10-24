@@ -2,6 +2,7 @@ package lk.educore.schoolms.gui;
 
 import lk.educore.schoolms.model.MySQL;
 import lk.educore.schoolms.model.Student;
+import lk.educore.schoolms.model.UserSession;
 import lk.educore.schoolms.validate.JOptionIcon;
 
 import javax.swing.*;
@@ -343,6 +344,12 @@ public class StudentView extends JDialog {
         left.add(btnEdit);
         left.add(btnDelete);
 
+        // Hide Edit and Delete buttons for teachers
+        if (UserSession.get() != null && UserSession.get().isTeacher()) {
+            btnEdit.setVisible(false);
+            btnDelete.setVisible(false);
+        }
+
         JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         right.setOpaque(false);
         btnEmail = styledButton("Email", new Color(126, 34, 206), Color.WHITE);
@@ -355,6 +362,12 @@ public class StudentView extends JDialog {
         right.add(btnAttendance);
         right.add(btnFees);
         right.add(btnResults);
+
+        // Hide Email and QR Code buttons for teachers
+        if (UserSession.get() != null && UserSession.get().isTeacher()) {
+            btnEmail.setVisible(false);
+            btnQRCode.setVisible(false);
+        }
 
         wrapper.add(left, BorderLayout.WEST);
         wrapper.add(right, BorderLayout.EAST);
@@ -560,6 +573,7 @@ public class StudentView extends JDialog {
     }
 
     private void viewResults() {
-        JOptionIcon.showInfoDialog(this, "View Results - Coming Soon");
+        Window parent = SwingUtilities.getWindowAncestor(this);
+        new StudentResultsDialog((Frame) parent, studentId).setVisible(true);
     }
 }
