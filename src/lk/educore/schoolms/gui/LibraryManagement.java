@@ -2,6 +2,7 @@ package lk.educore.schoolms.gui;
 
 import lk.educore.schoolms.model.BarcodeGenerator;
 import lk.educore.schoolms.model.MySQL;
+import lk.educore.schoolms.model.UserSession;
 import lk.educore.schoolms.validate.JOptionIcon;
 
 import javax.imageio.ImageIO;
@@ -80,7 +81,12 @@ public class LibraryManagement extends JPanel {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
 
-        JLabel titleLabel = new JLabel("Library Management");
+        // Title - Change to "Library" for teachers
+        String titleText = "Library Management";
+        if (UserSession.get() != null && UserSession.get().isTeacher()) {
+            titleText = "Library";
+        }
+        JLabel titleLabel = new JLabel(titleText);
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
         panel.add(titleLabel, BorderLayout.WEST);
 
@@ -131,6 +137,15 @@ public class LibraryManagement extends JPanel {
         buttonPanel.add(btnDeleteBook);
         buttonPanel.add(btnBarcode);
         buttonPanel.add(btnRefresh);
+
+        // Hide Add, Edit, Delete, and Barcode buttons for teachers
+        if (UserSession.get() != null && UserSession.get().isTeacher()) {
+            btnAddBook.setVisible(false);
+            btnEditBook.setVisible(false);
+            btnDeleteBook.setVisible(false);
+            btnBarcode.setVisible(false);
+        }
+
         topBar.add(buttonPanel, BorderLayout.EAST);
 
         panel.add(topBar, BorderLayout.NORTH);
@@ -534,6 +549,14 @@ public class LibraryManagement extends JPanel {
         buttonPanel.add(btnReturn);
         buttonPanel.add(btnUpdateOverdue);
         buttonPanel.add(btnRefresh);
+
+        // Hide Issue, Return, and Mark Overdue buttons for teachers
+        if (UserSession.get() != null && UserSession.get().isTeacher()) {
+            btnIssue.setVisible(false);
+            btnReturn.setVisible(false);
+            btnUpdateOverdue.setVisible(false);
+        }
+
         topBar.add(buttonPanel, BorderLayout.EAST);
 
         panel.add(topBar, BorderLayout.NORTH);
