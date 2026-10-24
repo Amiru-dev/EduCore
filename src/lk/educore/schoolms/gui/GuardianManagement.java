@@ -282,6 +282,18 @@ public class GuardianManagement extends JPanel {
                     DataValidator.isValidEmail(email);
                 }
 
+                // Check if guardian with same NIC already exists
+                if (!nic.isEmpty()) {
+                    ResultSet checkNic = MySQL.executeSearch("SELECT guardian_id, first_name, last_name FROM guardian WHERE nic = '" + nic.replace("'", "''") + "'");
+                    if (checkNic.next()) {
+                        String existingName = checkNic.getString("first_name") + " " + checkNic.getString("last_name");
+                        checkNic.close();
+                        JOptionIcon.showWarningDialog(dialog, "A guardian with NIC '" + nic + "' already exists:\n" + existingName + "\n\nPlease edit the existing guardian instead of adding a duplicate.");
+                        return;
+                    }
+                    checkNic.close();
+                }
+
                 String nicVal = nic.isEmpty() ? "NULL" : "'" + nic.replace("'", "''") + "'";
                 String emailVal = email.isEmpty() ? "NULL" : "'" + email.replace("'", "''") + "'";
                 String occupationVal = occupation.isEmpty() ? "NULL" : "'" + occupation.replace("'", "''") + "'";
