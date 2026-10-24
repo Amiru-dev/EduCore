@@ -1,6 +1,7 @@
 package lk.educore.schoolms.gui;
 
 import lk.educore.schoolms.model.MySQL;
+import lk.educore.schoolms.util.PasswordUtil;
 import lk.educore.schoolms.email.SendQREmail;
 import lk.educore.schoolms.email.SendEmail;
 import lk.educore.schoolms.validate.JOptionIcon;
@@ -481,8 +482,9 @@ public class StudentRegistration extends JDialog {
                 // Create user account
                 String username = email;
                 String temporaryPassword = generateRandomPassword();
+                String hashedPassword = PasswordUtil.hashPassword(temporaryPassword);
                 
-                String userQuery = "INSERT INTO user (username, password, email, user_type_id, is_active) VALUES ('" + username + "', '" + temporaryPassword + "', '" + email + "', 3, 1)";
+                String userQuery = "INSERT INTO user (username, password, email, user_type_id, is_active) VALUES ('" + username + "', '" + hashedPassword + "', '" + email + "', 3, 1)";
                 Statement userStmt = conn.createStatement();
                 userStmt.executeUpdate(userQuery, Statement.RETURN_GENERATED_KEYS);
                 

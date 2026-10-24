@@ -557,17 +557,17 @@ CREATE INDEX idx_teacher_attendance_date ON teacher_attendance(attendance_date);
 -- SAMPLE DATA FOR TESTING
 -- ============================================
 
--- Insert sample admin user
+-- Insert sample admin user (password: admin123)
 INSERT IGNORE INTO user (username, password, email, user_type_id) VALUES 
-('admin', 'admin123', 'admin@educore.com', 1);
+('admin', '$2a$12$/J2GG1EyG/QEp5z1s.mAE.DPxGsksDJBKxBQNcGfDnGT9Xf.YxoyO', 'admin@educore.com', 1);
 
--- Insert sample teacher user
+-- Insert sample teacher user (password: teacher123)
 INSERT IGNORE INTO user (username, password, email, user_type_id) VALUES 
-('teacher1', 'teacher123', 'teacher1@educore.com', 2);
+('teacher1', '$2a$12$7aWoXIZSUOvCAdHXC1.7MuVF8eZLeLsXrBoYhaKFPvtxZaAaTkLxO', 'teacher1@educore.com', 2);
 
--- Insert sample student user
+-- Insert sample student user (password: student123)
 INSERT IGNORE INTO user (username, password, email, user_type_id) VALUES 
-('student1', 'student123', 'student1@educore.com', 3);
+('student1', '$2a$12$.hFVcJSYv3slqYzUkq/m/.HIie1NyvTfAlHb2QSc0EILwaVUSQPpC', 'student1@educore.com', 3);
 
 -- Insert sample guardian
 INSERT IGNORE INTO guardian (first_name, last_name, nic, relationship, phone, email, address, occupation) VALUES 
@@ -579,7 +579,7 @@ INSERT IGNORE INTO student (student_id, first_name, last_name, dob, gender, nic,
 
 -- Insert sample teacher
 INSERT IGNORE INTO teacher (NIC, first_name, last_name, dob, gender, email, phone, address, teacher_type_id, username, password, salary, hire_date, status_id, user_id) VALUES 
-('801234567V', 'Dr. Sarah', 'Smith', '1985-03-20', 'Female', 'sarah.smith@educore.com', '0771234569', '456 School Road, Anuradhapura', 1, 'teacher1', 'teacher123', 75000.00, '2020-01-15', 1, 2);
+('801234567V', 'Dr. Sarah', 'Smith', '1985-03-20', 'Female', 'sarah.smith@educore.com', '0771234569', '456 School Road, Anuradhapura', 1, 'teacher1', '$2a$12$7aWoXIZSUOvCAdHXC1.7MuVF8eZLeLsXrBoYhaKFPvtxZaAaTkLxO', 75000.00, '2020-01-15', 1, 2);
 
 -- Insert sample subject
 INSERT IGNORE INTO subject (subject_name, grade_id, description) VALUES 

@@ -12,6 +12,7 @@ import java.util.logging.SimpleFormatter;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import lk.educore.schoolms.model.MySQL;
+import lk.educore.schoolms.util.PasswordUtil;
 import lk.educore.schoolms.validate.JOptionIcon;
 import lk.educore.schoolms.validate.DataValidator;
 import lk.educore.schoolms.exceptions.ValidationException;
@@ -28,6 +29,12 @@ public class SignIn extends javax.swing.JFrame {
     public SignIn() {
         initComponents();
         initializeLogging();
+
+        try {
+            PasswordUtil.migrateDatabasePasswords();
+        } catch (Exception ex) {
+            logger.log(Level.WARNING, "Startup password migration failed: " + ex.getMessage(), ex);
+        }
 
         try {
             InputStream imgStream = getClass().getResourceAsStream("/lk/educore/schoolms/resources/logo.png");
@@ -269,7 +276,20 @@ public class SignIn extends javax.swing.JFrame {
                 String actualRole = rs.getString("type_name");
                 int userId = rs.getInt("user_id");
 
-                if (password.equals(storedPassword)) {
+                if (PasswordUtil.checkPassword(password, storedPassword)) {
+                    // Upgrade legacy plain-text password to BCrypt hash in DB
+                    if (PasswordUtil.needsRehash(storedPassword)) {
+                        try {
+                            String newHashedPassword = PasswordUtil.hashPassword(password);
+                            MySQL.executeIUD("UPDATE user SET password = '" + newHashedPassword + "' WHERE user_id = " + userId);
+                            if ("Teacher".equals(actualRole)) {
+                                MySQL.executeIUD("UPDATE teacher SET password = '" + newHashedPassword + "' WHERE user_id = " + userId);
+                            }
+                        } catch (Exception ex) {
+                            logger.log(Level.WARNING, "Failed to upgrade password to BCrypt", ex);
+                        }
+                    }
+
                     // Populate UserSession
                     String teacherNIC = null;
                     int teacherId = -1;
