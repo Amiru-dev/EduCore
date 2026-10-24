@@ -44,6 +44,12 @@ public class StudentRegistration extends JDialog {
     private JRadioButton rdoMale;
     private JRadioButton rdoFemale;
     private ButtonGroup genderGroup;
+    
+    // Guardian search components
+    private JTextField txtGuardianSearchNIC;
+    private JButton btnSearchGuardian;
+    private JCheckBox chkUseExistingGuardian;
+    private int selectedGuardianId = -1;
 
     public StudentRegistration(Frame parent) {
         super(parent, "Student Registration", true);
@@ -53,7 +59,7 @@ public class StudentRegistration extends JDialog {
     }
 
     private void initComponents() {
-        setSize(700, 600);
+        setSize(700, 650);
         setLayout(new BorderLayout(10, 10));
 
         // Main panel with scroll
@@ -206,9 +212,32 @@ public class StudentRegistration extends JDialog {
         guardianLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 5, 0));
         formPanel.add(guardianLabel, gbc);
 
-        // Guardian First Name
+        // Guardian Search Panel
         gbc.gridx = 0;
         gbc.gridy = 11;
+        gbc.gridwidth = 2;
+        gbc.weightx = 0.0;
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
+        searchPanel.add(new JLabel("Search Guardian by NIC:"));
+        txtGuardianSearchNIC = new JTextField(15);
+        searchPanel.add(txtGuardianSearchNIC);
+        btnSearchGuardian = new JButton("Search");
+        btnSearchGuardian.addActionListener(e -> searchGuardianByNIC());
+        searchPanel.add(btnSearchGuardian);
+        formPanel.add(searchPanel, gbc);
+
+        // Use Existing Guardian Checkbox
+        gbc.gridx = 0;
+        gbc.gridy = 12;
+        gbc.gridwidth = 2;
+        gbc.weightx = 0.0;
+        chkUseExistingGuardian = new JCheckBox("Use Existing Guardian");
+        chkUseExistingGuardian.addActionListener(e -> toggleGuardianMode());
+        formPanel.add(chkUseExistingGuardian, gbc);
+
+        // Guardian First Name
+        gbc.gridx = 0;
+        gbc.gridy = 13;
         gbc.gridwidth = 1;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Guardian First Name:"), gbc);
@@ -220,7 +249,7 @@ public class StudentRegistration extends JDialog {
 
         // Guardian Last Name
         gbc.gridx = 0;
-        gbc.gridy = 12;
+        gbc.gridy = 14;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Guardian Last Name:"), gbc);
 
@@ -231,7 +260,7 @@ public class StudentRegistration extends JDialog {
 
         // Guardian NIC
         gbc.gridx = 0;
-        gbc.gridy = 13;
+        gbc.gridy = 15;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Guardian NIC:"), gbc);
 
@@ -242,7 +271,7 @@ public class StudentRegistration extends JDialog {
 
         // Guardian Relationship
         gbc.gridx = 0;
-        gbc.gridy = 14;
+        gbc.gridy = 16;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Relationship:"), gbc);
 
@@ -253,7 +282,7 @@ public class StudentRegistration extends JDialog {
 
         // Guardian Phone
         gbc.gridx = 0;
-        gbc.gridy = 15;
+        gbc.gridy = 17;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Guardian Phone:"), gbc);
 
@@ -264,7 +293,7 @@ public class StudentRegistration extends JDialog {
 
         // Guardian Email
         gbc.gridx = 0;
-        gbc.gridy = 16;
+        gbc.gridy = 18;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Guardian Email:"), gbc);
 
@@ -275,7 +304,7 @@ public class StudentRegistration extends JDialog {
 
         // Guardian Address
         gbc.gridx = 0;
-        gbc.gridy = 17;
+        gbc.gridy = 19;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Guardian Address:"), gbc);
 
@@ -286,7 +315,7 @@ public class StudentRegistration extends JDialog {
 
         // Guardian Occupation
         gbc.gridx = 0;
-        gbc.gridy = 18;
+        gbc.gridy = 20;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Guardian Occupation:"), gbc);
 
@@ -297,7 +326,7 @@ public class StudentRegistration extends JDialog {
 
         // Email and QR options
         gbc.gridx = 0;
-        gbc.gridy = 19;
+        gbc.gridy = 21;
         gbc.gridwidth = 2;
         gbc.weightx = 0.0;
         JPanel optionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -351,6 +380,79 @@ public class StudentRegistration extends JDialog {
             
         } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error loading grades: " + e.getMessage());
+        }
+    }
+
+    private void searchGuardianByNIC() {
+        String nic = txtGuardianSearchNIC.getText().trim();
+        
+        if (nic.isEmpty()) {
+            JOptionIcon.showWarningDialog(this, "Please enter a NIC to search.");
+            return;
+        }
+        
+        try {
+            String query = "SELECT guardian_id, first_name, last_name, nic, relationship, phone, email, address, occupation " +
+                          "FROM guardian WHERE nic = '" + nic.replace("'", "''") + "'";
+            ResultSet rs = MySQL.executeSearch(query);
+            
+            if (rs.next()) {
+                selectedGuardianId = rs.getInt("guardian_id");
+                txtGuardianFirstName.setText(rs.getString("first_name"));
+                txtGuardianLastName.setText(rs.getString("last_name"));
+                txtGuardianNIC.setText(rs.getString("nic"));
+                cmbGuardianRelationship.setSelectedItem(rs.getString("relationship"));
+                txtGuardianPhone.setText(rs.getString("phone"));
+                txtGuardianEmail.setText(rs.getString("email"));
+                txtGuardianAddress.setText(rs.getString("address"));
+                txtGuardianOccupation.setText(rs.getString("occupation"));
+                
+                chkUseExistingGuardian.setSelected(true);
+                toggleGuardianMode();
+                
+                JOptionIcon.showSuccessDialog(this, "Guardian found: " + rs.getString("first_name") + " " + rs.getString("last_name"));
+            } else {
+                JOptionIcon.showWarningDialog(this, "No guardian found with NIC: " + nic + "\nYou can add a new guardian manually.");
+                selectedGuardianId = -1;
+                chkUseExistingGuardian.setSelected(false);
+                toggleGuardianMode();
+            }
+            
+            rs.close();
+            
+        } catch (Exception e) {
+            JOptionIcon.showErrorDialog(this, "Error searching guardian: " + e.getMessage());
+        }
+    }
+
+    private void toggleGuardianMode() {
+        boolean useExisting = chkUseExistingGuardian.isSelected();
+        
+        txtGuardianFirstName.setEditable(!useExisting);
+        txtGuardianLastName.setEditable(!useExisting);
+        txtGuardianNIC.setEditable(!useExisting);
+        cmbGuardianRelationship.setEnabled(!useExisting);
+        txtGuardianPhone.setEditable(!useExisting);
+        txtGuardianEmail.setEditable(!useExisting);
+        txtGuardianAddress.setEditable(!useExisting);
+        txtGuardianOccupation.setEditable(!useExisting);
+        
+        if (useExisting) {
+            txtGuardianFirstName.setBackground(new Color(240, 240, 240));
+            txtGuardianLastName.setBackground(new Color(240, 240, 240));
+            txtGuardianNIC.setBackground(new Color(240, 240, 240));
+            txtGuardianPhone.setBackground(new Color(240, 240, 240));
+            txtGuardianEmail.setBackground(new Color(240, 240, 240));
+            txtGuardianAddress.setBackground(new Color(240, 240, 240));
+            txtGuardianOccupation.setBackground(new Color(240, 240, 240));
+        } else {
+            txtGuardianFirstName.setBackground(Color.WHITE);
+            txtGuardianLastName.setBackground(Color.WHITE);
+            txtGuardianNIC.setBackground(Color.WHITE);
+            txtGuardianPhone.setBackground(Color.WHITE);
+            txtGuardianEmail.setBackground(Color.WHITE);
+            txtGuardianAddress.setBackground(Color.WHITE);
+            txtGuardianOccupation.setBackground(Color.WHITE);
         }
     }
 
@@ -422,39 +524,52 @@ public class StudentRegistration extends JDialog {
             // Polymorphic validation from Person and Student
             student.validate();
 
-            // Validate guardian inputs
-            DataValidator.isRequired(guardianFirstName, "Guardian First Name");
-            DataValidator.isRequired(guardianLastName, "Guardian Last Name");
-            DataValidator.isValidNIC(guardianNIC, "Guardian NIC");
-            DataValidator.isValidEmail(guardianEmail, "Guardian Email");
-            DataValidator.isValidPhone(guardianPhone, "Guardian Phone");
-            DataValidator.isRequired(guardianAddress, "Guardian Address");
-            DataValidator.isRequired(guardianOccupation, "Guardian Occupation");
+            // Determine guardian handling
+            int guardianId = -1;
+            boolean useExistingGuardian = chkUseExistingGuardian.isSelected();
+            
+            if (useExistingGuardian) {
+                // Using existing guardian - validate that one is selected
+                if (selectedGuardianId == -1) {
+                    throw new ValidationException("Please search and select an existing guardian, or uncheck 'Use Existing Guardian' to add a new one.");
+                }
+                guardianId = selectedGuardianId;
+            } else {
+                // Validate guardian inputs for new guardian
+                DataValidator.isRequired(guardianFirstName, "Guardian First Name");
+                DataValidator.isRequired(guardianLastName, "Guardian Last Name");
+                DataValidator.isValidNIC(guardianNIC, "Guardian NIC");
+                DataValidator.isValidEmail(guardianEmail, "Guardian Email");
+                DataValidator.isValidPhone(guardianPhone, "Guardian Phone");
+                DataValidator.isRequired(guardianAddress, "Guardian Address");
+                DataValidator.isRequired(guardianOccupation, "Guardian Occupation");
+            }
 
             Connection conn = MySQL.getConnection();
             conn.setAutoCommit(false);
 
             try {
-                // Insert guardian
-                String guardianQuery = "INSERT INTO guardian (first_name, last_name, nic, relationship, phone, email, address, occupation) VALUES ('"
-                        + guardianFirstName + "', '"
-                        + guardianLastName + "', '"
-                        + guardianNIC + "', '"
-                        + relationship + "', '"
-                        + guardianPhone + "', '"
-                        + guardianEmail + "', '"
-                        + guardianAddress + "', '"
-                        + guardianOccupation + "')";
-                Statement guardianStmt = conn.createStatement();
-                guardianStmt.executeUpdate(guardianQuery, Statement.RETURN_GENERATED_KEYS);
-                
-                ResultSet guardianRs = guardianStmt.getGeneratedKeys();
-                int guardianId = -1;
-                if (guardianRs.next()) {
-                    guardianId = guardianRs.getInt(1);
+                // Insert guardian if not using existing
+                if (!useExistingGuardian) {
+                    String guardianQuery = "INSERT INTO guardian (first_name, last_name, nic, relationship, phone, email, address, occupation) VALUES ('"
+                            + guardianFirstName + "', '"
+                            + guardianLastName + "', '"
+                            + guardianNIC + "', '"
+                            + relationship + "', '"
+                            + guardianPhone + "', '"
+                            + guardianEmail + "', '"
+                            + guardianAddress + "', '"
+                            + guardianOccupation + "')";
+                    Statement guardianStmt = conn.createStatement();
+                    guardianStmt.executeUpdate(guardianQuery, Statement.RETURN_GENERATED_KEYS);
+                    
+                    ResultSet guardianRs = guardianStmt.getGeneratedKeys();
+                    if (guardianRs.next()) {
+                        guardianId = guardianRs.getInt(1);
+                    }
+                    guardianRs.close();
+                    guardianStmt.close();
                 }
-                guardianRs.close();
-                guardianStmt.close();
 
                 // Get grade ID
                 String gradeName = grade;
