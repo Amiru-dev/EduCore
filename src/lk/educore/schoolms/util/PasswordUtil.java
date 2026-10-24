@@ -1,9 +1,9 @@
 package lk.educore.schoolms.util;
 
 import org.mindrot.jbcrypt.BCrypt;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import lk.educore.schoolms.model.MySQL;
@@ -88,47 +88,46 @@ public class PasswordUtil {
      */
     public static void migrateDatabasePasswords() {
         try {
-            Connection conn = MySQL.getConnection();
-            if (conn == null || conn.isClosed()) {
-                return;
-            }
-
             // 1. Migrate user table
-            try (PreparedStatement selectUsers = conn.prepareStatement("SELECT user_id, password FROM user");
-                 ResultSet rs = selectUsers.executeQuery()) {
-                while (rs.next()) {
-                    int userId = rs.getInt("user_id");
-                    String currentPw = rs.getString("password");
-                    if (currentPw != null && !isHashed(currentPw)) {
-                        String hashed = hashPassword(currentPw);
-                        try (PreparedStatement update = conn.prepareStatement(
-                                "UPDATE user SET password = ? WHERE user_id = ?")) {
-                            update.setString(1, hashed);
-                            update.setInt(2, userId);
-                            update.executeUpdate();
-                        }
-                        LOGGER.log(Level.INFO, "Migrated user ID {0} password to BCrypt", userId);
-                    }
+            ResultSet rs = MySQL.executeSearch("SELECT user_id, password FROM user");
+            List<Integer> userIds = new ArrayList<>();
+            List<String> userHashes = new ArrayList<>();
+            while (rs.next()) {
+                int userId = rs.getInt("user_id");
+                String currentPw = rs.getString("password");
+                if (currentPw != null && !isHashed(currentPw)) {
+                    userIds.add(userId);
+                    userHashes.add(hashPassword(currentPw));
                 }
+            }
+            rs.close();
+
+            for (int i = 0; i < userIds.size(); i++) {
+                int userId = userIds.get(i);
+                String hashed = userHashes.get(i);
+                MySQL.executeIUD("UPDATE user SET password='" + hashed + "' WHERE user_id=" + userId);
+                LOGGER.log(Level.INFO, "Migrated user ID {0} password to BCrypt", userId);
             }
 
             // 2. Migrate teacher table
-            try (PreparedStatement selectTeachers = conn.prepareStatement("SELECT teacher_id, password FROM teacher");
-                 ResultSet rs = selectTeachers.executeQuery()) {
-                while (rs.next()) {
-                    int teacherId = rs.getInt("teacher_id");
-                    String currentPw = rs.getString("password");
-                    if (currentPw != null && !isHashed(currentPw)) {
-                        String hashed = hashPassword(currentPw);
-                        try (PreparedStatement update = conn.prepareStatement(
-                                "UPDATE teacher SET password = ? WHERE teacher_id = ?")) {
-                            update.setString(1, hashed);
-                            update.setInt(2, teacherId);
-                            update.executeUpdate();
-                        }
-                        LOGGER.log(Level.INFO, "Migrated teacher ID {0} password to BCrypt", teacherId);
-                    }
+            ResultSet trs = MySQL.executeSearch("SELECT teacher_id, password FROM teacher");
+            List<Integer> teacherIds = new ArrayList<>();
+            List<String> teacherHashes = new ArrayList<>();
+            while (trs.next()) {
+                int teacherId = trs.getInt("teacher_id");
+                String currentPw = trs.getString("password");
+                if (currentPw != null && !isHashed(currentPw)) {
+                    teacherIds.add(teacherId);
+                    teacherHashes.add(hashPassword(currentPw));
                 }
+            }
+            trs.close();
+
+            for (int i = 0; i < teacherIds.size(); i++) {
+                int teacherId = teacherIds.get(i);
+                String hashed = teacherHashes.get(i);
+                MySQL.executeIUD("UPDATE teacher SET password='" + hashed + "' WHERE teacher_id=" + teacherId);
+                LOGGER.log(Level.INFO, "Migrated teacher ID {0} password to BCrypt", teacherId);
             }
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Failed to run password migration: " + e.getMessage(), e);

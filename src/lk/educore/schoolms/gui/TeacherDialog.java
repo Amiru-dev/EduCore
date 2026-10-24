@@ -6,8 +6,6 @@ import lk.educore.schoolms.validate.JOptionIcon;
 
 import javax.swing.*;
 import java.awt.*;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
@@ -207,41 +205,23 @@ public class TeacherDialog extends JDialog {
             // Sync user account for teacher
             Integer linkedUserId = existingUserId;
             if (!user.isEmpty()) {
-                Connection conn = MySQL.getConnection();
                 if (linkedUserId != null && linkedUserId > 0) {
-                    try (PreparedStatement uStmt = conn.prepareStatement(
-                            "UPDATE user SET username = ?, password = ?, email = ? WHERE user_id = ?")) {
-                        uStmt.setString(1, user);
-                        uStmt.setString(2, passwordToStore);
-                        uStmt.setString(3, email);
-                        uStmt.setInt(4, linkedUserId);
-                        uStmt.executeUpdate();
-                    }
+                    MySQL.executeIUD("UPDATE user SET username='" + user + "', password='" + passwordToStore + "', email='" + email + "' WHERE user_id=" + linkedUserId);
                 } else {
-                    ResultSet checkUser = MySQL.executeSearch("SELECT user_id FROM user WHERE username = '" + user.replace("'", "''") + "'");
+                    ResultSet checkUser = MySQL.executeSearch("SELECT user_id FROM user WHERE username = '" + user + "'");
                     if (checkUser.next()) {
                         linkedUserId = checkUser.getInt("user_id");
-                        try (PreparedStatement uStmt = conn.prepareStatement(
-                                "UPDATE user SET password = ?, email = ?, user_type_id = 2 WHERE user_id = ?")) {
-                            uStmt.setString(1, passwordToStore);
-                            uStmt.setString(2, email);
-                            uStmt.setInt(3, linkedUserId);
-                            uStmt.executeUpdate();
-                        }
+                        MySQL.executeIUD("UPDATE user SET password='" + passwordToStore + "', email='" + email + "', user_type_id=2 WHERE user_id=" + linkedUserId);
                     } else {
-                        try (PreparedStatement uStmt = conn.prepareStatement(
-                                "INSERT INTO user (username, password, email, user_type_id, is_active) VALUES (?, ?, ?, 2, 1)",
-                                Statement.RETURN_GENERATED_KEYS)) {
-                            uStmt.setString(1, user);
-                            uStmt.setString(2, passwordToStore);
-                            uStmt.setString(3, email);
-                            uStmt.executeUpdate();
-                            ResultSet gKeys = uStmt.getGeneratedKeys();
-                            if (gKeys.next()) {
-                                linkedUserId = gKeys.getInt(1);
-                            }
-                            gKeys.close();
+                        String insertUserQuery = "INSERT INTO user (username, password, email, user_type_id, is_active) VALUES ('" + user + "', '" + passwordToStore + "', '" + email + "', 2, 1)";
+                        Statement uStmt = MySQL.getConnection().createStatement();
+                        uStmt.executeUpdate(insertUserQuery, Statement.RETURN_GENERATED_KEYS);
+                        ResultSet gKeys = uStmt.getGeneratedKeys();
+                        if (gKeys.next()) {
+                            linkedUserId = gKeys.getInt(1);
                         }
+                        gKeys.close();
+                        uStmt.close();
                     }
                     checkUser.close();
                 }
