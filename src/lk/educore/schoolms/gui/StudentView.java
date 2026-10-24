@@ -1,6 +1,7 @@
 package lk.educore.schoolms.gui;
 
 import lk.educore.schoolms.model.MySQL;
+import lk.educore.schoolms.model.Student;
 import lk.educore.schoolms.validate.JOptionIcon;
 
 import javax.swing.*;
@@ -164,14 +165,22 @@ public class StudentView extends JDialog {
 
         try {
             ResultSet rs = MySQL.executeSearch(
-                    "SELECT g.grade_name, s.registration_date, s.is_active "
+                    "SELECT s.student_id, s.first_name, s.last_name, g.grade_name, s.registration_date, s.is_active "
                     + "FROM student s JOIN grade g ON s.grade_id = g.grade_id "
                     + "WHERE s.student_id = '" + studentId + "'");
 
             if (rs.next()) {
-                addCardRow(card, gbc, 0, "Grade", rs.getString("grade_name"));
-                addCardRow(card, gbc, 1, "Registration Date", rs.getString("registration_date"));
-                addCardRow(card, gbc, 2, "Status", rs.getBoolean("is_active") ? "Active" : "Inactive");
+                Student student = new Student();
+                student.setStudentId(rs.getString("student_id"));
+                student.setFirstName(rs.getString("first_name"));
+                student.setLastName(rs.getString("last_name"));
+                student.setGrade(rs.getString("grade_name"));
+                student.setRegistrationDate(rs.getString("registration_date"));
+                student.setStatus(rs.getBoolean("is_active") ? "Active" : "Inactive");
+
+                addCardRow(card, gbc, 0, "Grade", student.getGrade());
+                addCardRow(card, gbc, 1, "Registration Date", student.getRegistrationDate());
+                addCardRow(card, gbc, 2, "Status", student.getStatus());
             }
             rs.close();
         } catch (Exception e) {
@@ -462,9 +471,12 @@ public class StudentView extends JDialog {
         try {
             ResultSet rs = MySQL.executeSearch("SELECT email, first_name, last_name FROM student WHERE student_id = '" + studentId + "'");
             if (rs.next()) {
-                String email = rs.getString("email");
-                String name = rs.getString("first_name") + " " + rs.getString("last_name");
-                new StudentMailDialog((Frame) SwingUtilities.getWindowAncestor(this), email, name).setVisible(true);
+                Student student = new Student();
+                student.setStudentId(studentId);
+                student.setFirstName(rs.getString("first_name"));
+                student.setLastName(rs.getString("last_name"));
+                student.setEmail(rs.getString("email"));
+                new StudentMailDialog((Frame) SwingUtilities.getWindowAncestor(this), student.getEmail(), student.getFullName()).setVisible(true);
             }
             rs.close();
         } catch (Exception e) {
@@ -481,9 +493,12 @@ public class StudentView extends JDialog {
         try {
             ResultSet rs = MySQL.executeSearch("SELECT first_name, last_name FROM student WHERE student_id = '" + studentId + "'");
             if (rs.next()) {
-                String name = rs.getString("first_name") + " " + rs.getString("last_name");
-                lk.educore.schoolms.model.QRCodeGenerator.generateStudentQR(studentId, name);
-                JOptionIcon.showSuccessDialog(this, "QR code generated successfully for " + name);
+                Student student = new Student();
+                student.setStudentId(studentId);
+                student.setFirstName(rs.getString("first_name"));
+                student.setLastName(rs.getString("last_name"));
+                lk.educore.schoolms.model.QRCodeGenerator.generateStudentQR(student.getStudentId(), student.getFullName());
+                JOptionIcon.showSuccessDialog(this, "QR code generated successfully for " + student.getFullName());
             }
             rs.close();
         } catch (Exception e) {

@@ -1,6 +1,8 @@
 package lk.educore.schoolms.gui;
 
+import lk.educore.schoolms.exceptions.ValidationException;
 import lk.educore.schoolms.model.MySQL;
+import lk.educore.schoolms.model.Teacher;
 import lk.educore.schoolms.util.PasswordUtil;
 import lk.educore.schoolms.validate.JOptionIcon;
 
@@ -120,15 +122,29 @@ public class TeacherDialog extends JDialog {
         try {
             ResultSet rs = MySQL.executeSearch("SELECT * FROM teacher WHERE NIC = '" + teacherNIC + "'");
             if (rs.next()) {
-                txtNIC.setText(rs.getString("NIC"));
-                txtFirstName.setText(rs.getString("first_name"));
-                txtLastName.setText(rs.getString("last_name"));
+                Teacher teacher = new Teacher();
+                teacher.setNic(rs.getString("NIC"));
+                teacher.setFirstName(rs.getString("first_name"));
+                teacher.setLastName(rs.getString("last_name"));
                 java.sql.Date dobDate = rs.getDate("dob");
-                if (dobDate != null) dcDob.setDate(dobDate);
-                cmbGender.setSelectedItem(rs.getString("gender"));
-                txtEmail.setText(rs.getString("email"));
-                txtPhone.setText(rs.getString("phone"));
-                txtAddress.setText(rs.getString("address"));
+                if (dobDate != null) {
+                    teacher.setDateOfBirth(dobDate.toString());
+                    dcDob.setDate(dobDate);
+                }
+                teacher.setGender(rs.getString("gender"));
+                teacher.setEmail(rs.getString("email"));
+                teacher.setPhone(rs.getString("phone"));
+                teacher.setAddress(rs.getString("address"));
+                teacher.setBasicSalary(rs.getDouble("salary"));
+
+                txtNIC.setText(teacher.getPersonId());
+                txtFirstName.setText(teacher.getFirstName());
+                txtLastName.setText(teacher.getLastName());
+                cmbGender.setSelectedItem(teacher.getGender());
+                txtEmail.setText(teacher.getEmail());
+                txtPhone.setText(teacher.getPhone());
+                txtAddress.setText(teacher.getAddress());
+                txtSalary.setText(String.valueOf(teacher.getBasicSalary()));
                 txtUsername.setText(rs.getString("username"));
                 existingPasswordHash = rs.getString("password");
                 int uId = rs.getInt("user_id");
@@ -136,7 +152,6 @@ public class TeacherDialog extends JDialog {
                     existingUserId = uId;
                 }
                 txtPassword.setText(""); // Leave empty to keep existing password, or enter new password
-                txtSalary.setText(rs.getString("salary"));
                 java.sql.Date hireDate = rs.getDate("hire_date");
                 if (hireDate != null) dcHireDate.setDate(hireDate);
 
@@ -185,6 +200,36 @@ public class TeacherDialog extends JDialog {
                 return;
             }
 
+            double salaryVal = 0.0;
+            try {
+                salaryVal = Double.parseDouble(sal);
+            } catch (NumberFormatException nfe) {
+                JOptionIcon.showWarningDialog(this, "Salary must be a valid number.");
+                return;
+            }
+
+            // Build Teacher domain object (hierarchy: Teacher extends Person)
+            Teacher teacher = new Teacher();
+            teacher.setNic(nic);
+            teacher.setFirstName(fName);
+            teacher.setLastName(lName);
+            teacher.setDateOfBirth(dob);
+            teacher.setGender(gender);
+            teacher.setEmail(email);
+            teacher.setPhone(phone);
+            teacher.setAddress(address);
+            teacher.setTeacherType(cmbType.getSelectedItem().toString().split(" - ")[1]);
+            teacher.setBasicSalary(salaryVal);
+            teacher.setStatus(cmbStatus.getSelectedItem().toString().split(" - ")[1]);
+
+            // Call polymorphic validation method
+            try {
+                teacher.validate();
+            } catch (ValidationException ve) {
+                JOptionIcon.showWarningDialog(this, ve.getMessage());
+                return;
+            }
+
             String passwordToStore;
             if (isEdit) {
                 if (pass.isEmpty()) {
@@ -206,14 +251,14 @@ public class TeacherDialog extends JDialog {
             Integer linkedUserId = existingUserId;
             if (!user.isEmpty()) {
                 if (linkedUserId != null && linkedUserId > 0) {
-                    MySQL.executeIUD("UPDATE user SET username='" + user + "', password='" + passwordToStore + "', email='" + email + "' WHERE user_id=" + linkedUserId);
+                    MySQL.executeIUD("UPDATE user SET username='" + user + "', password='" + passwordToStore + "', email='" + teacher.getEmail() + "' WHERE user_id=" + linkedUserId);
                 } else {
                     ResultSet checkUser = MySQL.executeSearch("SELECT user_id FROM user WHERE username = '" + user + "'");
                     if (checkUser.next()) {
                         linkedUserId = checkUser.getInt("user_id");
-                        MySQL.executeIUD("UPDATE user SET password='" + passwordToStore + "', email='" + email + "', user_type_id=2 WHERE user_id=" + linkedUserId);
+                        MySQL.executeIUD("UPDATE user SET password='" + passwordToStore + "', email='" + teacher.getEmail() + "', user_type_id=2 WHERE user_id=" + linkedUserId);
                     } else {
-                        String insertUserQuery = "INSERT INTO user (username, password, email, user_type_id, is_active) VALUES ('" + user + "', '" + passwordToStore + "', '" + email + "', 2, 1)";
+                        String insertUserQuery = "INSERT INTO user (username, password, email, user_type_id, is_active) VALUES ('" + user + "', '" + passwordToStore + "', '" + teacher.getEmail() + "', 2, 1)";
                         Statement uStmt = MySQL.getConnection().createStatement();
                         uStmt.executeUpdate(insertUserQuery, Statement.RETURN_GENERATED_KEYS);
                         ResultSet gKeys = uStmt.getGeneratedKeys();
@@ -228,17 +273,17 @@ public class TeacherDialog extends JDialog {
             }
 
             if (isEdit) {
-                String query = "UPDATE teacher SET first_name='" + fName + "', last_name='" + lName + "', dob='" + dob + "', gender='" + gender
-                        + "', email='" + email + "', phone='" + phone + "', address='" + address + "', teacher_type_id=" + type
-                        + ", username='" + user + "', password='" + passwordToStore + "', salary=" + sal + ", hire_date='" + hire
+                String query = "UPDATE teacher SET first_name='" + teacher.getFirstName() + "', last_name='" + teacher.getLastName() + "', dob='" + teacher.getDateOfBirth() + "', gender='" + teacher.getGender()
+                        + "', email='" + teacher.getEmail() + "', phone='" + teacher.getPhone() + "', address='" + teacher.getAddress() + "', teacher_type_id=" + type
+                        + ", username='" + user + "', password='" + passwordToStore + "', salary=" + teacher.getBasicSalary() + ", hire_date='" + hire
                         + "', status_id=" + stat + ", user_id=" + (linkedUserId != null ? linkedUserId : "NULL")
-                        + " WHERE NIC='" + teacherNIC + "'";
+                        + " WHERE NIC='" + teacher.getPersonId() + "'";
                 MySQL.executeIUD(query);
                 JOptionIcon.showSuccessDialog(this, "Teacher updated successfully!");
             } else {
                 String query = "INSERT INTO teacher (NIC, first_name, last_name, dob, gender, email, phone, address, teacher_type_id, username, password, salary, hire_date, status_id, user_id) "
-                        + "VALUES ('" + nic + "', '" + fName + "', '" + lName + "', '" + dob + "', '" + gender + "', '" + email + "', '" + phone
-                        + "', '" + address + "', " + type + ", '" + user + "', '" + passwordToStore + "', " + sal + ", '" + hire + "', " + stat + ", " + (linkedUserId != null ? linkedUserId : "NULL") + ")";
+                        + "VALUES ('" + teacher.getPersonId() + "', '" + teacher.getFirstName() + "', '" + teacher.getLastName() + "', '" + teacher.getDateOfBirth() + "', '" + teacher.getGender() + "', '" + teacher.getEmail() + "', '" + teacher.getPhone()
+                        + "', '" + teacher.getAddress() + "', " + type + ", '" + user + "', '" + passwordToStore + "', " + teacher.getBasicSalary() + ", '" + hire + "', " + stat + ", " + (linkedUserId != null ? linkedUserId : "NULL") + ")";
                 MySQL.executeIUD(query);
                 JOptionIcon.showSuccessDialog(this, "Teacher added successfully!");
             }

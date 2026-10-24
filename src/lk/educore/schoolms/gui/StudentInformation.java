@@ -1,6 +1,7 @@
 package lk.educore.schoolms.gui;
 
 import lk.educore.schoolms.model.MySQL;
+import lk.educore.schoolms.model.Student;
 import lk.educore.schoolms.validate.JOptionIcon;
 
 import javax.swing.*;
@@ -14,12 +15,17 @@ import java.sql.*;
 public class StudentInformation extends JPanel {
 
     private String studentId;
+    private Student student;
     private JLabel lblStudentId, lblName, lblNIC, lblEmail, lblPhone, lblAddress, lblGrade, lblGuardian, lblGuardianPhone, lblRegistrationDate;
 
     public StudentInformation(String studentId) {
         this.studentId = studentId;
         initComponents();
         loadStudentInfo();
+    }
+
+    public Student getStudent() {
+        return student;
     }
 
     private void initComponents() {
@@ -169,7 +175,7 @@ public class StudentInformation extends JPanel {
 
     private void loadStudentInfo() {
         try {
-            ResultSet rs = MySQL.executeSearch("SELECT s.student_id, s.first_name, s.last_name, s.nic, s.email, s.phone, s.address, " +
+            ResultSet rs = MySQL.executeSearch("SELECT s.student_id, s.first_name, s.last_name, s.dob, s.gender, s.nic, s.email, s.phone, s.address, s.is_active, " +
                           "g.grade_name, gu.first_name as guardian_first, gu.last_name as guardian_last, " +
                           "gu.phone as guardian_phone, s.registration_date " +
                           "FROM student s " +
@@ -178,16 +184,33 @@ public class StudentInformation extends JPanel {
                           "WHERE s.student_id = '" + studentId + "'");
             
             if (rs.next()) {
-                lblStudentId.setText(rs.getString("student_id"));
-                lblName.setText(rs.getString("first_name") + " " + rs.getString("last_name"));
-                lblNIC.setText(rs.getString("nic"));
-                lblEmail.setText(rs.getString("email"));
-                lblPhone.setText(rs.getString("phone"));
-                lblAddress.setText(rs.getString("address"));
-                lblGrade.setText(rs.getString("grade_name"));
+                // Build Student domain object
+                student = new Student(
+                    rs.getString("student_id"),
+                    rs.getString("first_name"),
+                    rs.getString("last_name"),
+                    rs.getString("email"),
+                    rs.getString("phone"),
+                    rs.getString("nic"),
+                    rs.getString("dob"),
+                    rs.getString("gender"),
+                    rs.getString("grade_name"),
+                    rs.getString("address")
+                );
+                student.setRegistrationDate(rs.getString("registration_date"));
+                student.setStatus(rs.getBoolean("is_active") ? "Active" : "Inactive");
+
+                // Bind UI labels using polymorphic Person & Student methods
+                lblStudentId.setText(student.getPersonId());
+                lblName.setText(student.getFullName());
+                lblNIC.setText(student.getNic() != null && !student.getNic().isEmpty() ? student.getNic() : "—");
+                lblEmail.setText(student.getEmail());
+                lblPhone.setText(student.getPhone());
+                lblAddress.setText(student.getAddress());
+                lblGrade.setText(student.getRoleDescription()); // "Student – Grade ..."
                 lblGuardian.setText(rs.getString("guardian_first") + " " + rs.getString("guardian_last"));
                 lblGuardianPhone.setText(rs.getString("guardian_phone"));
-                lblRegistrationDate.setText(rs.getString("registration_date"));
+                lblRegistrationDate.setText(student.getRegistrationDate());
             } else {
                 JOptionIcon.showErrorDialog(this, "Student not found: " + studentId);
             }

@@ -30,6 +30,7 @@ public abstract class Person {
     private String phone;
     private String nic;
     private String dateOfBirth; // YYYY-MM-DD
+    private String gender;
     private String address;
     private String status;
 
@@ -53,12 +54,18 @@ public abstract class Person {
      */
     protected Person(String firstName, String lastName, String email, String phone,
             String nic, String dateOfBirth, String address, String status) {
+        this(firstName, lastName, email, phone, nic, dateOfBirth, null, address, status);
+    }
+
+    protected Person(String firstName, String lastName, String email, String phone,
+            String nic, String dateOfBirth, String gender, String address, String status) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.phone = phone;
         this.nic = nic;
         this.dateOfBirth = dateOfBirth;
+        this.gender = gender;
         this.address = address;
         this.status = status;
     }
@@ -220,6 +227,14 @@ public abstract class Person {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 
     public String getStatus() {

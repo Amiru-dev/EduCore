@@ -1,6 +1,7 @@
 package lk.educore.schoolms.gui;
 
 import lk.educore.schoolms.model.MySQL;
+import lk.educore.schoolms.model.Student;
 import lk.educore.schoolms.model.UserSession;
 import lk.educore.schoolms.validate.JOptionIcon;
 
@@ -317,15 +318,25 @@ public class StudentManagement extends JPanel {
             ResultSet rs = MySQL.executeSearch(query);
 
             while (rs.next()) {
-                String studentId = rs.getString("student_id");
-                String name = rs.getString("first_name") + " " + rs.getString("last_name");
-                String grade = rs.getString("grade_name");
-                String nic = rs.getString("nic");
-                String phone = rs.getString("phone");
-                String email = rs.getString("email");
-                String status = rs.getBoolean("is_active") ? "Active" : "Inactive";
+                Student student = new Student();
+                student.setStudentId(rs.getString("student_id"));
+                student.setFirstName(rs.getString("first_name"));
+                student.setLastName(rs.getString("last_name"));
+                student.setGrade(rs.getString("grade_name"));
+                student.setNic(rs.getString("nic"));
+                student.setPhone(rs.getString("phone"));
+                student.setEmail(rs.getString("email"));
+                student.setStatus(rs.getBoolean("is_active") ? "Active" : "Inactive");
 
-                tableModel.addRow(new Object[]{studentId, name, grade, nic, phone, email, status});
+                tableModel.addRow(new Object[]{
+                    student.getPersonId(),
+                    student.getFullName(),
+                    student.getGrade(),
+                    student.getNic(),
+                    student.getPhone(),
+                    student.getEmail(),
+                    student.getStatus()
+                });
             }
 
             rs.close();
@@ -403,15 +414,25 @@ public class StudentManagement extends JPanel {
             ResultSet rs = MySQL.executeSearch(query);
 
             while (rs.next()) {
-                String studentId = rs.getString("student_id");
-                String name = rs.getString("first_name") + " " + rs.getString("last_name");
-                String grade = rs.getString("grade_name");
-                String nic = rs.getString("nic");
-                String phone = rs.getString("phone");
-                String email = rs.getString("email");
-                String status = rs.getBoolean("is_active") ? "Active" : "Inactive";
+                Student student = new Student();
+                student.setStudentId(rs.getString("student_id"));
+                student.setFirstName(rs.getString("first_name"));
+                student.setLastName(rs.getString("last_name"));
+                student.setGrade(rs.getString("grade_name"));
+                student.setNic(rs.getString("nic"));
+                student.setPhone(rs.getString("phone"));
+                student.setEmail(rs.getString("email"));
+                student.setStatus(rs.getBoolean("is_active") ? "Active" : "Inactive");
 
-                tableModel.addRow(new Object[]{studentId, name, grade, nic, phone, email, status});
+                tableModel.addRow(new Object[]{
+                    student.getPersonId(),
+                    student.getFullName(),
+                    student.getGrade(),
+                    student.getNic(),
+                    student.getPhone(),
+                    student.getEmail(),
+                    student.getStatus()
+                });
             }
 
             rs.close();

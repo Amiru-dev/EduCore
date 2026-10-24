@@ -1,6 +1,7 @@
 package lk.educore.schoolms.gui;
 
 import lk.educore.schoolms.model.MySQL;
+import lk.educore.schoolms.model.Student;
 import lk.educore.schoolms.util.PasswordUtil;
 import lk.educore.schoolms.email.SendQREmail;
 import lk.educore.schoolms.email.SendEmail;
@@ -409,12 +410,19 @@ public class StudentRegistration extends JDialog {
             String guardianOccupation = txtGuardianOccupation.getText().trim();
             String relationship = (String) cmbGuardianRelationship.getSelectedItem();
 
-            DataValidator.isRequired(firstName, "First Name");
-            DataValidator.isRequired(lastName, "Last Name");
-            DataValidator.isValidNIC(nic, "Student NIC");
-            DataValidator.isValidEmail(email, "Student Email");
-            DataValidator.isValidPhone(phone, "Student Phone");
-            DataValidator.isRequired(address, "Address");
+            java.util.Date dobDate = dateChooserDOB.getDate();
+            if (dobDate == null) {
+                throw new ValidationException("Date of Birth is required");
+            }
+            String dob = new SimpleDateFormat("yyyy-MM-dd").format(dobDate);
+            String gender = rdoMale.isSelected() ? "Male" : "Female";
+
+            // Build Student domain object (inherits from Person)
+            Student student = new Student(studentId, firstName, lastName, email, phone, nic, dob, gender, grade, address);
+            // Polymorphic validation from Person and Student
+            student.validate();
+
+            // Validate guardian inputs
             DataValidator.isRequired(guardianFirstName, "Guardian First Name");
             DataValidator.isRequired(guardianLastName, "Guardian Last Name");
             DataValidator.isValidNIC(guardianNIC, "Guardian NIC");
@@ -422,14 +430,6 @@ public class StudentRegistration extends JDialog {
             DataValidator.isValidPhone(guardianPhone, "Guardian Phone");
             DataValidator.isRequired(guardianAddress, "Guardian Address");
             DataValidator.isRequired(guardianOccupation, "Guardian Occupation");
-            
-            java.util.Date dobDate = dateChooserDOB.getDate();
-            if (dobDate == null) {
-                throw new ValidationException("Date of Birth is required");
-            }
-            String dob = new SimpleDateFormat("yyyy-MM-dd").format(dobDate);
-            
-            String gender = rdoMale.isSelected() ? "Male" : "Female";
 
             Connection conn = MySQL.getConnection();
             conn.setAutoCommit(false);
@@ -496,18 +496,24 @@ public class StudentRegistration extends JDialog {
                 userRs.close();
                 userStmt.close();
 
-                // Insert student
+                // Save student using the validated Student domain object
+                student.setGradeId(gradeId);
+                student.setGuardianId(guardianId);
+                student.setUserId(userId);
+
                 String studentQuery = "INSERT INTO student (student_id, first_name, last_name, dob, gender, nic, email, phone, address, grade_id, guardian_id, user_id, registration_date, is_active) VALUES ('" 
-                        + studentId + "', '" 
-                        + firstName + "', '" 
-                        + lastName + "', '" + dob + "', '" + gender + "', " 
-                        + (nic.isEmpty() ? "NULL" : "'" + nic + "'") + ", '" 
-                        + email + "', '" 
-                        + phone + "', '" 
-                        + address + "', " 
-                        + gradeId + ", " 
-                        + guardianId + ", " 
-                        + userId + ", CURDATE(), 1)";
+                        + student.getStudentId() + "', '" 
+                        + student.getFirstName() + "', '" 
+                        + student.getLastName() + "', '" 
+                        + student.getDateOfBirth() + "', '" 
+                        + student.getGender() + "', " 
+                        + (student.getNic() == null || student.getNic().isEmpty() ? "NULL" : "'" + student.getNic() + "'") + ", '" 
+                        + student.getEmail() + "', '" 
+                        + student.getPhone() + "', '" 
+                        + student.getAddress() + "', " 
+                        + student.getGradeId() + ", " 
+                        + student.getGuardianId() + ", " 
+                        + student.getUserId() + ", CURDATE(), 1)";
                 Statement studentStmt = conn.createStatement();
                 studentStmt.executeUpdate(studentQuery);
                 studentStmt.close();
@@ -519,33 +525,33 @@ public class StudentRegistration extends JDialog {
                     try {
                         if (chkGenerateQR.isSelected()) {
                             SendQREmail.sendRegistrationEmailWithQR(
-                                email,
-                                studentId,
-                                firstName + " " + lastName,
-                                grade,
+                                student.getEmail(),
+                                student.getStudentId(),
+                                student.getFullName(),
+                                student.getGrade(),
                                 username,
                                 temporaryPassword
                             );
                         } else {
-                            String message = "Dear " + firstName + " " + lastName + ",\n\n" +
+                            String message = "Dear " + student.getFullName() + ",\n\n" +
                                 "Welcome to Central College Anuradhapura!\n\n" +
                                 "Your student account has been created successfully.\n\n" +
-                                "Student ID: " + studentId + "\n" +
-                                "Grade: " + grade + "\n" +
+                                "Student ID: " + student.getStudentId() + "\n" +
+                                "Grade: " + student.getGrade() + "\n" +
                                 "Username: " + username + "\n" +
                                 "Temporary Password: " + temporaryPassword + "\n\n" +
                                 "Please change your password after your first login.\n\n" +
                                 "Best regards,\n" +
                                 "Central College Anuradhapura";
                             
-                            SendEmail.sendEmail(email, "Student Registration Confirmation", message);
+                            SendEmail.sendEmail(student.getEmail(), "Student Registration Confirmation", message);
                         }
                     } catch (Exception emailEx) {
                         JOptionIcon.showWarningDialog(this, "Student registered successfully but email failed: " + emailEx.getMessage());
                     }
                 }
 
-                JOptionIcon.showSuccessDialog(this, "Student registered successfully! Student ID: " + studentId);
+                JOptionIcon.showSuccessDialog(this, "Student registered successfully! Student ID: " + student.getStudentId());
                 dispose();
 
             } catch (SQLException e) {

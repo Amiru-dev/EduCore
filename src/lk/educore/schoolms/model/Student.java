@@ -21,6 +21,11 @@ public class Student extends Person {
     // Student-specific fields (not shared with Teacher)
     private String studentId;
     private String grade;
+    private int gradeId = -1;
+    private int guardianId = -1;
+    private int userId = -1;
+    private String registrationDate;
+    private String photoPath;
 
     public Student() {
         super();
@@ -30,6 +35,13 @@ public class Student extends Person {
     public Student(String studentId, String firstName, String lastName, String email, String phone,
             String nic, String dateOfBirth, String grade, String address) {
         super(firstName, lastName, email, phone, nic, dateOfBirth, address, "Active");
+        this.studentId = studentId;
+        this.grade = grade;
+    }
+
+    public Student(String studentId, String firstName, String lastName, String email, String phone,
+            String nic, String dateOfBirth, String gender, String grade, String address) {
+        super(firstName, lastName, email, phone, nic, dateOfBirth, gender, address, "Active");
         this.studentId = studentId;
         this.grade = grade;
     }
@@ -57,6 +69,7 @@ public class Student extends Person {
         // Delegate common field validation to the superclass
         validateCommonFields();
 
+        DataValidator.isRequired(getAddress(), "Address");
         DataValidator.isRequired(grade, "Grade");
         return true;
     }
@@ -66,7 +79,7 @@ public class Student extends Person {
      */
     @Override
     public String getRoleDescription() {
-        return "Student – Grade " + (grade != null ? grade : "N/A");
+        return "Student – " + (grade != null ? grade : "N/A");
     }
 
     // -------------------------------------------------------------------------
@@ -86,6 +99,46 @@ public class Student extends Person {
 
     public void setGrade(String grade) {
         this.grade = grade;
+    }
+
+    public int getGradeId() {
+        return gradeId;
+    }
+
+    public void setGradeId(int gradeId) {
+        this.gradeId = gradeId;
+    }
+
+    public int getGuardianId() {
+        return guardianId;
+    }
+
+    public void setGuardianId(int guardianId) {
+        this.guardianId = guardianId;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    public String getRegistrationDate() {
+        return registrationDate;
+    }
+
+    public void setRegistrationDate(String registrationDate) {
+        this.registrationDate = registrationDate;
+    }
+
+    public String getPhotoPath() {
+        return photoPath;
+    }
+
+    public void setPhotoPath(String photoPath) {
+        this.photoPath = photoPath;
     }
 
     @Override
