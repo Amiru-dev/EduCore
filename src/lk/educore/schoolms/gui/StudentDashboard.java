@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Student Dashboard
@@ -29,7 +30,7 @@ import java.util.logging.Level;
  */
 public class StudentDashboard extends JFrame {
 
-    private static Logger logger = SignIn.getLoggerObject();
+    private static Logger logger = Logger.getLogger(StudentDashboard.class.getName());
 
     private String username;
     private String studentId;
