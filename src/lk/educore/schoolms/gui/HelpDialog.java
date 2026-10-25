@@ -27,7 +27,7 @@ public class HelpDialog extends JDialog {
         JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JLabel titleLabel = new JLabel("EduCore User Guide");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        titlePanel.add(titlePanel);
+        titlePanel.add(titleLabel);
         mainPanel.add(titlePanel, BorderLayout.NORTH);
 
         // Help content

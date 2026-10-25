@@ -391,12 +391,23 @@ public class Dashboard extends JFrame {
         if (isAdmin) {
             editMenu.add(updateLogoMenu);
         }
-        
+
         menuBar.add(fileMenu);
         if (isAdmin) {
             menuBar.add(editMenu);
         }
-        
+
+        // Help Menu - Available to all users
+        JMenu helpMenu = new JMenu("Help");
+
+        JMenuItem userGuideMenu = new JMenuItem("User Guide");
+        userGuideMenu.addActionListener(e -> {
+            new HelpDialog(this).setVisible(true);
+        });
+
+        helpMenu.add(userGuideMenu);
+        menuBar.add(helpMenu);
+
         return menuBar;
     }
 
