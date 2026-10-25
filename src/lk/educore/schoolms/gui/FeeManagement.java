@@ -5,6 +5,7 @@ import lk.educore.schoolms.validate.JOptionIcon;
 import lk.educore.schoolms.charts.PieChart;
 import lk.educore.schoolms.email.SendEmail;
 import lk.educore.schoolms.exceptions.EmailException;
+import lk.educore.schoolms.util.ReportGenerator;
 
 import javax.swing.*;
 import javax.swing.table.*;
@@ -15,6 +16,8 @@ import java.sql.*;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Fee Management Panel Main interface for fee collection, payment tracking,
@@ -26,7 +29,7 @@ public class FeeManagement extends JPanel {
     private DefaultTableModel tableModel;
     private JTextField txtSearch;
     private JComboBox<String> cmbSearchBy;
-    private JButton btnAddFee, btnMarkPaid, btnViewReceipt, btnRefresh, btnAnalytics, btnSendReceipt;
+    private JButton btnAddFee, btnMarkPaid, btnViewReceipt, btnRefresh, btnAnalytics, btnSendReceipt, btnPaidFeesReport, btnPendingFeesReport;
     private JTabbedPane tabbedPane;
 
     // Analytics components for refreshing
@@ -134,12 +137,22 @@ public class FeeManagement extends JPanel {
         btnAnalytics.addActionListener(e -> viewAnalytics());
         applySecondaryButtonEffect(btnAnalytics);
 
+        btnPaidFeesReport = new JButton("Paid Fees");
+        btnPaidFeesReport.addActionListener(e -> generatePaidFeesReport());
+        applySecondaryButtonEffect(btnPaidFeesReport);
+
+        btnPendingFeesReport = new JButton("Pending Fees");
+        btnPendingFeesReport.addActionListener(e -> generatePendingFeesReport());
+        applySecondaryButtonEffect(btnPendingFeesReport);
+
         buttonPanel.add(btnAddFee);
         buttonPanel.add(btnMarkPaid);
         buttonPanel.add(btnViewReceipt);
         buttonPanel.add(btnSendReceipt);
         buttonPanel.add(btnRefresh);
         buttonPanel.add(btnAnalytics);
+        buttonPanel.add(btnPaidFeesReport);
+        buttonPanel.add(btnPendingFeesReport);
 
         panel.add(buttonPanel, BorderLayout.NORTH);
 
@@ -821,5 +834,17 @@ public class FeeManagement extends JPanel {
                 }
             }
         });
+    }
+
+    private void generatePaidFeesReport() {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("REPORT_TITLE", "Paid Fees Report");
+        ReportGenerator.generateReport("FeeCollectionReport", parameters, "Paid Fees Report");
+    }
+
+    private void generatePendingFeesReport() {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("REPORT_TITLE", "Pending Fees Report");
+        ReportGenerator.generateReport("PendingFeesReport", parameters, "Pending Fees Report");
     }
 }

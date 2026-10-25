@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.21.5.final using JasperReports Library version 6.21.5-74d586df47b25dbd05bd0957999819196e59934a  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ResultSheet" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20" uuid="c308fb74-3796-4120-97f0-ff166672777d">
+<jasperReport name="ResultSheet" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20">
 	<parameter name="exam_id" class="java.lang.Integer"/>
-	<queryString>
+	<query>
 		<![CDATA[SELECT r.student_id, s.first_name, s.last_name, r.marks_obtained, r.grade_letter, e.exam_name, sub.subject_name
 		FROM result r
 		JOIN student s ON r.student_id = s.student_id
@@ -10,7 +9,7 @@
 		JOIN subject sub ON e.subject_id = sub.subject_id
 		WHERE r.exam_id = $P{exam_id}
 		ORDER BY r.marks_obtained DESC]]>
-	</queryString>
+	</query>
 	<field name="student_id" class="java.lang.String"/>
 	<field name="first_name" class="java.lang.String"/>
 	<field name="last_name" class="java.lang.String"/>
@@ -18,63 +17,55 @@
 	<field name="grade_letter" class="java.lang.String"/>
 	<field name="exam_name" class="java.lang.String"/>
 	<field name="subject_name" class="java.lang.String"/>
-	<title>
-		<band height="50">
-			<staticText>
-				<reportElement mode="Opaque" x="0" y="0" width="535" height="30" forecolor="#FCBC26" backcolor="#2935A3" uuid="3ac67fc5-e027-4539-b109-b3bacbf2d216"/>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="16" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Result Sheet]]></text>
-			</staticText>
-		</band>
+	<title height="50">
+		<element kind="staticText" x="0" y="0" width="535" height="30" hTextAlign="Center" fontSize="16" bold="true">
+			<text><![CDATA[Result Sheet]]></text>
+		</element>
 	</title>
-	<columnHeader>
-		<band height="25">
-			<staticText>
-				<reportElement x="0" y="0" width="80" height="20" uuid="bb0c503d-2dba-4815-ab62-01a2ed542050"/>
-				<text><![CDATA[Student ID]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="80" y="0" width="100" height="20" uuid="dbe387e9-a7e0-409d-af1c-c0221873607e"/>
-				<text><![CDATA[Name]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="180" y="0" width="80" height="20" uuid="e55f95cf-f3e0-418f-a2a5-2f1b1cb71a01"/>
-				<text><![CDATA[Marks]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="260" y="0" width="50" height="20" uuid="971a6774-9cf5-4037-a1e9-649b191abd15"/>
-				<text><![CDATA[Grade]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="310" y="0" width="100" height="20" uuid="7b97a7a3-30aa-49b7-a361-ac283d975242"/>
-				<text><![CDATA[Subject]]></text>
-			</staticText>
-		</band>
+	<pageHeader height="30">
+		<element kind="staticText" x="0" y="0" width="200" height="20">
+			<text><![CDATA[Central College Anuradhapura]]></text>
+		</element>
+	</pageHeader>
+	<columnHeader height="25">
+		<element kind="staticText" x="0" y="0" width="80" height="20">
+			<text><![CDATA[Student ID]]></text>
+		</element>
+		<element kind="staticText" x="80" y="0" width="100" height="20">
+			<text><![CDATA[Name]]></text>
+		</element>
+		<element kind="staticText" x="180" y="0" width="80" height="20">
+			<text><![CDATA[Marks]]></text>
+		</element>
+		<element kind="staticText" x="260" y="0" width="50" height="20">
+			<text><![CDATA[Grade]]></text>
+		</element>
+		<element kind="staticText" x="310" y="0" width="100" height="20">
+			<text><![CDATA[Subject]]></text>
+		</element>
 	</columnHeader>
 	<detail>
 		<band height="25">
-			<textField>
-				<reportElement x="0" y="0" width="80" height="20" uuid="9cb71be8-2a35-41f0-a19c-87fc424d5fdd"/>
-				<textFieldExpression><![CDATA[$F{student_id}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="80" y="0" width="100" height="20" uuid="9c1be212-0772-47e3-969f-42d9cfbfcfa1"/>
-				<textFieldExpression><![CDATA[$F{first_name} + " " + $F{last_name}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="180" y="0" width="80" height="20" uuid="f8274d5e-bb58-4e68-a7d4-1954b04b0942"/>
-				<textFieldExpression><![CDATA[$F{marks_obtained}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="260" y="0" width="50" height="20" uuid="ee3df24a-73ce-4439-9558-d747bdac2777"/>
-				<textFieldExpression><![CDATA[$F{grade_letter}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="310" y="0" width="100" height="20" uuid="2d3cce14-e0b9-44cf-8903-4efbcc0934f5"/>
-				<textFieldExpression><![CDATA[$F{subject_name}]]></textFieldExpression>
-			</textField>
+			<element kind="textField" x="0" y="0" width="80" height="20">
+				<expression><![CDATA[$F{student_id}]]></expression>
+			</element>
+			<element kind="textField" x="80" y="0" width="100" height="20">
+				<expression><![CDATA[$F{first_name} + " " + $F{last_name}]]></expression>
+			</element>
+			<element kind="textField" x="180" y="0" width="80" height="20">
+				<expression><![CDATA[$F{marks_obtained}]]></expression>
+			</element>
+			<element kind="textField" x="260" y="0" width="50" height="20">
+				<expression><![CDATA[$F{grade_letter}]]></expression>
+			</element>
+			<element kind="textField" x="310" y="0" width="100" height="20">
+				<expression><![CDATA[$F{subject_name}]]></expression>
+			</element>
 		</band>
 	</detail>
+	<pageFooter height="30">
+		<element kind="textField" x="0" y="10" width="535" height="20" hTextAlign="Center">
+			<expression><![CDATA["Page " + $V{PAGE_NUMBER} + " of " + $V{PAGE_COUNT}]]></expression>
+		</element>
+	</pageFooter>
 </jasperReport>

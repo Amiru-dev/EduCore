@@ -192,22 +192,63 @@ public class FeeReceiptDialog extends JDialog {
 
     private void printReceipt() {
         try {
-            // Fetch receipt details
+            // Try to use JasperReports if template exists
+            File jasperFile = new File("reports/FeeReceipt.jasper");
+            File jrxmlFile = new File("reports/FeeReceipt.jrxml");
+
+            if (jasperFile.exists() || jrxmlFile.exists()) {
+                try {
+                    // Get database connection
+                    Connection conn = MySQL.getConnection();
+
+                    // Create parameters for JasperReports
+                    Map<String, Object> parameters = new HashMap<>();
+                    parameters.put("fee_id", feeId);
+
+                    JasperReport jasperReport;
+                    if (jasperFile.exists()) {
+                        jasperReport = (JasperReport) JRLoader.loadObject(jasperFile);
+                    } else {
+                        jasperReport = JasperCompileManager.compileReport(jrxmlFile.getAbsolutePath());
+                    }
+
+                    JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, conn);
+
+                    // Display report in viewer
+                    JFrame viewerFrame = new JFrame("Fee Receipt");
+                    viewerFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                    viewerFrame.getContentPane().add(new net.sf.jasperreports.swing.JRViewer(jasperPrint));
+                    viewerFrame.pack();
+                    viewerFrame.setLocationRelativeTo(this);
+                    viewerFrame.setVisible(true);
+
+                    conn.close();
+                    return;
+
+                } catch (Exception e) {
+                    System.out.println("JasperReports error: " + e.getMessage());
+                    e.printStackTrace();
+                    JOptionIcon.showErrorDialog(this, "JasperReports error: " + e.getMessage());
+                    // Fall back to simple receipt if JasperReports fails
+                }
+            }
+
+            // Fallback to simple printable receipt dialog
             ResultSet rs = MySQL.executeSearch("SELECT f.receipt_no, f.student_id, s.first_name, s.last_name, ft.fee_type_name, " +
                           "f.amount, f.due_date, f.paid_date " +
                           "FROM fee f " +
                           "JOIN student s ON f.student_id = s.student_id " +
                           "JOIN fee_type ft ON f.fee_type_id = ft.fee_type_id " +
                           "WHERE f.fee_id = '" + feeId + "'");
-            
+
             if (!rs.next()) {
                 JOptionIcon.showErrorDialog(this, "Error loading receipt details for printing.");
                 rs.close();
                 return;
             }
-            
+
             DecimalFormat df = new DecimalFormat("'Rs.' #,##0.00");
-            
+
             String receiptNo = rs.getString("receipt_no");
             String studentId = rs.getString("student_id");
             String studentName = rs.getString("first_name") + " " + rs.getString("last_name");
@@ -216,74 +257,11 @@ public class FeeReceiptDialog extends JDialog {
             String dueDate = rs.getString("due_date");
             String paidDate = rs.getString("paid_date");
             String paymentMethod = "Cash"; // Only cash payments
-            
+
             rs.close();
-            
-            // Try to use JasperReports if template exists
-            File jasperFile = new File("reports/FeeReceipt.jasper");
-            File jrxmlFile = new File("reports/FeeReceipt.jrxml");
-            
-            if (jasperFile.exists() || jrxmlFile.exists()) {
-                // Create parameters for JasperReports
-                Map<String, Object> parameters = new HashMap<>();
-                parameters.put("receiptNo", receiptNo);
-                parameters.put("studentId", studentId);
-                parameters.put("studentName", studentName);
-                parameters.put("feeType", feeType);
-                parameters.put("amount", amount);
-                parameters.put("dueDate", dueDate);
-                parameters.put("paidDate", paidDate);
-                parameters.put("paymentMethod", paymentMethod != null ? paymentMethod : "N/A");
-                
-                try {
-                    JasperReport jasperReport;
-                    if (jasperFile.exists()) {
-                        jasperReport = (JasperReport) JRLoader.loadObject(jasperFile);
-                    } else {
-                        jasperReport = JasperCompileManager.compileReport(jrxmlFile.getAbsolutePath());
-                    }
-                    
-                    JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
-                    
-                    // Create PDF file
-                    JFileChooser fileChooser = new JFileChooser();
-                    fileChooser.setDialogTitle("Save Receipt as PDF");
-                    fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("PDF Files", "pdf"));
-                    
-                    String defaultFileName = "Receipt_" + receiptNo + ".pdf";
-                    fileChooser.setSelectedFile(new File(defaultFileName));
-                    
-                    int userSelection = fileChooser.showSaveDialog(this);
-                    
-                    if (userSelection == JFileChooser.APPROVE_OPTION) {
-                        File fileToSave = fileChooser.getSelectedFile();
-                        
-                        // Ensure .pdf extension
-                        if (!fileToSave.getName().toLowerCase().endsWith(".pdf")) {
-                            fileToSave = new File(fileToSave.getParent(), fileToSave.getName() + ".pdf");
-                        }
-                        
-                        // Export to PDF using JasperReports
-                        JasperExportManager.exportReportToPdfFile(jasperPrint, fileToSave.getAbsolutePath());
-                        
-                        JOptionIcon.showSuccessDialog(this, "Receipt saved as PDF:\n" + fileToSave.getAbsolutePath());
-                        
-                        // Open the PDF file
-                        if (Desktop.isDesktopSupported()) {
-                            Desktop.getDesktop().open(fileToSave);
-                        }
-                    }
-                    return;
-                    
-                } catch (Exception e) {
-                    System.out.println("JasperReports error: " + e.getMessage());
-                    // Fall back to simple receipt if JasperReports fails
-                }
-            }
-            
-            // Fallback to simple printable receipt dialog
+
             printSimpleReceipt(receiptNo, studentId, studentName, feeType, amount, dueDate, paidDate, paymentMethod);
-            
+
         } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error printing receipt: " + e.getMessage());
         }

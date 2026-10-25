@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.21.5.final using JasperReports Library version 6.21.5-74d586df47b25dbd05bd0957999819196e59934a  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="GuardianReport" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20" uuid="1090ee23-8648-47ac-8afe-1f24ab93d37b">
-	<queryString>
+<jasperReport name="GuardianReport" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20">
+	<query>
 		<![CDATA[SELECT g.guardian_id, g.first_name, g.last_name, g.nic, g.relationship, g.phone, g.email, g.address
 		FROM guardian g
 		ORDER BY g.first_name, g.last_name]]>
-	</queryString>
+	</query>
 	<field name="guardian_id" class="java.lang.Integer"/>
 	<field name="first_name" class="java.lang.String"/>
 	<field name="last_name" class="java.lang.String"/>
@@ -14,63 +13,55 @@
 	<field name="phone" class="java.lang.String"/>
 	<field name="email" class="java.lang.String"/>
 	<field name="address" class="java.lang.String"/>
-	<title>
-		<band height="50">
-			<staticText>
-				<reportElement mode="Opaque" x="0" y="0" width="535" height="30" forecolor="#FCBC26" backcolor="#2935A3" uuid="53780f7b-ac30-4a88-9191-02c81a284016"/>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="16" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Guardian Report]]></text>
-			</staticText>
-		</band>
+	<title height="50">
+		<element kind="staticText" x="0" y="0" width="535" height="30" hTextAlign="Center" fontSize="16" bold="true">
+			<text><![CDATA[Guardian Report]]></text>
+		</element>
 	</title>
-	<columnHeader>
-		<band height="25">
-			<staticText>
-				<reportElement x="0" y="0" width="80" height="20" uuid="7b969d7f-5776-444c-a799-fe5be0912430"/>
-				<text><![CDATA[Guardian ID]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="80" y="0" width="100" height="20" uuid="66f6b959-4b9a-472d-9b72-412cfbba6788"/>
-				<text><![CDATA[Name]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="180" y="0" width="80" height="20" uuid="81348384-0ec3-4544-aeff-bd1faf0db4a5"/>
-				<text><![CDATA[NIC]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="260" y="0" width="80" height="20" uuid="d9ed89c8-6e66-424c-b8fe-3db818c694c0"/>
-				<text><![CDATA[Relationship]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="340" y="0" width="80" height="20" uuid="9d6362b3-386b-4085-b568-cf28c9de362b"/>
-				<text><![CDATA[Phone]]></text>
-			</staticText>
-		</band>
+	<pageHeader height="30">
+		<element kind="staticText" x="0" y="0" width="200" height="20">
+			<text><![CDATA[Central College Anuradhapura]]></text>
+		</element>
+	</pageHeader>
+	<columnHeader height="25">
+		<element kind="staticText" x="0" y="0" width="80" height="20">
+			<text><![CDATA[Guardian ID]]></text>
+		</element>
+		<element kind="staticText" x="80" y="0" width="100" height="20">
+			<text><![CDATA[Name]]></text>
+		</element>
+		<element kind="staticText" x="180" y="0" width="80" height="20">
+			<text><![CDATA[NIC]]></text>
+		</element>
+		<element kind="staticText" x="260" y="0" width="80" height="20">
+			<text><![CDATA[Relationship]]></text>
+		</element>
+		<element kind="staticText" x="340" y="0" width="80" height="20">
+			<text><![CDATA[Phone]]></text>
+		</element>
 	</columnHeader>
 	<detail>
 		<band height="25">
-			<textField>
-				<reportElement x="0" y="0" width="80" height="20" uuid="3cb7eb7c-a4c5-4fab-bfe8-d7145bab89b9"/>
-				<textFieldExpression><![CDATA[$F{guardian_id}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="80" y="0" width="100" height="20" uuid="2da4b251-7fe3-40b4-b6a1-226bfe0e2192"/>
-				<textFieldExpression><![CDATA[$F{first_name} + " " + $F{last_name}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="180" y="0" width="80" height="20" uuid="ca4a7e1a-9d26-4115-9c3b-677cbb946a65"/>
-				<textFieldExpression><![CDATA[$F{nic}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="260" y="0" width="80" height="20" uuid="f53d6a81-4afb-496d-b161-91080f561cc0"/>
-				<textFieldExpression><![CDATA[$F{relationship}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="340" y="0" width="80" height="20" uuid="18edf0c8-177b-4144-903c-2690cde2802b"/>
-				<textFieldExpression><![CDATA[$F{phone}]]></textFieldExpression>
-			</textField>
+			<element kind="textField" x="0" y="0" width="80" height="20">
+				<expression><![CDATA[$F{guardian_id}]]></expression>
+			</element>
+			<element kind="textField" x="80" y="0" width="100" height="20">
+				<expression><![CDATA[$F{first_name} + " " + $F{last_name}]]></expression>
+			</element>
+			<element kind="textField" x="180" y="0" width="80" height="20">
+				<expression><![CDATA[$F{nic}]]></expression>
+			</element>
+			<element kind="textField" x="260" y="0" width="80" height="20">
+				<expression><![CDATA[$F{relationship}]]></expression>
+			</element>
+			<element kind="textField" x="340" y="0" width="80" height="20">
+				<expression><![CDATA[$F{phone}]]></expression>
+			</element>
 		</band>
 	</detail>
+	<pageFooter height="30">
+		<element kind="textField" x="0" y="10" width="535" height="20" hTextAlign="Center">
+			<expression><![CDATA["Page " + $V{PAGE_NUMBER} + " of " + $V{PAGE_COUNT}]]></expression>
+		</element>
+	</pageFooter>
 </jasperReport>

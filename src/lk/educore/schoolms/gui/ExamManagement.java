@@ -3,6 +3,7 @@ package lk.educore.schoolms.gui;
 import lk.educore.schoolms.model.MySQL;
 import lk.educore.schoolms.model.UserSession;
 import lk.educore.schoolms.validate.JOptionIcon;
+import lk.educore.schoolms.util.ReportGenerator;
 
 import javax.swing.*;
 import javax.swing.table.*;
@@ -11,6 +12,8 @@ import java.awt.event.*;
 import java.sql.*;
 import com.toedter.calendar.JDateChooser;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Exam Management Panel
@@ -22,7 +25,7 @@ public class ExamManagement extends JPanel {
     private DefaultTableModel tableModel;
     private JTextField txtSearch;
     private JComboBox<String> cmbSearchBy;
-    private JButton btnAddExam, btnViewResults, btnRefresh, btnPublishResults;
+    private JButton btnAddExam, btnViewResults, btnRefresh, btnPublishResults, btnReport;
     private JTabbedPane tabbedPane;
 
     public ExamManagement() {
@@ -116,10 +119,15 @@ public class ExamManagement extends JPanel {
         btnRefresh.addActionListener(e -> loadExamData());
         applySecondaryButtonEffect(btnRefresh);
 
+        btnReport = new JButton("Generate Report");
+        btnReport.addActionListener(e -> generateExamReport());
+        applySecondaryButtonEffect(btnReport);
+
         buttonPanel.add(btnAddExam);
         buttonPanel.add(btnViewResults);
         buttonPanel.add(btnPublishResults);
         buttonPanel.add(btnRefresh);
+        buttonPanel.add(btnReport);
 
         if (UserSession.get() != null && UserSession.get().isTeacher()) {
             btnAddExam.setVisible(false);
@@ -1121,5 +1129,11 @@ public class ExamManagement extends JPanel {
                 }
             }
         });
+    }
+
+    private void generateExamReport() {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("REPORT_TITLE", "Exam Schedule Report");
+        ReportGenerator.generateReport("ExamScheduleReport", parameters, "Exam Schedule Report");
     }
 }

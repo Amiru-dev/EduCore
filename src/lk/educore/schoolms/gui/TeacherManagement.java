@@ -2,6 +2,7 @@ package lk.educore.schoolms.gui;
 
 import lk.educore.schoolms.model.MySQL;
 import lk.educore.schoolms.validate.JOptionIcon;
+import lk.educore.schoolms.util.ReportGenerator;
 
 import javax.swing.*;
 import javax.swing.table.*;
@@ -11,6 +12,8 @@ import java.awt.event.*;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Teacher Management Panel Main CRUD interface for teacher management with tabs
@@ -22,7 +25,7 @@ public class TeacherManagement extends JPanel {
     private DefaultTableModel tableModel;
     private JTextField txtSearch;
     private JComboBox<String> cmbSearchBy;
-    private JButton btnAdd, btnEdit, btnDelete, btnView, btnRefresh, btnAttendance, btnSalary, btnQRCode;
+    private JButton btnAdd, btnEdit, btnDelete, btnView, btnRefresh, btnAttendance, btnSalary, btnQRCode, btnReport;
     private JTabbedPane tabbedPane;
     private JTable leaveTable;
     private DefaultTableModel leaveModel;
@@ -148,6 +151,10 @@ public class TeacherManagement extends JPanel {
         btnQRCode.addActionListener(e -> generateQRCode());
         applySecondaryButtonEffect(btnQRCode);
 
+        btnReport = new JButton("Generate Report");
+        btnReport.addActionListener(e -> generateTeacherReport());
+        applySecondaryButtonEffect(btnReport);
+
         buttonPanel.add(btnAdd);
         buttonPanel.add(btnEdit);
         buttonPanel.add(btnDelete);
@@ -156,6 +163,7 @@ public class TeacherManagement extends JPanel {
         buttonPanel.add(btnAttendance);
         buttonPanel.add(btnSalary);
         buttonPanel.add(btnQRCode);
+        buttonPanel.add(btnReport);
 
         panel.add(buttonPanel, BorderLayout.NORTH);
 
@@ -860,6 +868,12 @@ public class TeacherManagement extends JPanel {
         } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error generating QR code: " + e.getMessage());
         }
+    }
+
+    private void generateTeacherReport() {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("REPORT_TITLE", "All Teachers Report");
+        ReportGenerator.generateReport("TeacherReport", parameters, "Teacher Report");
     }
 
     private JPanel createAssignmentPanel() {

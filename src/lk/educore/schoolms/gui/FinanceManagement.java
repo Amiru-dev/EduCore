@@ -3,6 +3,7 @@ package lk.educore.schoolms.gui;
 import lk.educore.schoolms.model.MySQL;
 import lk.educore.schoolms.validate.JOptionIcon;
 import lk.educore.schoolms.charts.PieChart;
+import lk.educore.schoolms.util.ReportGenerator;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -16,6 +17,8 @@ import java.sql.*;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 
 /**
@@ -26,7 +29,7 @@ public class FinanceManagement extends JPanel {
 
     private JTable financeTable;
     private DefaultTableModel tableModel;
-    private JButton btnAddTransaction, btnRefresh, btnViewSummary;
+    private JButton btnAddTransaction, btnRefresh, btnViewSummary, btnReport;
     private JPanel chartPanel;
 
     public FinanceManagement() {
@@ -66,9 +69,14 @@ public class FinanceManagement extends JPanel {
         btnViewSummary.addActionListener(e -> viewSummary());
         applySecondaryButtonEffect(btnViewSummary);
 
+        btnReport = new JButton("Generate Report");
+        btnReport.addActionListener(e -> generateFinanceReport());
+        applySecondaryButtonEffect(btnReport);
+
         buttonPanel.add(btnAddTransaction);
         buttonPanel.add(btnRefresh);
         buttonPanel.add(btnViewSummary);
+        buttonPanel.add(btnReport);
 
         headerPanel.add(buttonPanel, BorderLayout.EAST);
         add(headerPanel, BorderLayout.NORTH);
@@ -589,5 +597,11 @@ public class FinanceManagement extends JPanel {
                 }
             }
         });
+    }
+
+    private void generateFinanceReport() {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("REPORT_TITLE", "Finance Report");
+        ReportGenerator.generateReport("FinanceReport", parameters, "Finance Report");
     }
 }

@@ -1,67 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.21.5.final using JasperReports Library version 6.21.5-74d586df47b25dbd05bd0957999819196e59934a  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="AttendanceReport" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20" uuid="dcbf0354-7192-48e6-9a0f-032e9f59341e">
-	<queryString>
+<jasperReport name="AttendanceReport" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20">
+	<query>
 		<![CDATA[SELECT sa.student_id, s.first_name, s.last_name, sa.status, sa.date_time
 		FROM student_attendance sa
 		JOIN student s ON sa.student_id = s.student_id
 		WHERE sa.date_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
 		ORDER BY sa.date_time DESC]]>
-	</queryString>
+	</query>
 	<field name="student_id" class="java.lang.String"/>
 	<field name="first_name" class="java.lang.String"/>
 	<field name="last_name" class="java.lang.String"/>
 	<field name="status" class="java.lang.String"/>
 	<field name="date_time" class="java.sql.Timestamp"/>
-	<title>
-		<band height="50">
-			<staticText>
-				<reportElement mode="Opaque" x="0" y="0" width="535" height="30" forecolor="#FCBC26" backcolor="#2935A3" uuid="430e7948-f1ae-44d9-9f06-42e0085f1175"/>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="16" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Attendance Report (Last 30 Days)]]></text>
-			</staticText>
-		</band>
+	<title height="50">
+		<element kind="staticText" x="0" y="0" width="535" height="30" hTextAlign="Center" fontSize="16" bold="true">
+			<text><![CDATA[Attendance Report (Last 30 Days)]]></text>
+		</element>
 	</title>
-	<columnHeader>
-		<band height="25">
-			<staticText>
-				<reportElement x="0" y="0" width="80" height="20" uuid="4823a0ef-256e-4bab-90f7-43acf650bfc8"/>
-				<text><![CDATA[Student ID]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="80" y="0" width="100" height="20" uuid="5a765de9-196e-4830-a952-88894f0b8f1f"/>
-				<text><![CDATA[Name]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="180" y="0" width="80" height="20" uuid="7c8625fa-7ff9-42d4-8731-4b5d1e445758"/>
-				<text><![CDATA[Status]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="260" y="0" width="160" height="20" uuid="336e766c-d4ed-4a34-8545-bba305e3c90d"/>
-				<text><![CDATA[Date/Time]]></text>
-			</staticText>
-		</band>
+	<pageHeader height="30">
+		<element kind="staticText" x="0" y="0" width="200" height="20">
+			<text><![CDATA[Central College Anuradhapura]]></text>
+		</element>
+	</pageHeader>
+	<columnHeader height="25">
+		<element kind="staticText" x="0" y="0" width="80" height="20">
+			<text><![CDATA[Student ID]]></text>
+		</element>
+		<element kind="staticText" x="80" y="0" width="100" height="20">
+			<text><![CDATA[Name]]></text>
+		</element>
+		<element kind="staticText" x="180" y="0" width="80" height="20">
+			<text><![CDATA[Status]]></text>
+		</element>
+		<element kind="staticText" x="260" y="0" width="160" height="20">
+			<text><![CDATA[Date/Time]]></text>
+		</element>
 	</columnHeader>
 	<detail>
 		<band height="25">
-			<textField>
-				<reportElement x="0" y="0" width="80" height="20" uuid="fbd000c8-27e4-4d29-911b-f93b655ec43c"/>
-				<textFieldExpression><![CDATA[$F{student_id}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="80" y="0" width="100" height="20" uuid="d0e7bb85-d1cb-44e9-8b42-be1eac38665e"/>
-				<textFieldExpression><![CDATA[$F{first_name} + " " + $F{last_name}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="180" y="0" width="80" height="20" uuid="39d34f3a-85dc-4e64-90bb-073b56c438bc"/>
-				<textFieldExpression><![CDATA[$F{status}]]></textFieldExpression>
-			</textField>
-			<textField pattern="yyyy-MM-dd HH:mm">
-				<reportElement x="260" y="0" width="160" height="20" uuid="5fd9c13d-9d37-4747-bb59-5bce97f8ae1a"/>
-				<textFieldExpression><![CDATA[$F{date_time}]]></textFieldExpression>
-			</textField>
+			<element kind="textField" x="0" y="0" width="80" height="20">
+				<expression><![CDATA[$F{student_id}]]></expression>
+			</element>
+			<element kind="textField" x="80" y="0" width="100" height="20">
+				<expression><![CDATA[$F{first_name} + " " + $F{last_name}]]></expression>
+			</element>
+			<element kind="textField" x="180" y="0" width="80" height="20">
+				<expression><![CDATA[$F{status}]]></expression>
+			</element>
+			<element kind="textField" x="260" y="0" width="160" height="20" pattern="yyyy-MM-dd HH:mm">
+				<expression><![CDATA[$F{date_time}]]></expression>
+			</element>
 		</band>
 	</detail>
+	<pageFooter height="30">
+		<element kind="textField" x="0" y="10" width="535" height="20" hTextAlign="Center">
+			<expression><![CDATA["Page " + $V{PAGE_NUMBER} + " of " + $V{PAGE_COUNT}]]></expression>
+		</element>
+	</pageFooter>
 </jasperReport>

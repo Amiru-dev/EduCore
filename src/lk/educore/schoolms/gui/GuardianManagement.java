@@ -4,6 +4,7 @@ import lk.educore.schoolms.model.MySQL;
 import lk.educore.schoolms.validate.JOptionIcon;
 import lk.educore.schoolms.validate.DataValidator;
 import lk.educore.schoolms.exceptions.ValidationException;
+import lk.educore.schoolms.util.ReportGenerator;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -13,6 +14,8 @@ import java.awt.event.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 
 /**
@@ -24,7 +27,7 @@ public class GuardianManagement extends JPanel {
     private JTable guardianTable;
     private DefaultTableModel tableModel;
     private JTextField txtSearch;
-    private JButton btnAddGuardian, btnEditGuardian, btnDeleteGuardian, btnRefresh;
+    private JButton btnAddGuardian, btnEditGuardian, btnDeleteGuardian, btnRefresh, btnReport;
 
     public GuardianManagement() {
         initComponents();
@@ -73,12 +76,17 @@ public class GuardianManagement extends JPanel {
         btnRefresh.addActionListener(e -> loadGuardianData());
         applySecondaryButtonEffect(btnRefresh);
 
+        btnReport = new JButton("Generate Report");
+        btnReport.addActionListener(e -> generateGuardianReport());
+        applySecondaryButtonEffect(btnReport);
+
         rightPanel.add(new JLabel("Search:"));
         rightPanel.add(txtSearch);
         rightPanel.add(btnAddGuardian);
         rightPanel.add(btnEditGuardian);
         rightPanel.add(btnDeleteGuardian);
         rightPanel.add(btnRefresh);
+        rightPanel.add(btnReport);
         
         headerPanel.add(rightPanel, BorderLayout.EAST);
         add(headerPanel, BorderLayout.NORTH);
@@ -501,5 +509,11 @@ public class GuardianManagement extends JPanel {
                 }
             }
         });
+    }
+
+    private void generateGuardianReport() {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("REPORT_TITLE", "All Guardians Report");
+        ReportGenerator.generateReport("GuardianReport", parameters, "Guardian Report");
     }
 }

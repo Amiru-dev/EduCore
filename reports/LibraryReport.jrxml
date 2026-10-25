@@ -1,75 +1,66 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.21.5.final using JasperReports Library version 6.21.5-74d586df47b25dbd05bd0957999819196e59934a  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="LibraryReport" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20" uuid="a85437b0-da21-495e-8836-9ae9380b0738">
-	<queryString>
+<jasperReport name="LibraryReport" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20">
+	<query>
 		<![CDATA[SELECT b.ISBN, b.title, b.author, bc.category_name, b.available_qty, b.quantity
 		FROM book b
 		JOIN book_category bc ON b.category_id = bc.category_id
 		ORDER BY b.title]]>
-	</queryString>
+	</query>
 	<field name="ISBN" class="java.lang.String"/>
 	<field name="title" class="java.lang.String"/>
 	<field name="author" class="java.lang.String"/>
 	<field name="category_name" class="java.lang.String"/>
 	<field name="available_qty" class="java.lang.Integer"/>
 	<field name="quantity" class="java.lang.Integer"/>
-	<title>
-		<band height="50">
-			<staticText>
-				<reportElement mode="Opaque" x="0" y="0" width="535" height="30" forecolor="#FCBC26" backcolor="#2935A3" uuid="9b0d7c74-e72e-46ee-9345-d7f017abcc47"/>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="16" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Library Inventory Report]]></text>
-			</staticText>
-		</band>
+	<title height="50">
+		<element kind="staticText" x="0" y="0" width="535" height="30" hTextAlign="Center" fontSize="16" bold="true">
+			<text><![CDATA[Library Inventory Report]]></text>
+		</element>
 	</title>
-	<columnHeader>
-		<band height="25">
-			<staticText>
-				<reportElement x="0" y="0" width="100" height="20" uuid="4a979665-e65d-41e5-a083-de0bbcf033a8"/>
-				<text><![CDATA[ISBN]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="100" y="0" width="150" height="20" uuid="d34e49a1-0167-49b6-a72e-94cc1a72a588"/>
-				<text><![CDATA[Title]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="250" y="0" width="100" height="20" uuid="9fab5f56-cbd5-4c52-a71e-511a11149826"/>
-				<text><![CDATA[Author]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="350" y="0" width="80" height="20" uuid="5701dcef-375f-4180-b6d4-0ddda175f587"/>
-				<text><![CDATA[Category]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="430" y="0" width="50" height="20" uuid="ba61b05c-281d-4dca-b479-7f2d44871c2e"/>
-				<text><![CDATA[Available]]></text>
-			</staticText>
-		</band>
+	<pageHeader height="30">
+		<element kind="staticText" x="0" y="0" width="200" height="20">
+			<text><![CDATA[Central College Anuradhapura]]></text>
+		</element>
+	</pageHeader>
+	<columnHeader height="25">
+		<element kind="staticText" x="0" y="0" width="100" height="20">
+			<text><![CDATA[ISBN]]></text>
+		</element>
+		<element kind="staticText" x="100" y="0" width="150" height="20">
+			<text><![CDATA[Title]]></text>
+		</element>
+		<element kind="staticText" x="250" y="0" width="100" height="20">
+			<text><![CDATA[Author]]></text>
+		</element>
+		<element kind="staticText" x="350" y="0" width="80" height="20">
+			<text><![CDATA[Category]]></text>
+		</element>
+		<element kind="staticText" x="430" y="0" width="50" height="20">
+			<text><![CDATA[Available]]></text>
+		</element>
 	</columnHeader>
 	<detail>
 		<band height="25">
-			<textField>
-				<reportElement x="0" y="0" width="100" height="20" uuid="e3ac02be-f801-4974-b7fe-7bedccbbe3f1"/>
-				<textFieldExpression><![CDATA[$F{ISBN}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="100" y="0" width="150" height="20" uuid="e7e6b369-bf95-4faa-85b2-9f1bdbcbcab9"/>
-				<textFieldExpression><![CDATA[$F{title}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="250" y="0" width="100" height="20" uuid="d715b61b-677e-4468-b4b1-30faa9569f75"/>
-				<textFieldExpression><![CDATA[$F{author}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="350" y="0" width="80" height="20" uuid="5834ef50-6859-4778-9fc4-58b0ddc5315e"/>
-				<textFieldExpression><![CDATA[$F{category_name}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="430" y="0" width="50" height="20" uuid="2af81a26-9c94-41e5-b60d-27beeac5c97e"/>
-				<textFieldExpression><![CDATA[$F{available_qty}]]></textFieldExpression>
-			</textField>
+			<element kind="textField" x="0" y="0" width="100" height="20">
+				<expression><![CDATA[$F{ISBN}]]></expression>
+			</element>
+			<element kind="textField" x="100" y="0" width="150" height="20">
+				<expression><![CDATA[$F{title}]]></expression>
+			</element>
+			<element kind="textField" x="250" y="0" width="100" height="20">
+				<expression><![CDATA[$F{author}]]></expression>
+			</element>
+			<element kind="textField" x="350" y="0" width="80" height="20">
+				<expression><![CDATA[$F{category_name}]]></expression>
+			</element>
+			<element kind="textField" x="430" y="0" width="50" height="20">
+				<expression><![CDATA[$F{available_qty}]]></expression>
+			</element>
 		</band>
 	</detail>
+	<pageFooter height="30">
+		<element kind="textField" x="0" y="10" width="535" height="20" hTextAlign="Center">
+			<expression><![CDATA["Page " + $V{PAGE_NUMBER} + " of " + $V{PAGE_COUNT}]]></expression>
+		</element>
+	</pageFooter>
 </jasperReport>

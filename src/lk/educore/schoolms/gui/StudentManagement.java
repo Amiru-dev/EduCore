@@ -3,6 +3,7 @@ package lk.educore.schoolms.gui;
 import lk.educore.schoolms.model.MySQL;
 import lk.educore.schoolms.model.Student;
 import lk.educore.schoolms.model.UserSession;
+import lk.educore.schoolms.util.ReportGenerator;
 import lk.educore.schoolms.validate.JOptionIcon;
 
 import javax.swing.*;
@@ -10,6 +11,8 @@ import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Student Management Panel Main CRUD interface for student management with tabs
@@ -21,7 +24,7 @@ public class StudentManagement extends JPanel {
     private DefaultTableModel tableModel;
     private JTextField txtSearch;
     private JComboBox<String> cmbSearchBy;
-    private JButton btnAdd, btnEdit, btnDelete, btnView, btnRefresh, btnAttendance, btnQRCode;
+    private JButton btnAdd, btnEdit, btnDelete, btnView, btnRefresh, btnAttendance, btnQRCode, btnReport;
     private JTabbedPane tabbedPane;
 
     public StudentManagement() {
@@ -133,6 +136,10 @@ public class StudentManagement extends JPanel {
         btnQRCode.addActionListener(e -> generateQRCode());
         applySecondaryButtonEffect(btnQRCode);
 
+        btnReport = new JButton("Generate Report");
+        btnReport.addActionListener(e -> generateStudentReport());
+        applySecondaryButtonEffect(btnReport);
+
         buttonPanel.add(btnAdd);
         buttonPanel.add(btnEdit);
         buttonPanel.add(btnDelete);
@@ -140,6 +147,7 @@ public class StudentManagement extends JPanel {
         buttonPanel.add(btnRefresh);
         buttonPanel.add(btnAttendance);
         buttonPanel.add(btnQRCode);
+        buttonPanel.add(btnReport);
 
         if (UserSession.get() != null && UserSession.get().isTeacher()) {
             btnAdd.setVisible(false);
@@ -601,6 +609,12 @@ public class StudentManagement extends JPanel {
         } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error generating QR code: " + e.getMessage());
         }
+    }
+
+    private void generateStudentReport() {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("REPORT_TITLE", "All Students Report");
+        ReportGenerator.generateReport("StudentReport", parameters, "Student Report");
     }
 
     private void applyButtonHoverEffect(JButton button, Color normalColor, Color hoverColor) {

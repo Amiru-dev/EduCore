@@ -4,6 +4,7 @@ import lk.educore.schoolms.model.BarcodeGenerator;
 import lk.educore.schoolms.model.MySQL;
 import lk.educore.schoolms.model.UserSession;
 import lk.educore.schoolms.validate.JOptionIcon;
+import lk.educore.schoolms.util.ReportGenerator;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -15,6 +16,8 @@ import java.io.InputStream;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 
 /**
@@ -27,7 +30,7 @@ public class LibraryManagement extends JPanel {
     private JTable bookTable;
     private DefaultTableModel bookTableModel;
     private JTextField txtSearch;
-    private JButton btnAddBook, btnEditBook, btnDeleteBook, btnBarcode;
+    private JButton btnAddBook, btnEditBook, btnDeleteBook, btnBarcode, btnReport;
 
     // Issue/Return Tab
     private JTable issueTable;
@@ -145,12 +148,17 @@ public class LibraryManagement extends JPanel {
         JButton btnRefresh = new JButton("Refresh");
         btnRefresh.addActionListener(e -> loadBookData());
         applySecondaryButtonEffect(btnRefresh);
-        
+
+        btnReport = new JButton("Library Report");
+        btnReport.addActionListener(e -> generateLibraryReport());
+        applySecondaryButtonEffect(btnReport);
+
         buttonPanel.add(btnAddBook);
         buttonPanel.add(btnEditBook);
         buttonPanel.add(btnDeleteBook);
         buttonPanel.add(btnBarcode);
         buttonPanel.add(btnRefresh);
+        buttonPanel.add(btnReport);
 
         // Hide Add, Edit, Delete, and Barcode buttons for teachers
         if (UserSession.get() != null && UserSession.get().isTeacher()) {
@@ -1324,7 +1332,7 @@ public class LibraryManagement extends JPanel {
         button.setBorderPainted(false);
         button.setOpaque(true);
         button.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
-        
+
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseEntered(java.awt.event.MouseEvent e) {
@@ -1340,5 +1348,11 @@ public class LibraryManagement extends JPanel {
                 }
             }
         });
+    }
+
+    private void generateLibraryReport() {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("REPORT_TITLE", "Library Report");
+        ReportGenerator.generateReport("LibraryReport", parameters, "Library Report");
     }
 }

@@ -3,6 +3,7 @@ package lk.educore.schoolms.gui;
 import lk.educore.schoolms.model.MySQL;
 import lk.educore.schoolms.model.UserSession;
 import lk.educore.schoolms.validate.JOptionIcon;
+import lk.educore.schoolms.util.ReportGenerator;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -14,6 +15,8 @@ import java.io.InputStream;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 
 /**
@@ -24,7 +27,7 @@ public class EventManagement extends JPanel {
 
     private JTable eventTable;
     private DefaultTableModel tableModel;
-    private JButton btnAddEvent, btnEditEvent, btnDeleteEvent, btnRefresh;
+    private JButton btnAddEvent, btnEditEvent, btnDeleteEvent, btnRefresh, btnReport;
     private JTextField txtSearch;
 
     public EventManagement() {
@@ -74,12 +77,17 @@ public class EventManagement extends JPanel {
         btnRefresh.addActionListener(e -> loadEventData());
         applySecondaryButtonEffect(btnRefresh);
 
+        btnReport = new JButton("Generate Report");
+        btnReport.addActionListener(e -> generateEventReport());
+        applySecondaryButtonEffect(btnReport);
+
         rightPanel.add(new JLabel("Search:"));
         rightPanel.add(txtSearch);
         rightPanel.add(btnAddEvent);
         rightPanel.add(btnEditEvent);
         rightPanel.add(btnDeleteEvent);
         rightPanel.add(btnRefresh);
+        rightPanel.add(btnReport);
 
         if (UserSession.get() != null && UserSession.get().isTeacher()) {
             btnAddEvent.setVisible(false);
@@ -724,5 +732,11 @@ public class EventManagement extends JPanel {
                 }
             }
         });
+    }
+
+    private void generateEventReport() {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("REPORT_TITLE", "Event Report");
+        ReportGenerator.generateReport("EventReport", parameters, "Event Report");
     }
 }
