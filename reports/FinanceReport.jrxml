@@ -1,40 +1,74 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" name="FinanceReport" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20">
+<!-- Created with Jaspersoft Studio version 6.21.5.final using JasperReports Library version 6.21.5-74d586df47b25dbd05bd0957999819196e59934a  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="FinanceReport" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20" uuid="18efee10-cb30-44f8-9edb-8885366d4f58">
 	<queryString>
-		SELECT ft.transaction_id, ft.transaction_type, ft.amount, ft.description, ft.transaction_date
-		FROM finance_transaction ft
-		ORDER BY ft.transaction_date DESC
+		<![CDATA[SELECT ft.finance_id, tt.type_name, ft.amount, ft.description, ft.transaction_date
+		FROM finance ft
+		JOIN transaction_type tt ON ft.transaction_type_id = tt.transaction_type_id
+		ORDER BY ft.transaction_date DESC]]>
 	</queryString>
-	<field name="transaction_id" class="java.lang.Integer"/>
-	<field name="transaction_type" class="java.lang.String"/>
+	<field name="finance_id" class="java.lang.Integer"/>
+	<field name="type_name" class="java.lang.String"/>
 	<field name="amount" class="java.lang.Double"/>
 	<field name="description" class="java.lang.String"/>
 	<field name="transaction_date" class="java.sql.Date"/>
 	<title>
 		<band height="50">
 			<staticText>
-				<reportElement x="0" y="0" width="535" height="30" textAlignment="Center"/>
-				<font size="16" isBold="true"/>
+				<reportElement mode="Opaque" x="0" y="0" width="535" height="30" forecolor="#FCBC26" backcolor="#2935A3" uuid="4c37d3b2-fc43-4bbe-9fa8-628b4fb2d6a5"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="16" isBold="true"/>
+				</textElement>
 				<text><![CDATA[Finance Report]]></text>
 			</staticText>
 		</band>
 	</title>
 	<columnHeader>
 		<band height="25">
-			<staticText><reportElement x="0" y="0" width="80" height="20"/><text><![CDATA[Transaction ID]]></text></staticText>
-			<staticText><reportElement x="80" y="0" width="100" height="20"/><text><![CDATA[Type]]></text></staticText>
-			<staticText><reportElement x="180" y="0" width="80" height="20"/><text><![CDATA[Amount]]></text></staticText>
-			<staticText><reportElement x="260" y="0" width="150" height="20"/><text><![CDATA[Description]]></text></staticText>
-			<staticText><reportElement x="410" y="0" width="80" height="20"/><text><![CDATA[Date]]></text></staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="80" height="20" uuid="1a51d338-09bc-4040-913a-cc8a13697700"/>
+				<text><![CDATA[Finance ID]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="80" y="0" width="100" height="20" uuid="0b91949e-c583-4302-9904-cf369b7de7a1"/>
+				<text><![CDATA[Type]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="180" y="0" width="80" height="20" uuid="5636df43-a491-4d73-9e09-7142e51dd41a"/>
+				<text><![CDATA[Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="260" y="0" width="150" height="20" uuid="d9b91e50-c47c-4070-a385-a75f46d15ce2"/>
+				<text><![CDATA[Description]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="410" y="0" width="80" height="20" uuid="c14457be-807f-4604-8968-17642836b7e3"/>
+				<text><![CDATA[Date]]></text>
+			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
 		<band height="25">
-			<textField><reportElement x="0" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{transaction_id}]]></textFieldExpression></textField>
-			<textField><reportElement x="80" y="0" width="100" height="20"/><textFieldExpression><![CDATA[$F{transaction_type}]]></textFieldExpression></textField>
-			<textField pattern="Rs. #,##0.00"><reportElement x="180" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{amount}]]></textFieldExpression></textField>
-			<textField><reportElement x="260" y="0" width="150" height="20"/><textFieldExpression><![CDATA[$F{description}]]></textFieldExpression></textField>
-			<textField pattern="yyyy-MM-dd"><reportElement x="410" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{transaction_date}]]></textFieldExpression></textField>
+			<textField>
+				<reportElement x="0" y="0" width="80" height="20" uuid="516447b5-8008-4b07-b7da-e5467b9b780a"/>
+				<textFieldExpression><![CDATA[$F{finance_id}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="80" y="0" width="100" height="20" uuid="9eb803bf-23a3-4ae4-850b-e88ca4ac74ad"/>
+				<textFieldExpression><![CDATA[$F{type_name}]]></textFieldExpression>
+			</textField>
+			<textField pattern="Rs. #,##0.00">
+				<reportElement x="180" y="0" width="80" height="20" uuid="9134a624-d643-4bbf-b521-01f17e390fbe"/>
+				<textFieldExpression><![CDATA[$F{amount}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="260" y="0" width="150" height="20" uuid="52627316-1dd2-4e6b-afcd-29d8be942d44"/>
+				<textFieldExpression><![CDATA[$F{description}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd">
+				<reportElement x="410" y="0" width="80" height="20" uuid="68c45b80-fde9-4b15-a4d7-31f31503f127"/>
+				<textFieldExpression><![CDATA[$F{transaction_date}]]></textFieldExpression>
+			</textField>
 		</band>
 	</detail>
 </jasperReport>

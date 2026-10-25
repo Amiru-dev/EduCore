@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" name="PendingFeesReport" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20">
+<!-- Created with Jaspersoft Studio version 6.21.5.final using JasperReports Library version 6.21.5-74d586df47b25dbd05bd0957999819196e59934a  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="PendingFeesReport" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20" uuid="22602ba7-a0c9-4b32-8d2e-d5043687083b">
 	<queryString>
-		SELECT f.receipt_no, f.student_id, s.first_name, s.last_name, ft.fee_type_name, f.amount, f.due_date
+		<![CDATA[SELECT f.receipt_no, f.student_id, s.first_name, s.last_name, ft.fee_type_name, f.amount, f.due_date
 		FROM fee f
 		JOIN student s ON f.student_id = s.student_id
 		JOIN fee_type ft ON f.fee_type_id = ft.fee_type_id
 		WHERE f.status != 'Paid'
-		ORDER BY f.due_date ASC
+		ORDER BY f.due_date ASC]]>
 	</queryString>
 	<field name="receipt_no" class="java.lang.String"/>
 	<field name="student_id" class="java.lang.String"/>
@@ -18,30 +19,68 @@
 	<title>
 		<band height="50">
 			<staticText>
-				<reportElement x="0" y="0" width="535" height="30" textAlignment="Center"/>
-				<font size="16" isBold="true"/>
+				<reportElement mode="Opaque" x="0" y="0" width="535" height="30" forecolor="#FCBC26" backcolor="#2935A3" uuid="f570de53-dc51-4828-9693-3ec41127152c"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="16" isBold="true"/>
+				</textElement>
 				<text><![CDATA[Pending Fees Report]]></text>
 			</staticText>
 		</band>
 	</title>
 	<columnHeader>
 		<band height="25">
-			<staticText><reportElement x="0" y="0" width="80" height="20"/><text><![CDATA[Receipt No]]></text></staticText>
-			<staticText><reportElement x="80" y="0" width="80" height="20"/><text><![CDATA[Student ID]]></text></staticText>
-			<staticText><reportElement x="160" y="0" width="100" height="20"/><text><![CDATA[Name]]></text></staticText>
-			<staticText><reportElement x="260" y="0" width="80" height="20"/><text><![CDATA[Fee Type]]></text></staticText>
-			<staticText><reportElement x="340" y="0" width="80" height="20"/><text><![CDATA[Amount]]></text></staticText>
-			<staticText><reportElement x="420" y="0" width="80" height="20"/><text><![CDATA[Due Date]]></text></staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="80" height="20" uuid="29590de0-6165-40bf-a9cb-1aae7991da70"/>
+				<text><![CDATA[Receipt No]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="80" y="0" width="80" height="20" uuid="92cc9681-7bcc-4da9-a889-fef095b90cfa"/>
+				<text><![CDATA[Student ID]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="160" y="0" width="100" height="20" uuid="daf057d0-ece2-4628-a9f1-8415bb8da189"/>
+				<text><![CDATA[Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="260" y="0" width="80" height="20" uuid="72031ab0-d588-457e-8ee6-5ef025c1b206"/>
+				<text><![CDATA[Fee Type]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="340" y="0" width="80" height="20" uuid="f96ddfef-c0eb-488b-ab58-3b2216fa638c"/>
+				<text><![CDATA[Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="420" y="0" width="80" height="20" uuid="07bd2808-e77f-4b80-b9c2-752e2aa578ab"/>
+				<text><![CDATA[Due Date]]></text>
+			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
 		<band height="25">
-			<textField><reportElement x="0" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{receipt_no}]]></textFieldExpression></textField>
-			<textField><reportElement x="80" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{student_id}]]></textFieldExpression></textField>
-			<textField><reportElement x="160" y="0" width="100" height="20"/><textFieldExpression><![CDATA[$F{first_name} + " " + $F{last_name}]]></textFieldExpression></textField>
-			<textField><reportElement x="260" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{fee_type_name}]]></textFieldExpression></textField>
-			<textField pattern="Rs. #,##0.00"><reportElement x="340" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{amount}]]></textFieldExpression></textField>
-			<textField pattern="yyyy-MM-dd"><reportElement x="420" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{due_date}]]></textFieldExpression></textField>
+			<textField>
+				<reportElement x="0" y="0" width="80" height="20" uuid="ea778854-d73f-483a-bb90-51ec208fe948"/>
+				<textFieldExpression><![CDATA[$F{receipt_no}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="80" y="0" width="80" height="20" uuid="bdd2bcea-3b12-4705-9b84-7546b07aa69b"/>
+				<textFieldExpression><![CDATA[$F{student_id}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="160" y="0" width="100" height="20" uuid="17d480b0-7e2f-48ac-8d61-24bb7e432c3a"/>
+				<textFieldExpression><![CDATA[$F{first_name} + " " + $F{last_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="260" y="0" width="80" height="20" uuid="b8b07af6-1829-4316-8f80-904f0b096415"/>
+				<textFieldExpression><![CDATA[$F{fee_type_name}]]></textFieldExpression>
+			</textField>
+			<textField pattern="Rs. #,##0.00">
+				<reportElement x="340" y="0" width="80" height="20" uuid="7f7842cc-b21f-4a1c-b990-2ed2598d0188"/>
+				<textFieldExpression><![CDATA[$F{amount}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd">
+				<reportElement x="420" y="0" width="80" height="20" uuid="3ddc439e-1c39-40be-9336-9a528778ed30"/>
+				<textFieldExpression><![CDATA[$F{due_date}]]></textFieldExpression>
+			</textField>
 		</band>
 	</detail>
 </jasperReport>

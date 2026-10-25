@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" name="SalaryReport" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20">
+<!-- Created with Jaspersoft Studio version 6.21.5.final using JasperReports Library version 6.21.5-74d586df47b25dbd05bd0957999819196e59934a  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="SalaryReport" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20" uuid="5b97ee10-c0a2-4b31-84f0-b59934010792">
 	<queryString>
-		SELECT t.NIC, t.first_name, t.last_name, t.salary, ts.status_name
+		<![CDATA[SELECT t.NIC, t.first_name, t.last_name, t.salary, ts.status_name
 		FROM teacher t
 		JOIN teacher_status ts ON t.status_id = ts.status_id
-		ORDER BY t.first_name, t.last_name
+		ORDER BY t.first_name, t.last_name]]>
 	</queryString>
 	<field name="NIC" class="java.lang.String"/>
 	<field name="first_name" class="java.lang.String"/>
@@ -14,26 +15,52 @@
 	<title>
 		<band height="50">
 			<staticText>
-				<reportElement x="0" y="0" width="535" height="30" textAlignment="Center"/>
-				<font size="16" isBold="true"/>
+				<reportElement mode="Opaque" x="0" y="0" width="535" height="30" forecolor="#FCBC26" backcolor="#2935A3" uuid="1ebc7133-97ac-4fdd-af43-bfdb4dc8004f"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="16" isBold="true"/>
+				</textElement>
 				<text><![CDATA[Salary Report]]></text>
 			</staticText>
 		</band>
 	</title>
 	<columnHeader>
 		<band height="25">
-			<staticText><reportElement x="0" y="0" width="80" height="20"/><text><![CDATA[NIC]]></text></staticText>
-			<staticText><reportElement x="80" y="0" width="100" height="20"/><text><![CDATA[Name]]></text></staticText>
-			<staticText><reportElement x="180" y="0" width="80" height="20"/><text><![CDATA[Salary]]></text></staticText>
-			<staticText><reportElement x="260" y="0" width="100" height="20"/><text><![CDATA[Status]]></text></staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="80" height="20" uuid="50b6d349-2ec6-41af-b22f-8fad0d41b357"/>
+				<text><![CDATA[NIC]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="80" y="0" width="100" height="20" uuid="7c7b0295-3edd-41ac-9341-f3d60d7145c7"/>
+				<text><![CDATA[Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="180" y="0" width="80" height="20" uuid="f5fb20d2-c460-4e28-abd6-92fee1043b76"/>
+				<text><![CDATA[Salary]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="260" y="0" width="100" height="20" uuid="a6c39d1b-c1fe-448e-98c7-8125feb0867b"/>
+				<text><![CDATA[Status]]></text>
+			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
 		<band height="25">
-			<textField><reportElement x="0" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{NIC}]]></textFieldExpression></textField>
-			<textField><reportElement x="80" y="0" width="100" height="20"/><textFieldExpression><![CDATA[$F{first_name} + " " + $F{last_name}]]></textFieldExpression></textField>
-			<textField pattern="Rs. #,##0.00"><reportElement x="180" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{salary}]]></textFieldExpression></textField>
-			<textField><reportElement x="260" y="0" width="100" height="20"/><textFieldExpression><![CDATA[$F{status_name}]]></textFieldExpression></textField>
+			<textField>
+				<reportElement x="0" y="0" width="80" height="20" uuid="945dbac4-c10a-438d-a532-9af148cdad02"/>
+				<textFieldExpression><![CDATA[$F{NIC}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="80" y="0" width="100" height="20" uuid="3e79c140-c454-40d0-8a24-76b8d1aa9e5a"/>
+				<textFieldExpression><![CDATA[$F{first_name} + " " + $F{last_name}]]></textFieldExpression>
+			</textField>
+			<textField pattern="Rs. #,##0.00">
+				<reportElement x="180" y="0" width="80" height="20" uuid="3fc0d79f-9893-4dc2-a84f-cb10e74a36d3"/>
+				<textFieldExpression><![CDATA[$F{salary}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="260" y="0" width="100" height="20" uuid="146aad51-e09a-4a8b-8698-705e7f05a16b"/>
+				<textFieldExpression><![CDATA[$F{status_name}]]></textFieldExpression>
+			</textField>
 		</band>
 	</detail>
 </jasperReport>

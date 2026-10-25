@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" name="EventReport" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20">
+<!-- Created with Jaspersoft Studio version 6.21.5.final using JasperReports Library version 6.21.5-74d586df47b25dbd05bd0957999819196e59934a  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="EventReport" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20" uuid="24a6bed6-012f-4c13-98ae-b3b9453a4e60">
 	<queryString>
-		SELECT e.event_id, e.event_name, e.start_date, e.end_date, e.description, es.status_name
+		<![CDATA[SELECT e.event_id, e.event_name, e.start_date, e.end_date, e.description, es.status_name
 		FROM event e
 		JOIN event_status es ON e.event_status_id = es.event_status_id
-		ORDER BY e.start_date DESC
+		ORDER BY e.start_date DESC]]>
 	</queryString>
 	<field name="event_id" class="java.lang.Integer"/>
 	<field name="event_name" class="java.lang.String"/>
@@ -15,28 +16,60 @@
 	<title>
 		<band height="50">
 			<staticText>
-				<reportElement x="0" y="0" width="535" height="30" textAlignment="Center"/>
-				<font size="16" isBold="true"/>
+				<reportElement mode="Opaque" x="0" y="0" width="535" height="30" forecolor="#FCBC26" backcolor="#2935A3" uuid="ea000123-65fc-4fc4-9928-5cf232de2210"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="16" isBold="true"/>
+				</textElement>
 				<text><![CDATA[Event Report]]></text>
 			</staticText>
 		</band>
 	</title>
 	<columnHeader>
 		<band height="25">
-			<staticText><reportElement x="0" y="0" width="60" height="20"/><text><![CDATA[Event ID]]></text></staticText>
-			<staticText><reportElement x="60" y="0" width="150" height="20"/><text><![CDATA[Event Name]]></text></staticText>
-			<staticText><reportElement x="210" y="0" width="80" height="20"/><text><![CDATA[Start Date]]></text></staticText>
-			<staticText><reportElement x="290" y="0" width="80" height="20"/><text><![CDATA[End Date]]></text></staticText>
-			<staticText><reportElement x="370" y="0" width="80" height="20"/><text><![CDATA[Status]]></text></staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="60" height="20" uuid="e32af4fd-23bb-4de6-a546-e65aca5ca9e9"/>
+				<text><![CDATA[Event ID]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="60" y="0" width="150" height="20" uuid="f06dc52f-a5a9-4bea-bb9f-d9ed90ab4c10"/>
+				<text><![CDATA[Event Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="210" y="0" width="80" height="20" uuid="a9c0868d-372d-4614-b823-8f96caac6ff2"/>
+				<text><![CDATA[Start Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="290" y="0" width="80" height="20" uuid="d8e6592e-34ba-46a0-ac0a-b8c50ef4e62e"/>
+				<text><![CDATA[End Date]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="370" y="0" width="80" height="20" uuid="07d183ca-0d95-43c8-8af5-51b1e518c9eb"/>
+				<text><![CDATA[Status]]></text>
+			</staticText>
 		</band>
 	</columnHeader>
 	<detail>
 		<band height="25">
-			<textField><reportElement x="0" y="0" width="60" height="20"/><textFieldExpression><![CDATA[$F{event_id}]]></textFieldExpression></textField>
-			<textField><reportElement x="60" y="0" width="150" height="20"/><textFieldExpression><![CDATA[$F{event_name}]]></textFieldExpression></textField>
-			<textField pattern="yyyy-MM-dd"><reportElement x="210" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{start_date}]]></textFieldExpression></textField>
-			<textField pattern="yyyy-MM-dd"><reportElement x="290" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{end_date}]]></textFieldExpression></textField>
-			<textField><reportElement x="370" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{status_name}]]></textFieldExpression></textField>
+			<textField>
+				<reportElement x="0" y="0" width="60" height="20" uuid="1924e916-39d1-4dec-97a1-08201f4ade66"/>
+				<textFieldExpression><![CDATA[$F{event_id}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="60" y="0" width="150" height="20" uuid="a4498e90-c210-49d8-9034-aa42538b1f4f"/>
+				<textFieldExpression><![CDATA[$F{event_name}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd">
+				<reportElement x="210" y="0" width="80" height="20" uuid="c94d58ab-4129-4672-8281-50100e333176"/>
+				<textFieldExpression><![CDATA[$F{start_date}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd">
+				<reportElement x="290" y="0" width="80" height="20" uuid="7655ac3e-0bef-45be-8579-8504dc93f22f"/>
+				<textFieldExpression><![CDATA[$F{end_date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="370" y="0" width="80" height="20" uuid="6ed59272-eece-4a75-ada8-23360f4f3f14"/>
+				<textFieldExpression><![CDATA[$F{status_name}]]></textFieldExpression>
+			</textField>
 		</band>
 	</detail>
 </jasperReport>
