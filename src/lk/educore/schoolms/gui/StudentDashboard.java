@@ -29,6 +29,8 @@ import java.util.logging.Level;
  */
 public class StudentDashboard extends JFrame {
 
+    private static Logger logger = SignIn.getLoggerObject();
+
     private String username;
     private String studentId;
     private String studentName = "";
@@ -970,6 +972,8 @@ public class StudentDashboard extends JFrame {
                 // Update password
                 String hashedNew = PasswordUtil.hashPassword(newPassword);
                 MySQL.executeIUD("UPDATE user SET password='" + hashedNew + "' WHERE username = '" + username + "'");
+                
+                logger.log(Level.INFO, "Student " + username + " (ID: " + studentId + ") changed their password successfully.");
                 
                 JOptionIcon.showSuccessDialog(dialog, "Password changed successfully!");
                 dialog.dispose();

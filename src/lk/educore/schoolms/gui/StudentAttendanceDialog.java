@@ -66,6 +66,7 @@ public class StudentAttendanceDialog extends JDialog {
         gbc.gridx = 1;
         gbc.weightx = 1.0;
         cmbStatus = new JComboBox<>(new String[]{"Present", "Absent", "Late"});
+        cmbStatus.addActionListener(e -> toggleTimeFields());
         mainPanel.add(cmbStatus, gbc);
 
         gbc.gridx = 0; gbc.gridy = 3;
@@ -139,8 +140,23 @@ public class StudentAttendanceDialog extends JDialog {
                 txtRemarks.setText("");
             }
             rs.close();
+            toggleTimeFields();
         } catch (Exception ex) {
             // Ignore error for new dates
+        }
+    }
+
+    private void toggleTimeFields() {
+        String status = (String) cmbStatus.getSelectedItem();
+        boolean enableTimeFields = !"Absent".equals(status);
+        
+        spinCheckIn.setEnabled(enableTimeFields);
+        spinCheckOut.setEnabled(enableTimeFields);
+        
+        // Clear time fields if status is Absent
+        if (!enableTimeFields) {
+            spinCheckIn.setValue(new Date(0));
+            spinCheckOut.setValue(new Date(0));
         }
     }
 
@@ -152,10 +168,31 @@ public class StudentAttendanceDialog extends JDialog {
         
         String date = new SimpleDateFormat("yyyy-MM-dd").format(dateChooser.getDate());
         String status = (String) cmbStatus.getSelectedItem();
-        String checkIn = new SimpleDateFormat("HH:mm:ss").format((Date) spinCheckIn.getValue());
-        String checkOut = new SimpleDateFormat("HH:mm:ss").format((Date) spinCheckOut.getValue());
         String remarks = txtRemarks.getText().trim();
         String datetime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+        
+        String checkIn = null;
+        String checkOut = null;
+        
+        // Only capture time if student is not absent
+        if (!"Absent".equals(status)) {
+            checkIn = new SimpleDateFormat("HH:mm:ss").format((Date) spinCheckIn.getValue());
+            checkOut = new SimpleDateFormat("HH:mm:ss").format((Date) spinCheckOut.getValue());
+            
+            // Validate check-out is after check-in
+            try {
+                Date inTime = new SimpleDateFormat("HH:mm:ss").parse(checkIn);
+                Date outTime = new SimpleDateFormat("HH:mm:ss").parse(checkOut);
+                
+                if (!outTime.after(inTime)) {
+                    JOptionIcon.showWarningDialog(this, "Check-out time must be after check-in time.");
+                    return;
+                }
+            } catch (Exception e) {
+                JOptionIcon.showErrorDialog(this, "Error parsing time values.");
+                return;
+            }
+        }
 
         try {
             String checkQuery = "SELECT attendance_id FROM student_attendance WHERE student_id = '" + studentId + "' AND attendance_date = '" + date + "'";
@@ -163,8 +200,8 @@ public class StudentAttendanceDialog extends JDialog {
             if (rs.next()) {
                 // Update
                 String updateQuery = "UPDATE student_attendance SET status = '" + status + "', " +
-                        "check_in_time = '" + checkIn + "', " +
-                        "check_out_time = '" + checkOut + "', " +
+                        "check_in_time = " + (checkIn != null ? "'" + checkIn + "'" : "NULL") + ", " +
+                        "check_out_time = " + (checkOut != null ? "'" + checkOut + "'" : "NULL") + ", " +
                         "remarks = '" + remarks + "' " +
                         "WHERE student_id = '" + studentId + "' AND attendance_date = '" + date + "'";
                 MySQL.executeIUD(updateQuery);
@@ -172,7 +209,9 @@ public class StudentAttendanceDialog extends JDialog {
             } else {
                 // Insert
                 String insertQuery = "INSERT INTO student_attendance (student_id, date_time, attendance_date, status, check_in_time, check_out_time, remarks) " +
-                        "VALUES ('" + studentId + "', '" + datetime + "', '" + date + "', '" + status + "', '" + checkIn + "', '" + checkOut + "', '" + remarks + "')";
+                        "VALUES ('" + studentId + "', '" + datetime + "', '" + date + "', '" + status + "', " +
+                        (checkIn != null ? "'" + checkIn + "'" : "NULL") + ", " +
+                        (checkOut != null ? "'" + checkOut + "'" : "NULL") + ", '" + remarks + "')";
                 MySQL.executeIUD(insertQuery);
                 JOptionIcon.showSuccessDialog(this, "Attendance marked successfully.");
             }

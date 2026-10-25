@@ -9,6 +9,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.sql.ResultSet;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * My Profile Panel (Teacher Self-Service)
@@ -16,6 +17,8 @@ import java.util.logging.Level;
  * including personal details, employment info, and assigned classes/subjects.
  */
 public class MyProfilePanel extends JPanel {
+
+    private static Logger logger = Logger.getLogger(MyProfilePanel.class.getName());
 
     public MyProfilePanel() {
         initComponents();
@@ -353,6 +356,8 @@ public class MyProfilePanel extends JPanel {
                 if (teacherNIC != null) {
                     MySQL.executeIUD("UPDATE teacher SET password='" + hashedNew + "' WHERE NIC = '" + teacherNIC + "'");
                 }
+
+                logger.log(Level.INFO, "Teacher " + username + " (NIC: " + teacherNIC + ") changed their password successfully.");
 
                 JOptionIcon.showSuccessDialog(dialog, "Password changed successfully!");
                 dialog.dispose();
