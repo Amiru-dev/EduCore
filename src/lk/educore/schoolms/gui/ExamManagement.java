@@ -94,19 +94,27 @@ public class ExamManagement extends JPanel {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
 
         // Button panel
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 10));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
         
         btnAddExam = new JButton("Add Exam");
+        btnAddExam.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btnAddExam.addActionListener(e -> addExam());
+        applyPrimaryButtonEffect(btnAddExam);
         
         btnViewResults = new JButton("View Results");
+        btnViewResults.setEnabled(false);
         btnViewResults.addActionListener(e -> viewResults());
+        applySecondaryButtonEffect(btnViewResults);
         
         btnPublishResults = new JButton("Publish Results");
+        btnPublishResults.setEnabled(false);
         btnPublishResults.addActionListener(e -> publishResults());
+        applySecondaryButtonEffect(btnPublishResults);
         
         btnRefresh = new JButton("Refresh");
         btnRefresh.addActionListener(e -> loadExamData());
+        applySecondaryButtonEffect(btnRefresh);
 
         buttonPanel.add(btnAddExam);
         buttonPanel.add(btnViewResults);
@@ -132,8 +140,18 @@ public class ExamManagement extends JPanel {
 
         examTable = new JTable(tableModel);
         examTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        examTable.setRowHeight(25);
-        examTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
+        examTable.setRowHeight(30);
+        examTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
+        examTable.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        
+        // Add selection listener to enable/disable buttons
+        examTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                boolean hasSelection = examTable.getSelectedRow() != -1;
+                btnViewResults.setEnabled(hasSelection);
+                btnPublishResults.setEnabled(hasSelection);
+            }
+        });
         
         // Add mouse listener for double-click
         examTable.addMouseListener(new MouseAdapter() {
@@ -1041,5 +1059,67 @@ public class ExamManagement extends JPanel {
         } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error publishing results: " + e.getMessage());
         }
+    }
+
+    private void applyPrimaryButtonEffect(JButton button) {
+        button.setBackground(new Color(37, 99, 235));
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(29, 78, 216));
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(37, 99, 235));
+                }
+            }
+        });
+    }
+
+    private void applySecondaryButtonEffect(JButton button) {
+        button.setBackground(Color.WHITE);
+        button.setForeground(new Color(71, 85, 105));
+        button.setFocusPainted(false);
+        button.setBorderPainted(true);
+        button.setBorder(BorderFactory.createLineBorder(new Color(203, 213, 225), 1));
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+            BorderFactory.createEmptyBorder(8, 16, 8, 16)
+        ));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(248, 250, 252));
+                    button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(148, 163, 184), 1),
+                        BorderFactory.createEmptyBorder(8, 16, 8, 16)
+                    ));
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(Color.WHITE);
+                    button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+                        BorderFactory.createEmptyBorder(8, 16, 8, 16)
+                    ));
+                }
+            }
+        });
     }
 }

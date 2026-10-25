@@ -44,7 +44,8 @@ public class EventManagement extends JPanel {
         headerPanel.add(titleLabel, BorderLayout.WEST);
 
         // Search and button panel
-        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 5));
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 10));
+        rightPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
         
         txtSearch = new JTextField(20);
         txtSearch.addKeyListener(new KeyAdapter() {
@@ -55,16 +56,23 @@ public class EventManagement extends JPanel {
         });
         
         btnAddEvent = new JButton("Add Event");
+        btnAddEvent.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btnAddEvent.addActionListener(e -> addEvent());
+        applyPrimaryButtonEffect(btnAddEvent);
 
         btnEditEvent = new JButton("Edit Event");
+        btnEditEvent.setEnabled(false);
         btnEditEvent.addActionListener(e -> editEvent());
+        applySecondaryButtonEffect(btnEditEvent);
 
         btnDeleteEvent = new JButton("Delete Event");
+        btnDeleteEvent.setEnabled(false);
         btnDeleteEvent.addActionListener(e -> deleteEvent());
+        applyDestructiveButtonEffect(btnDeleteEvent);
 
         btnRefresh = new JButton("Refresh");
         btnRefresh.addActionListener(e -> loadEventData());
+        applySecondaryButtonEffect(btnRefresh);
 
         rightPanel.add(new JLabel("Search:"));
         rightPanel.add(txtSearch);
@@ -94,8 +102,18 @@ public class EventManagement extends JPanel {
 
         eventTable = new JTable(tableModel);
         eventTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        eventTable.setRowHeight(25);
-        eventTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
+        eventTable.setRowHeight(30);
+        eventTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
+        eventTable.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        
+        // Add selection listener to enable/disable buttons
+        eventTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                boolean hasSelection = eventTable.getSelectedRow() != -1;
+                btnEditEvent.setEnabled(hasSelection);
+                btnDeleteEvent.setEnabled(hasSelection);
+            }
+        });
 
         JScrollPane scrollPane = new JScrollPane(eventTable);
         add(scrollPane, BorderLayout.CENTER);
@@ -619,5 +637,92 @@ public class EventManagement extends JPanel {
                 JOptionIcon.showErrorDialog(this, "Error deleting event: " + ex.getMessage());
             }
         }
+    }
+
+    private void applyPrimaryButtonEffect(JButton button) {
+        button.setBackground(new Color(37, 99, 235));
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(29, 78, 216));
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(37, 99, 235));
+                }
+            }
+        });
+    }
+
+    private void applySecondaryButtonEffect(JButton button) {
+        button.setBackground(Color.WHITE);
+        button.setForeground(new Color(71, 85, 105));
+        button.setFocusPainted(false);
+        button.setBorderPainted(true);
+        button.setBorder(BorderFactory.createLineBorder(new Color(203, 213, 225), 1));
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+            BorderFactory.createEmptyBorder(8, 16, 8, 16)
+        ));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(248, 250, 252));
+                    button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(148, 163, 184), 1),
+                        BorderFactory.createEmptyBorder(8, 16, 8, 16)
+                    ));
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(Color.WHITE);
+                    button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+                        BorderFactory.createEmptyBorder(8, 16, 8, 16)
+                    ));
+                }
+            }
+        });
+    }
+
+    private void applyDestructiveButtonEffect(JButton button) {
+        button.setBackground(new Color(220, 38, 38));
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(185, 28, 28));
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(220, 38, 38));
+                }
+            }
+        });
     }
 }

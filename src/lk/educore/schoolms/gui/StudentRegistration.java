@@ -217,12 +217,13 @@ public class StudentRegistration extends JDialog {
         gbc.gridy = 11;
         gbc.gridwidth = 2;
         gbc.weightx = 0.0;
-        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 5));
         searchPanel.add(new JLabel("Search Guardian by NIC:"));
         txtGuardianSearchNIC = new JTextField(15);
         searchPanel.add(txtGuardianSearchNIC);
         btnSearchGuardian = new JButton("Search");
         btnSearchGuardian.addActionListener(e -> searchGuardianByNIC());
+        applySecondaryButtonEffect(btnSearchGuardian);
         searchPanel.add(btnSearchGuardian);
         formPanel.add(searchPanel, gbc);
 
@@ -346,12 +347,16 @@ public class StudentRegistration extends JDialog {
 
         // Button panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
         
         JButton btnSave = new JButton("Register Student");
+        btnSave.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btnSave.addActionListener(e -> registerStudent());
+        applyPrimaryButtonEffect(btnSave);
         
         JButton btnCancel = new JButton("Cancel");
         btnCancel.addActionListener(e -> dispose());
+        applySecondaryButtonEffect(btnCancel);
 
         buttonPanel.add(btnSave);
         buttonPanel.add(btnCancel);
@@ -684,5 +689,67 @@ public class StudentRegistration extends JDialog {
         } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Unexpected error: " + e.getMessage());
         }
+    }
+
+    private void applyPrimaryButtonEffect(JButton button) {
+        button.setBackground(new Color(37, 99, 235));
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(29, 78, 216));
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(37, 99, 235));
+                }
+            }
+        });
+    }
+
+    private void applySecondaryButtonEffect(JButton button) {
+        button.setBackground(Color.WHITE);
+        button.setForeground(new Color(71, 85, 105));
+        button.setFocusPainted(false);
+        button.setBorderPainted(true);
+        button.setBorder(BorderFactory.createLineBorder(new Color(203, 213, 225), 1));
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+            BorderFactory.createEmptyBorder(8, 16, 8, 16)
+        ));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(248, 250, 252));
+                    button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(148, 163, 184), 1),
+                        BorderFactory.createEmptyBorder(8, 16, 8, 16)
+                    ));
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(Color.WHITE);
+                    button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+                        BorderFactory.createEmptyBorder(8, 16, 8, 16)
+                    ));
+                }
+            }
+        });
     }
 }

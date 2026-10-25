@@ -40,8 +40,10 @@ public class MyAttendancePanel extends JPanel {
 
         JButton btnRefresh = new JButton("Refresh");
         btnRefresh.addActionListener(e -> loadAttendanceData());
-        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        applySecondaryButtonEffect(btnRefresh);
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 10));
         btnPanel.setBackground(Color.WHITE);
+        btnPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
         btnPanel.add(btnRefresh);
         headerPanel.add(btnPanel, BorderLayout.EAST);
 
@@ -78,8 +80,8 @@ public class MyAttendancePanel extends JPanel {
 
         JTable attendanceTable = new JTable(tableModel);
         attendanceTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        attendanceTable.setRowHeight(28);
-        attendanceTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
+        attendanceTable.setRowHeight(30);
+        attendanceTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
         attendanceTable.setFont(new Font("Segoe UI", Font.PLAIN, 12));
 
         JScrollPane scrollPane = new JScrollPane(attendanceTable);
@@ -173,5 +175,42 @@ public class MyAttendancePanel extends JPanel {
         } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error loading attendance: " + e.getMessage());
         }
+    }
+
+    private void applySecondaryButtonEffect(JButton button) {
+        button.setBackground(Color.WHITE);
+        button.setForeground(new Color(71, 85, 105));
+        button.setFocusPainted(false);
+        button.setBorderPainted(true);
+        button.setBorder(BorderFactory.createLineBorder(new Color(203, 213, 225), 1));
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+            BorderFactory.createEmptyBorder(8, 16, 8, 16)
+        ));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(248, 250, 252));
+                    button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(148, 163, 184), 1),
+                        BorderFactory.createEmptyBorder(8, 16, 8, 16)
+                    ));
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(Color.WHITE);
+                    button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+                        BorderFactory.createEmptyBorder(8, 16, 8, 16)
+                    ));
+                }
+            }
+        });
     }
 }

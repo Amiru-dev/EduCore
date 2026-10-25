@@ -72,6 +72,7 @@ public class MyProfilePanel extends JPanel {
         btnChangePassword.setFocusPainted(false);
         btnChangePassword.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnChangePassword.addActionListener(e -> openChangePasswordDialog());
+        applyButtonHoverEffect(btnChangePassword, new Color(22, 163, 74), new Color(18, 140, 60));
         buttonPanel.add(btnChangePassword);
 
         JPanel topPanel = new JPanel(new BorderLayout());
@@ -373,5 +374,25 @@ public class MyProfilePanel extends JPanel {
         buttons.add(btnSave);
         dialog.add(buttons, BorderLayout.SOUTH);
         dialog.setVisible(true);
+    }
+
+    private void applyButtonHoverEffect(JButton button, Color normalColor, Color hoverColor) {
+        button.setBackground(normalColor);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                button.setBackground(hoverColor);
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                button.setBackground(normalColor);
+            }
+        });
     }
 }

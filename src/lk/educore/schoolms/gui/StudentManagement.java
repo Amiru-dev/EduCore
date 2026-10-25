@@ -97,28 +97,41 @@ public class StudentManagement extends JPanel {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
 
         // Button panel
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 10));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
 
         btnAdd = new JButton("Add Student");
+        btnAdd.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btnAdd.addActionListener(e -> addStudent());
+        applyPrimaryButtonEffect(btnAdd);
 
         btnEdit = new JButton("Edit");
+        btnEdit.setEnabled(false);
         btnEdit.addActionListener(e -> editStudent());
+        applySecondaryButtonEffect(btnEdit);
 
         btnDelete = new JButton("Delete");
+        btnDelete.setEnabled(false);
         btnDelete.addActionListener(e -> deleteStudent());
+        applyDestructiveButtonEffect(btnDelete);
 
         btnView = new JButton("View Details");
+        btnView.setEnabled(false);
         btnView.addActionListener(e -> viewStudentDetails());
+        applySecondaryButtonEffect(btnView);
 
         btnRefresh = new JButton("Refresh");
         btnRefresh.addActionListener(e -> loadStudentData());
+        applySecondaryButtonEffect(btnRefresh);
 
         btnAttendance = new JButton("Mark Attendance");
         btnAttendance.addActionListener(e -> markAttendance());
+        applySecondaryButtonEffect(btnAttendance);
 
         btnQRCode = new JButton("Generate QR");
+        btnQRCode.setEnabled(false);
         btnQRCode.addActionListener(e -> generateQRCode());
+        applySecondaryButtonEffect(btnQRCode);
 
         buttonPanel.add(btnAdd);
         buttonPanel.add(btnEdit);
@@ -149,8 +162,20 @@ public class StudentManagement extends JPanel {
 
         studentTable = new JTable(tableModel);
         studentTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        studentTable.setRowHeight(25);
-        studentTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
+        studentTable.setRowHeight(30);
+        studentTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
+        studentTable.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        
+        // Add selection listener to enable/disable buttons
+        studentTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                boolean hasSelection = studentTable.getSelectedRow() != -1;
+                btnEdit.setEnabled(hasSelection);
+                btnDelete.setEnabled(hasSelection);
+                btnView.setEnabled(hasSelection);
+                btnQRCode.setEnabled(hasSelection);
+            }
+        });
 
         // Add mouse listener for double-click
         studentTable.addMouseListener(new MouseAdapter() {
@@ -576,5 +601,108 @@ public class StudentManagement extends JPanel {
         } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error generating QR code: " + e.getMessage());
         }
+    }
+
+    private void applyButtonHoverEffect(JButton button, Color normalColor, Color hoverColor) {
+        button.setBackground(normalColor);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                button.setBackground(hoverColor);
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                button.setBackground(normalColor);
+            }
+        });
+    }
+
+    private void applyPrimaryButtonEffect(JButton button) {
+        button.setBackground(new Color(37, 99, 235));
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                button.setBackground(new Color(29, 78, 216));
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                button.setBackground(new Color(37, 99, 235));
+            }
+        });
+    }
+
+    private void applySecondaryButtonEffect(JButton button) {
+        button.setBackground(Color.WHITE);
+        button.setForeground(new Color(71, 85, 105));
+        button.setFocusPainted(false);
+        button.setBorderPainted(true);
+        button.setBorder(BorderFactory.createLineBorder(new Color(203, 213, 225), 1));
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+            BorderFactory.createEmptyBorder(8, 16, 8, 16)
+        ));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(248, 250, 252));
+                    button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(148, 163, 184), 1),
+                        BorderFactory.createEmptyBorder(8, 16, 8, 16)
+                    ));
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(Color.WHITE);
+                    button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+                        BorderFactory.createEmptyBorder(8, 16, 8, 16)
+                    ));
+                }
+            }
+        });
+    }
+
+    private void applyDestructiveButtonEffect(JButton button) {
+        button.setBackground(new Color(220, 38, 38));
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(185, 28, 28));
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(220, 38, 38));
+                }
+            }
+        });
     }
 }

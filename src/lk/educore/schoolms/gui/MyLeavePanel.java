@@ -42,18 +42,22 @@ public class MyLeavePanel extends JPanel {
         titleLabel.setForeground(new Color(44, 62, 80));
         headerPanel.add(titleLabel, BorderLayout.WEST);
 
-        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 10));
         btnPanel.setBackground(Color.WHITE);
+        btnPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
 
         JButton btnApply = new JButton("Apply for Leave");
+        btnApply.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btnApply.setBackground(new Color(37, 99, 235));
         btnApply.setForeground(Color.WHITE);
         btnApply.setFocusPainted(false);
         btnApply.addActionListener(e -> applyForLeave());
+        applyPrimaryButtonEffect(btnApply);
         btnPanel.add(btnApply);
 
         JButton btnRefresh = new JButton("Refresh");
         btnRefresh.addActionListener(e -> loadLeaveData());
+        applySecondaryButtonEffect(btnRefresh);
         btnPanel.add(btnRefresh);
 
         headerPanel.add(btnPanel, BorderLayout.EAST);
@@ -81,8 +85,8 @@ public class MyLeavePanel extends JPanel {
 
         JTable leaveTable = new JTable(tableModel);
         leaveTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        leaveTable.setRowHeight(28);
-        leaveTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
+        leaveTable.setRowHeight(30);
+        leaveTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
         leaveTable.setFont(new Font("Segoe UI", Font.PLAIN, 12));
 
         JScrollPane scrollPane = new JScrollPane(leaveTable);
@@ -292,5 +296,67 @@ public class MyLeavePanel extends JPanel {
                 JOptionIcon.showErrorDialog(this, "Error submitting leave request: " + e.getMessage());
             }
         }
+    }
+
+    private void applyPrimaryButtonEffect(JButton button) {
+        button.setBackground(new Color(37, 99, 235));
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(29, 78, 216));
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(37, 99, 235));
+                }
+            }
+        });
+    }
+
+    private void applySecondaryButtonEffect(JButton button) {
+        button.setBackground(Color.WHITE);
+        button.setForeground(new Color(71, 85, 105));
+        button.setFocusPainted(false);
+        button.setBorderPainted(true);
+        button.setBorder(BorderFactory.createLineBorder(new Color(203, 213, 225), 1));
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+            BorderFactory.createEmptyBorder(8, 16, 8, 16)
+        ));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(248, 250, 252));
+                    button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(148, 163, 184), 1),
+                        BorderFactory.createEmptyBorder(8, 16, 8, 16)
+                    ));
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(Color.WHITE);
+                    button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+                        BorderFactory.createEmptyBorder(8, 16, 8, 16)
+                    ));
+                }
+            }
+        });
     }
 }

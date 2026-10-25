@@ -43,7 +43,8 @@ public class GuardianManagement extends JPanel {
         headerPanel.add(titleLabel, BorderLayout.WEST);
 
         // Search and button panel
-        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 5));
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 10));
+        rightPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
         
         txtSearch = new JTextField(20);
         txtSearch.addKeyListener(new KeyAdapter() {
@@ -54,16 +55,23 @@ public class GuardianManagement extends JPanel {
         });
         
         btnAddGuardian = new JButton("Add Guardian");
+        btnAddGuardian.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btnAddGuardian.addActionListener(e -> addGuardian());
+        applyPrimaryButtonEffect(btnAddGuardian);
 
         btnEditGuardian = new JButton("Edit Guardian");
+        btnEditGuardian.setEnabled(false);
         btnEditGuardian.addActionListener(e -> editGuardian());
+        applySecondaryButtonEffect(btnEditGuardian);
 
         btnDeleteGuardian = new JButton("Delete Guardian");
+        btnDeleteGuardian.setEnabled(false);
         btnDeleteGuardian.addActionListener(e -> deleteGuardian());
+        applyDestructiveButtonEffect(btnDeleteGuardian);
 
         btnRefresh = new JButton("Refresh");
         btnRefresh.addActionListener(e -> loadGuardianData());
+        applySecondaryButtonEffect(btnRefresh);
 
         rightPanel.add(new JLabel("Search:"));
         rightPanel.add(txtSearch);
@@ -87,8 +95,18 @@ public class GuardianManagement extends JPanel {
 
         guardianTable = new JTable(tableModel);
         guardianTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        guardianTable.setRowHeight(25);
-        guardianTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
+        guardianTable.setRowHeight(30);
+        guardianTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
+        guardianTable.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        
+        // Add selection listener to enable/disable buttons
+        guardianTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                boolean hasSelection = guardianTable.getSelectedRow() != -1;
+                btnEditGuardian.setEnabled(hasSelection);
+                btnDeleteGuardian.setEnabled(hasSelection);
+            }
+        });
 
         JScrollPane scrollPane = new JScrollPane(guardianTable);
         add(scrollPane, BorderLayout.CENTER);
@@ -396,5 +414,92 @@ public class GuardianManagement extends JPanel {
                 JOptionIcon.showErrorDialog(this, "Error deleting guardian: " + ex.getMessage());
             }
         }
+    }
+
+    private void applyPrimaryButtonEffect(JButton button) {
+        button.setBackground(new Color(37, 99, 235));
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(29, 78, 216));
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(37, 99, 235));
+                }
+            }
+        });
+    }
+
+    private void applySecondaryButtonEffect(JButton button) {
+        button.setBackground(Color.WHITE);
+        button.setForeground(new Color(71, 85, 105));
+        button.setFocusPainted(false);
+        button.setBorderPainted(true);
+        button.setBorder(BorderFactory.createLineBorder(new Color(203, 213, 225), 1));
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+            BorderFactory.createEmptyBorder(8, 16, 8, 16)
+        ));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(248, 250, 252));
+                    button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(148, 163, 184), 1),
+                        BorderFactory.createEmptyBorder(8, 16, 8, 16)
+                    ));
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(Color.WHITE);
+                    button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+                        BorderFactory.createEmptyBorder(8, 16, 8, 16)
+                    ));
+                }
+            }
+        });
+    }
+
+    private void applyDestructiveButtonEffect(JButton button) {
+        button.setBackground(new Color(220, 38, 38));
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(185, 28, 28));
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(220, 38, 38));
+                }
+            }
+        });
     }
 }

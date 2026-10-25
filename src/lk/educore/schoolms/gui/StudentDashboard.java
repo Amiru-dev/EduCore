@@ -695,6 +695,7 @@ public class StudentDashboard extends JFrame {
         btnChangePassword.setFocusPainted(false);
         btnChangePassword.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnChangePassword.addActionListener(e -> openChangePasswordDialog());
+        applyButtonHoverEffect(btnChangePassword, new Color(22, 163, 74), new Color(18, 140, 60));
         rightBanner.add(btnChangePassword);
 
         JButton btnEditAddress = new JButton("Update Address");
@@ -704,6 +705,7 @@ public class StudentDashboard extends JFrame {
         btnEditAddress.setFocusPainted(false);
         btnEditAddress.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnEditAddress.addActionListener(e -> openAddressEditDialog());
+        applyButtonHoverEffect(btnEditAddress, new Color(37, 99, 235), new Color(29, 78, 216));
         rightBanner.add(btnEditAddress);
 
         JButton btnRefreshProfile = new JButton("Refresh");
@@ -2546,5 +2548,25 @@ public class StudentDashboard extends JFrame {
         } catch (Exception ignored) {}
 
         SwingUtilities.invokeLater(() -> new StudentDashboard("STU001").setVisible(true));
+    }
+
+    private void applyButtonHoverEffect(JButton button, Color normalColor, Color hoverColor) {
+        button.setBackground(normalColor);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                button.setBackground(hoverColor);
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                button.setBackground(normalColor);
+            }
+        });
     }
 }
