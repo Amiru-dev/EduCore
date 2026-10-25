@@ -317,10 +317,10 @@ public class SignIn extends javax.swing.JFrame {
                     }
                     logger.log(Level.INFO, "Username: " + username + " signed in to the account");
                 } else {
-                    JOptionIcon.showErrorDialog(this, "Invalid password!");
+                    JOptionIcon.showErrorDialog(this, "Invalid username or password!");
                 }
             } else {
-                JOptionIcon.showErrorDialog(this, "User not found!");
+                JOptionIcon.showErrorDialog(this, "Invalid username or password!");
             }
 
             rs.close();
