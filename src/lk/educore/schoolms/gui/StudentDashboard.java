@@ -350,6 +350,12 @@ public class StudentDashboard extends JFrame {
         JMenu helpMenu = new JMenu("Help");
         helpMenu.setFont(new Font("Segoe UI", Font.PLAIN, 12));
 
+        JMenuItem userGuideMenu = new JMenuItem("User Guide");
+        userGuideMenu.addActionListener(e -> {
+            new HelpDialog(this, "Student").setVisible(true);
+        });
+        helpMenu.add(userGuideMenu);
+
         JMenuItem aboutMenu = new JMenuItem("About EduCore");
         aboutMenu.addActionListener(e -> {
             try {

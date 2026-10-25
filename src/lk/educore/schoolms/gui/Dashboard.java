@@ -402,7 +402,7 @@ public class Dashboard extends JFrame {
 
         JMenuItem userGuideMenu = new JMenuItem("User Guide");
         userGuideMenu.addActionListener(e -> {
-            new HelpDialog(this).setVisible(true);
+            new HelpDialog(this, role).setVisible(true);
         });
 
         helpMenu.add(userGuideMenu);
