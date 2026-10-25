@@ -258,7 +258,25 @@ public class MyLeavePanel extends JPanel {
                     return;
                 }
 
+                // Check for overlapping leave requests
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                String startDateStr = sdf.format(startDate);
+                String endDateStr = sdf.format(endDate);
+                
+                ResultSet checkRs = MySQL.executeSearch(
+                    "SELECT COUNT(*) as count FROM teacher_leave "
+                    + "WHERE teacher_NIC = '" + session.getTeacherNIC() + "' "
+                    + "AND status IN ('Pending', 'Approved') "
+                    + "AND (start_date <= '" + endDateStr + "' AND end_date >= '" + startDateStr + "')");
+                
+                if (checkRs.next() && checkRs.getInt("count") > 0) {
+                    JOptionIcon.showWarningDialog(this, "You already have a leave request for this date range.\n"
+                        + "Please choose different dates or wait for the existing request to be processed.");
+                    checkRs.close();
+                    return;
+                }
+                checkRs.close();
+
                 String reason = txtReason.getText().trim().replace("'", "''");
 
                 MySQL.executeIUD(
