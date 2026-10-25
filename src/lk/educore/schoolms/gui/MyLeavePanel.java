@@ -267,8 +267,8 @@ public class MyLeavePanel extends JPanel {
                     + "'" + sdf.format(startDate) + "', '" + sdf.format(endDate) + "', "
                     + "'" + reason + "', 'Pending')");
 
-                JOptionIcon.showSuccessDialog(this, "Leave request submitted successfully!\nStatus: Pending (awaiting Admin approval)");
                 loadLeaveData();
+                JOptionIcon.showSuccessDialog(this, "Leave request submitted successfully!\nStatus: Pending (awaiting Admin approval)");
 
             } catch (Exception e) {
                 JOptionIcon.showErrorDialog(this, "Error submitting leave request: " + e.getMessage());

@@ -22,8 +22,10 @@ public class TeacherManagement extends JPanel {
     private DefaultTableModel tableModel;
     private JTextField txtSearch;
     private JComboBox<String> cmbSearchBy;
-    private JButton btnAdd, btnEdit, btnDelete, btnView, btnRefresh, btnAttendance, btnLeave, btnSalary, btnQRCode;
+    private JButton btnAdd, btnEdit, btnDelete, btnView, btnRefresh, btnAttendance, btnSalary, btnQRCode;
     private JTabbedPane tabbedPane;
+    private JTable leaveTable;
+    private DefaultTableModel leaveModel;
 
     public TeacherManagement() {
         initComponents();
@@ -126,9 +128,6 @@ public class TeacherManagement extends JPanel {
         btnAttendance = new JButton("Mark Attendance");
         btnAttendance.addActionListener(e -> markAttendance());
 
-        btnLeave = new JButton("Apply Leave");
-        btnLeave.addActionListener(e -> applyLeave());
-
         btnSalary = new JButton("Manage Salary");
         btnSalary.addActionListener(e -> manageSalary());
 
@@ -141,7 +140,6 @@ public class TeacherManagement extends JPanel {
         buttonPanel.add(btnView);
         buttonPanel.add(btnRefresh);
         buttonPanel.add(btnAttendance);
-        buttonPanel.add(btnLeave);
         buttonPanel.add(btnSalary);
         buttonPanel.add(btnQRCode);
 
@@ -250,7 +248,22 @@ public class TeacherManagement extends JPanel {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
 
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton btnApprove = new JButton("Approve");
+        btnApprove.setBackground(new Color(22, 163, 74));
+        btnApprove.setForeground(Color.WHITE);
+        btnApprove.setFocusPainted(false);
+        btnApprove.addActionListener(e -> approveLeave());
+        topPanel.add(btnApprove);
+        
+        JButton btnReject = new JButton("Reject");
+        btnReject.setBackground(new Color(220, 38, 38));
+        btnReject.setForeground(Color.WHITE);
+        btnReject.setFocusPainted(false);
+        btnReject.addActionListener(e -> rejectLeave());
+        topPanel.add(btnReject);
+        
         JButton btnRefresh = new JButton("Refresh Leave");
+        btnRefresh.addActionListener(e -> loadLeaveData());
         topPanel.add(btnRefresh);
         panel.add(topPanel, BorderLayout.NORTH);
 
@@ -262,47 +275,105 @@ public class TeacherManagement extends JPanel {
                 return false;
             }
         };
+        this.leaveModel = leaveModel;
 
         JTable leaveTable = new JTable(leaveModel);
         leaveTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         leaveTable.setRowHeight(25);
         leaveTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
+        this.leaveTable = leaveTable;
 
         JScrollPane scrollPane = new JScrollPane(leaveTable);
         panel.add(scrollPane, BorderLayout.CENTER);
 
-        java.awt.event.ActionListener loadAction = e -> {
-            try {
-                leaveModel.setRowCount(0);
-                ResultSet rs = MySQL.executeSearch("SELECT l.leave_id, l.teacher_NIC, "
-                        + "CONCAT(t.first_name, ' ', t.last_name) as name, "
-                        + "lt.leave_type_name, l.start_date, l.end_date, l.status "
-                        + "FROM teacher_leave l "
-                        + "INNER JOIN teacher t ON l.teacher_NIC = t.NIC "
-                        + "INNER JOIN leave_type lt ON l.leave_type_id = lt.leave_type_id "
-                        + "ORDER BY l.leave_id DESC LIMIT 100");
-
-                while (rs.next()) {
-                    leaveModel.addRow(new Object[]{
-                        rs.getString("leave_id"),
-                        rs.getString("teacher_NIC"),
-                        rs.getString("name"),
-                        rs.getString("leave_type_name"),
-                        rs.getString("start_date"),
-                        rs.getString("end_date"),
-                        rs.getString("status")
-                    });
-                }
-                rs.close();
-            } catch (Exception ex) {
-                JOptionIcon.showErrorDialog(this, "Error loading leave data: " + ex.getMessage());
-            }
-        };
-
-        btnRefresh.addActionListener(loadAction);
-        SwingUtilities.invokeLater(() -> loadAction.actionPerformed(null));
+        // Load initial data
+        loadLeaveData();
 
         return panel;
+    }
+
+    private void loadLeaveData() {
+        try {
+            leaveModel.setRowCount(0);
+            ResultSet rs = MySQL.executeSearch("SELECT l.leave_id, l.teacher_NIC, "
+                    + "CONCAT(t.first_name, ' ', t.last_name) as name, "
+                    + "lt.leave_type_name, l.start_date, l.end_date, l.status "
+                    + "FROM teacher_leave l "
+                    + "INNER JOIN teacher t ON l.teacher_NIC = t.NIC "
+                    + "INNER JOIN leave_type lt ON l.leave_type_id = lt.leave_type_id "
+                    + "ORDER BY l.leave_id DESC LIMIT 100");
+
+            while (rs.next()) {
+                leaveModel.addRow(new Object[]{
+                    rs.getString("leave_id"),
+                    rs.getString("teacher_NIC"),
+                    rs.getString("name"),
+                    rs.getString("leave_type_name"),
+                    rs.getString("start_date"),
+                    rs.getString("end_date"),
+                    rs.getString("status")
+                });
+            }
+            rs.close();
+        } catch (Exception ex) {
+            JOptionIcon.showErrorDialog(this, "Error loading leave data: " + ex.getMessage());
+        }
+    }
+
+    private void approveLeave() {
+        int selectedRow = leaveTable.getSelectedRow();
+        
+        if (selectedRow == -1) {
+            JOptionIcon.showWarningDialog(this, "Please select a leave request to approve.");
+            return;
+        }
+
+        String leaveId = leaveModel.getValueAt(selectedRow, 0).toString();
+        String status = leaveModel.getValueAt(selectedRow, 6).toString();
+
+        if (!"Pending".equals(status)) {
+            JOptionIcon.showWarningDialog(this, "Only pending leave requests can be approved.");
+            return;
+        }
+
+        int confirm = JOptionIcon.showConfirmDialog(this, "Are you sure you want to approve this leave request?");
+        if (confirm == JOptionPane.YES_OPTION) {
+            try {
+                MySQL.executeIUD("UPDATE teacher_leave SET status = 'Approved' WHERE leave_id = " + leaveId);
+                JOptionIcon.showSuccessDialog(this, "Leave request approved successfully.");
+                loadLeaveData();
+            } catch (Exception e) {
+                JOptionIcon.showErrorDialog(this, "Error approving leave: " + e.getMessage());
+            }
+        }
+    }
+
+    private void rejectLeave() {
+        int selectedRow = leaveTable.getSelectedRow();
+        
+        if (selectedRow == -1) {
+            JOptionIcon.showWarningDialog(this, "Please select a leave request to reject.");
+            return;
+        }
+
+        String leaveId = leaveModel.getValueAt(selectedRow, 0).toString();
+        String status = leaveModel.getValueAt(selectedRow, 6).toString();
+
+        if (!"Pending".equals(status)) {
+            JOptionIcon.showWarningDialog(this, "Only pending leave requests can be rejected.");
+            return;
+        }
+
+        int confirm = JOptionIcon.showConfirmDialog(this, "Are you sure you want to reject this leave request?");
+        if (confirm == JOptionPane.YES_OPTION) {
+            try {
+                MySQL.executeIUD("UPDATE teacher_leave SET status = 'Rejected' WHERE leave_id = " + leaveId);
+                JOptionIcon.showSuccessDialog(this, "Leave request rejected successfully.");
+                loadLeaveData();
+            } catch (Exception e) {
+                JOptionIcon.showErrorDialog(this, "Error rejecting leave: " + e.getMessage());
+            }
+        }
     }
 
     private JPanel createSalaryPanel() {
@@ -703,70 +774,6 @@ public class TeacherManagement extends JPanel {
                 rs.close();
             } catch (Exception e) {
                 JOptionIcon.showErrorDialog(this, "Error marking attendance: " + e.getMessage());
-            }
-        }
-    }
-
-    private void applyLeave() {
-        int selectedRow = teacherTable.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionIcon.showWarningDialog(this, "Please select a teacher to apply leave.");
-            return;
-        }
-
-        String nic = tableModel.getValueAt(selectedRow, 0).toString();
-
-        JDateChooser startDateChooser = new JDateChooser();
-        JDateChooser endDateChooser = new JDateChooser();
-        startDateChooser.setDateFormatString("yyyy-MM-dd");
-        endDateChooser.setDateFormatString("yyyy-MM-dd");
-
-        JComboBox<String> cmbLeaveType = new JComboBox<>();
-        try {
-            ResultSet rs = MySQL.executeSearch("SELECT * FROM leave_type");
-            while (rs.next()) {
-                cmbLeaveType.addItem(rs.getString("leave_type_id") + " - " + rs.getString("leave_type_name"));
-            }
-            rs.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        JPanel panel = new JPanel(new GridLayout(3, 2, 5, 5));
-        panel.add(new JLabel("Leave Type:"));
-        panel.add(cmbLeaveType);
-        panel.add(new JLabel("Start Date:"));
-        panel.add(startDateChooser);
-        panel.add(new JLabel("End Date:"));
-        panel.add(endDateChooser);
-
-        int result = JOptionPane.showConfirmDialog(this, panel, "Apply Leave for " + nic, JOptionPane.OK_CANCEL_OPTION);
-        if (result == JOptionPane.OK_OPTION) {
-            try {
-                String typeStr = cmbLeaveType.getSelectedItem().toString();
-                String typeId = typeStr.split(" - ")[0];
-
-                Date startDate = startDateChooser.getDate();
-                Date endDate = endDateChooser.getDate();
-
-                if (startDate == null || endDate == null) {
-                    JOptionIcon.showWarningDialog(this, "Please select both start and end dates.");
-                    return;
-                }
-
-                if (startDate.after(endDate)) {
-                    JOptionIcon.showWarningDialog(this, "Start date must be before end date.");
-                    return;
-                }
-
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                String startDateStr = sdf.format(startDate);
-                String endDateStr = sdf.format(endDate);
-
-                MySQL.executeIUD("INSERT INTO teacher_leave (teacher_NIC, leave_type_id, start_date, end_date, status) VALUES ('" + nic + "', " + typeId + ", '" + startDateStr + "', '" + endDateStr + "', 'Pending')");
-                JOptionIcon.showSuccessDialog(this, "Leave applied successfully.");
-            } catch (Exception e) {
-                JOptionIcon.showErrorDialog(this, "Error applying leave: " + e.getMessage());
             }
         }
     }
