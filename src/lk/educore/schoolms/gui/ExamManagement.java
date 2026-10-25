@@ -1133,7 +1133,16 @@ public class ExamManagement extends JPanel {
 
     private void generateExamReport() {
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("REPORT_TITLE", "Exam Schedule Report");
+
+        // Check if current user is a teacher
+        if (UserSession.get() != null && UserSession.get().isTeacher()) {
+            String teacherNIC = UserSession.get().getTeacherNIC();
+            parameters.put("teacher_NIC", teacherNIC);
+            parameters.put("REPORT_TITLE", "My Exams Report");
+        } else {
+            parameters.put("REPORT_TITLE", "Exam Schedule Report");
+        }
+
         ReportGenerator.generateReport("ExamScheduleReport", parameters, "Exam Schedule Report");
     }
 }

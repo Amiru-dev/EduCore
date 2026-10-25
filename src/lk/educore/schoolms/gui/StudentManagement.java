@@ -613,7 +613,16 @@ public class StudentManagement extends JPanel {
 
     private void generateStudentReport() {
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("REPORT_TITLE", "All Students Report");
+
+        // Check if current user is a teacher
+        if (UserSession.get() != null && UserSession.get().isTeacher()) {
+            String teacherNIC = UserSession.get().getTeacherNIC();
+            parameters.put("teacher_NIC", teacherNIC);
+            parameters.put("REPORT_TITLE", "My Classes Report");
+        } else {
+            parameters.put("REPORT_TITLE", "All Students Report");
+        }
+
         ReportGenerator.generateReport("StudentReport", parameters, "Student Report");
     }
 

@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport name="ExamScheduleReport" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20">
+	<parameter name="teacher_NIC" class="java.lang.String"/>
 	<query>
 		<![CDATA[SELECT e.exam_id, e.exam_name, sub.subject_name, g.grade_name, e.exam_date, e.max_marks, et.exam_type_name
 		FROM exam e
 		JOIN subject sub ON e.subject_id = sub.subject_id
 		JOIN grade g ON e.grade_id = g.grade_id
 		JOIN exam_type et ON e.exam_type_id = et.exam_type_id
+		LEFT JOIN teacher_subject ts ON e.subject_id = ts.subject_id AND e.grade_id = ts.grade_id AND ts.academic_year = YEAR(CURDATE())
+		WHERE $P{teacher_NIC} IS NULL OR ts.teacher_NIC = $P{teacher_NIC}
 		ORDER BY e.exam_date DESC]]>
 	</query>
 	<field name="exam_id" class="java.lang.Integer"/>

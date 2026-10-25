@@ -66,6 +66,13 @@ public class ReportGenerator {
 
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, connection);
 
+            // Check if report has pages
+            if (jasperPrint.getPages().isEmpty()) {
+                JOptionIcon.showWarningDialog(null, "The report has no records to display.");
+                connection.close();
+                return;
+            }
+
             // Display the report
             displayReport(jasperPrint, title != null ? title : reportName);
 

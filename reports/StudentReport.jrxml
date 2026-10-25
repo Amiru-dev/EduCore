@@ -1,10 +1,13 @@
 <!-- Created with Jaspersoft Studio version 7.0.8.final using JasperReports Library version 7.0.8-6f896111  -->
 <jasperReport name="StudentReport" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20" uuid="ffaabf19-5cfb-4233-820e-b47cdc65cf36">
+	<parameter name="teacher_NIC" class="java.lang.String"/>
 	<query language="sql"><![CDATA[
-		SELECT s.student_id, s.first_name, s.last_name, s.nic, s.email, s.phone, s.address, g.grade_name, s.registration_date
+		SELECT DISTINCT s.student_id, s.first_name, s.last_name, s.nic, s.email, s.phone, s.address, g.grade_name, s.registration_date
 		FROM student s
 		JOIN grade g ON s.grade_id = g.grade_id
+		LEFT JOIN teacher_class tc ON g.grade_id = tc.grade_id AND tc.academic_year = YEAR(CURDATE())
 		WHERE s.is_active = 1
+		AND ($P{teacher_NIC} IS NULL OR tc.teacher_NIC = $P{teacher_NIC})
 		ORDER BY s.student_id
 	]]></query>
 	<field name="student_id" class="java.lang.String"/>
