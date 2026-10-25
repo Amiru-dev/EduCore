@@ -144,15 +144,22 @@ public class DataValidator {
      * Validate letters only (for names)
      */
     public static boolean isLettersOnly(String text) throws ValidationException {
+        return isLettersOnly(text, "This field");
+    }
+
+    /**
+     * Validate letters only (for names) with custom field name
+     */
+    public static boolean isLettersOnly(String text, String fieldName) throws ValidationException {
         if (text == null || text.trim().isEmpty()) {
-            throw new ValidationException("This field is required", "name", text);
+            throw new ValidationException(fieldName + " is required", "name", text);
         }
         
         Pattern pattern = Pattern.compile(LETTERS_ONLY_PATTERN);
         Matcher matcher = pattern.matcher(text);
         
         if (!matcher.matches()) {
-            throw new ValidationException("This field should contain only letters", "name", text, LETTERS_ONLY_PATTERN);
+            throw new ValidationException(fieldName + " should contain only letters", "name", text, LETTERS_ONLY_PATTERN);
         }
         
         return true;

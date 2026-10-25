@@ -148,10 +148,10 @@ public abstract class Person {
      */
     protected void validateCommonFields() throws ValidationException {
         DataValidator.isRequired(firstName, "First Name");
-        DataValidator.isLettersOnly(firstName);
+        DataValidator.isLettersOnly(firstName, "First Name");
 
         DataValidator.isRequired(lastName, "Last Name");
-        DataValidator.isLettersOnly(lastName);
+        DataValidator.isLettersOnly(lastName, "Last Name");
 
         if (email != null && !email.trim().isEmpty()) {
             DataValidator.isValidEmail(email);
