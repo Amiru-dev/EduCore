@@ -6,6 +6,7 @@ import javaswingdev.chart.PieChart;
 import lk.educore.schoolms.component.RoundPanel;
 import lk.educore.schoolms.model.MySQL;
 import lk.educore.schoolms.model.SendLogo;
+import lk.educore.schoolms.util.PasswordUtil;
 import lk.educore.schoolms.validate.JOptionIcon;
 
 import javax.imageio.ImageIO;
@@ -678,6 +679,15 @@ public class StudentDashboard extends JFrame {
         JPanel rightBanner = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
         rightBanner.setOpaque(false);
 
+        JButton btnChangePassword = new JButton("Change Password");
+        btnChangePassword.setBackground(new Color(22, 163, 74));
+        btnChangePassword.setForeground(Color.WHITE);
+        btnChangePassword.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        btnChangePassword.setFocusPainted(false);
+        btnChangePassword.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnChangePassword.addActionListener(e -> openChangePasswordDialog());
+        rightBanner.add(btnChangePassword);
+
         JButton btnEditAddress = new JButton("Update Address");
         btnEditAddress.setBackground(new Color(37, 99, 235));
         btnEditAddress.setForeground(Color.WHITE);
@@ -850,6 +860,124 @@ public class StudentDashboard extends JFrame {
         p.add(buttons, BorderLayout.SOUTH);
 
         dialog.add(p);
+        dialog.setVisible(true);
+    }
+
+    private void openChangePasswordDialog() {
+        if (studentId == null) {
+            JOptionIcon.showWarningDialog(this, "Student ID not found!");
+            return;
+        }
+
+        JDialog dialog = new JDialog(this, "Change Password", true);
+        dialog.setSize(450, 300);
+        dialog.setLocationRelativeTo(this);
+        dialog.setLayout(new BorderLayout());
+
+        JPanel p = new JPanel(new GridBagLayout());
+        p.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        JLabel lblTitle = new JLabel("Change your password:");
+        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        p.add(lblTitle, gbc);
+
+        JLabel lblCurrent = new JLabel("Current Password:");
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.gridwidth = 1;
+        p.add(lblCurrent, gbc);
+
+        JPasswordField txtCurrent = new JPasswordField(20);
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        p.add(txtCurrent, gbc);
+
+        JLabel lblNew = new JLabel("New Password:");
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        p.add(lblNew, gbc);
+
+        JPasswordField txtNew = new JPasswordField(20);
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        p.add(txtNew, gbc);
+
+        JLabel lblConfirm = new JLabel("Confirm New Password:");
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        p.add(lblConfirm, gbc);
+
+        JPasswordField txtConfirm = new JPasswordField(20);
+        gbc.gridx = 1;
+        gbc.gridy = 3;
+        p.add(txtConfirm, gbc);
+
+        dialog.add(p, BorderLayout.CENTER);
+
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 5));
+        JButton btnSave = new JButton("Change Password");
+        btnSave.setBackground(new Color(39, 174, 96));
+        btnSave.setForeground(Color.WHITE);
+        btnSave.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        btnSave.addActionListener(ev -> {
+            String currentPassword = new String(txtCurrent.getPassword());
+            String newPassword = new String(txtNew.getPassword());
+            String confirmPassword = new String(txtConfirm.getPassword());
+
+            if (currentPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()) {
+                JOptionIcon.showWarningDialog(dialog, "All fields are required!");
+                return;
+            }
+
+            if (!newPassword.equals(confirmPassword)) {
+                JOptionIcon.showWarningDialog(dialog, "New passwords do not match!");
+                return;
+            }
+
+            if (newPassword.length() < 6) {
+                JOptionIcon.showWarningDialog(dialog, "Password must be at least 6 characters!");
+                return;
+            }
+
+            try {
+                // Verify current password using the same method as SignIn
+                ResultSet rs = MySQL.executeSearch(
+                    "SELECT password FROM user WHERE username = '" + username + "'");
+                if (rs.next()) {
+                    String storedPassword = rs.getString("password");
+                    
+                    // Use checkPassword instead of hashPassword for verification
+                    if (!PasswordUtil.checkPassword(currentPassword, storedPassword)) {
+                        JOptionIcon.showWarningDialog(dialog, "Current password is incorrect!");
+                        rs.close();
+                        return;
+                    }
+                }
+                rs.close();
+
+                // Update password
+                String hashedNew = PasswordUtil.hashPassword(newPassword);
+                MySQL.executeIUD("UPDATE user SET password='" + hashedNew + "' WHERE username = '" + username + "'");
+                
+                JOptionIcon.showSuccessDialog(dialog, "Password changed successfully!");
+                dialog.dispose();
+            } catch (Exception ex) {
+                JOptionIcon.showErrorDialog(dialog, "Failed to change password: " + ex.getMessage());
+            }
+        });
+
+        JButton btnCancel = new JButton("Cancel");
+        btnCancel.addActionListener(ev -> dialog.dispose());
+
+        buttons.add(btnCancel);
+        buttons.add(btnSave);
+        dialog.add(buttons, BorderLayout.SOUTH);
         dialog.setVisible(true);
     }
 
