@@ -91,7 +91,7 @@ public class HelpDialog extends JDialog {
                 "5. Library Management\n" +
                 "   - Manage book inventory\n" +
                 "   - Issue and return books\n\n" +
-                "For admin-specific support, contact support@educore.com";
+                "For admin-specific support, contact educore.cca@gmail.com";
         } else if ("Teacher".equals(role)) {
             content = "Getting Started with EduCore - Teacher\n\n" +
                 "1. Dashboard Overview\n" +
@@ -110,7 +110,7 @@ public class HelpDialog extends JDialog {
                 "5. My Profile\n" +
                 "   - View your personal information\n" +
                 "   - Change your password\n\n" +
-                "For teacher-specific support, contact support@educore.com";
+                "For teacher-specific support, contact educore.cca@gmail.com";
         } else { // Student
             content = "Getting Started with EduCore - Student\n\n" +
                 "1. Dashboard Overview\n" +
@@ -130,7 +130,7 @@ public class HelpDialog extends JDialog {
                 "   - Check payment status\n\n" +
                 "6. Library\n" +
                 "   - Search and view available books\n\n" +
-                "For student-specific support, contact support@educore.com";
+                "For student-specific support, contact educore.cca@gmail.com";
         }
         
         JTextArea textArea = new JTextArea(content);

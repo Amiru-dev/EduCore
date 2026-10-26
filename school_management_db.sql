@@ -559,7 +559,7 @@ CREATE INDEX idx_teacher_attendance_date ON teacher_attendance(attendance_date);
 
 -- Insert sample admin user (password: admin123)
 INSERT IGNORE INTO user (username, password, email, user_type_id) VALUES 
-('admin', 'admin123', 'admin@educore.lk', 1);
+('admin', 'admin123', 'educore.cca@gmail.com', 1);
 
 -- ============================================
 -- SAMPLE GUARDIANS (Sri Lankan)
