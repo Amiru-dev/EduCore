@@ -1,0 +1,5 @@
+com\urbantech\smartcity360\decorator\DecoratorPatternTest.class
+com\urbantech\smartcity360\composite\CompositePatternTest.class
+com\urbantech\smartcity360\interpreter\InterpreterPatternTest.class
+com\urbantech\smartcity360\chain\ChainPatternTest.class
+com\urbantech\smartcity360\flyweight\FlyweightPatternTest.class
