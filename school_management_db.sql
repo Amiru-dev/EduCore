@@ -557,29 +557,253 @@ CREATE INDEX idx_teacher_attendance_date ON teacher_attendance(attendance_date);
 -- SAMPLE DATA FOR TESTING
 -- ============================================
 
--- Insert sample admin user
+-- Insert sample admin user (password: admin123)
 INSERT IGNORE INTO user (username, password, email, user_type_id) VALUES 
-('admin', 'admin123', 'admin@educore.com', 1);
+('admin', 'admin123', 'educore.cca@gmail.com', 1);
 
--- Insert sample teacher user
-INSERT IGNORE INTO user (username, password, email, user_type_id) VALUES 
-('teacher1', 'teacher123', 'teacher1@educore.com', 2);
+-- ============================================
+-- SAMPLE GUARDIANS (Sri Lankan)
+-- ============================================
 
--- Insert sample student user
-INSERT IGNORE INTO user (username, password, email, user_type_id) VALUES 
-('student1', 'student123', 'student1@educore.com', 3);
-
--- Insert sample guardian
 INSERT IGNORE INTO guardian (first_name, last_name, nic, relationship, phone, email, address, occupation) VALUES 
-('John', 'Doe', '901234567V', 'Father', '0771234567', 'john.doe@email.com', '123 Main Street, Anuradhapura', 'Engineer');
+('Kumara', 'Bandara', '751234567V', 'Father', '0712345678', 'kumara.bandara@gmail.com', 'No. 45, Main Street, Anuradhapura', 'Teacher'),
+('Priyanka', 'Silva', '801234567V', 'Mother', '0723456789', 'priyanka.silva@yahoo.com', 'No. 23, School Road, Anuradhapura', 'Banker'),
+('Saman', 'Perera', '781234567V', 'Father', '0734567890', 'saman.perera@hotmail.com', 'No. 67, New Town, Anuradhapura', 'Engineer'),
+('Fathima', 'Mohamed', '851234567V', 'Mother', '0745678901', 'fathima.mohamed@gmail.com', 'No. 12, Mosque Road, Anuradhapura', 'Doctor'),
+('Nimal', 'Fernando', '771234567V', 'Father', '0756789012', 'nimal.fernando@sltnet.lk', 'No. 89, Hospital Road, Anuradhapura', 'Lawyer'),
+('Keshara', 'Jayasinghe', '821234567V', 'Mother', '0767890123', 'keshara.jayasinghe@gmail.com', 'No. 34, College Avenue, Anuradhapura', 'Accountant'),
+('Sivanathan', 'Kandasamy', '791234567V', 'Father', '0778901234', 'sivanathan.kandasamy@yahoo.com', 'No. 56, Temple Road, Anuradhapura', 'Businessman'),
+('Ruwan', 'Rathnayake', '761234567V', 'Father', '0789012345', 'ruwan.rathnayake@gmail.com', 'No. 78, Lake Drive, Anuradhapura', 'Farmer'),
+('Tharushi', 'Dissanayake', '861234567V', 'Mother', '0790123456', 'tharushi.dissanayake@hotmail.com', 'No. 91, Temple Street, Anuradhapura', 'Nurse'),
+('Kasun', 'Ariyaratne', '741234567V', 'Father', '0701234567', 'kasun.ariyaratne@sltnet.lk', 'No. 19, Main Road, Anuradhapura', 'Soldier');
 
--- Insert sample student
-INSERT IGNORE INTO student (student_id, first_name, last_name, dob, gender, nic, email, phone, address, grade_id, guardian_id, user_id, registration_date) VALUES 
-('STU-0001', 'Jane', 'Doe', '2008-05-15', 'Female', '081234567V', 'jane.doe@email.com', '0771234568', '123 Main Street, Anuradhapura', 1, 1, 3, CURDATE());
+-- ============================================
+-- SAMPLE STUDENTS (Sri Lankan)
+-- ============================================
+
+INSERT IGNORE INTO student (student_id, first_name, last_name, dob, gender, nic, email, phone, address, grade_id, guardian_id, registration_date, is_active) VALUES 
+('STU-0001', 'Dilshan', 'Bandara', '2012-05-15', 'Male', '201245678908', 'dilshan.bandara@gmail.com', '0719876543', 'No. 45, Main Street, Anuradhapura', 7, 1, '2024-01-15', TRUE),
+('STU-0002', 'Sanduni', 'Silva', '2012-08-22', 'Female', '201234567897', 'sanduni.silva@yahoo.com', '0728765432', 'No. 23, School Road, Anuradhapura', 7, 2, '2024-01-16', TRUE),
+('STU-0003', 'Isuru', 'Perera', '2011-03-10', 'Male', '201123456789', 'isuru.perera@hotmail.com', '0737654321', 'No. 67, New Town, Anuradhapura', 8, 3, '2024-01-17', TRUE),
+('STU-0004', 'Ayesha', 'Mohamed', '2012-11-05', 'Female', '201298765432', 'ayesha.mohamed@gmail.com', '0746543210', 'No. 12, Mosque Road, Anuradhapura', 7, 4, '2024-01-18', TRUE),
+('STU-0005', 'Nipun', 'Fernando', '2011-07-18', 'Male', '201187654321', 'nipun.fernando@sltnet.lk', '0755432109', 'No. 89, Hospital Road, Anuradhapura', 8, 5, '2024-01-19', TRUE),
+('STU-0006', 'Rashmi', 'Jayasinghe', '2012-02-28', 'Female', '201276543210', 'rashmi.jayasinghe@gmail.com', '0764321098', 'No. 34, College Avenue, Anuradhapura', 7, 6, '2024-01-20', TRUE),
+('STU-0007', 'Vithusan', 'Kandasamy', '2011-09-12', 'Male', '201165432109', 'vithusan.kandasamy@yahoo.com', '0773210987', 'No. 56, Temple Road, Anuradhapura', 8, 7, '2024-01-21', TRUE),
+('STU-0008', 'Thisara', 'Rathnayake', '2012-04-30', 'Male', '201254321098', 'thisara.rathnayake@gmail.com', '0782109876', 'No. 78, Lake Drive, Anuradhapura', 7, 8, '2024-01-22', TRUE),
+('STU-0009', 'Senuja', 'Dissanayake', '2011-12-08', 'Female', '201143210987', 'senuja.dissanayake@hotmail.com', '0791098765', 'No. 91, Temple Street, Anuradhapura', 8, 9, '2024-01-23', TRUE),
+('STU-0010', 'Yasith', 'Ariyaratne', '2012-06-25', 'Male', '201232109876', 'yasith.ariyaratne@sltnet.lk', '0700987654', 'No. 19, Main Road, Anuradhapura', 7, 10, '2024-01-24', TRUE);
+
+-- Create user accounts for students (password: student123)
+INSERT IGNORE INTO user (username, password, email, user_type_id) VALUES 
+('dilshan.bandara', 'admin123', 'dilshan.bandara@gmail.com', 3),
+('sanduni.silva', 'admin123', 'sanduni.silva@yahoo.com', 3),
+('isuru.perera', 'admin123', 'isuru.perera@hotmail.com', 3),
+('ayesha.mohamed', 'admin123', 'ayesha.mohamed@gmail.com', 3),
+('nipun.fernando', 'admin123', 'nipun.fernando@sltnet.lk', 3),
+('rashmi.jayasinghe', 'admin123', 'rashmi.jayasinghe@gmail.com', 3),
+('vithusan.kandasamy', 'admin123', 'vithusan.kandasamy@yahoo.com', 3),
+('thisara.rathnayake', 'admin123', 'thisara.rathnayake@gmail.com', 3),
+('senuja.dissanayake', 'admin123', 'senuja.dissanayake@hotmail.com', 3),
+('yasith.ariyaratne', 'admin123', 'yasith.ariyaratne@sltnet.lk', 3);
+
+-- Update student records with user IDs
+UPDATE student SET user_id = (SELECT user_id FROM user WHERE username = 'dilshan.bandara') WHERE student_id = 'STU-0001';
+UPDATE student SET user_id = (SELECT user_id FROM user WHERE username = 'sanduni.silva') WHERE student_id = 'STU-0002';
+UPDATE student SET user_id = (SELECT user_id FROM user WHERE username = 'isuru.perera') WHERE student_id = 'STU-0003';
+UPDATE student SET user_id = (SELECT user_id FROM user WHERE username = 'ayesha.mohamed') WHERE student_id = 'STU-0004';
+UPDATE student SET user_id = (SELECT user_id FROM user WHERE username = 'nipun.fernando') WHERE student_id = 'STU-0005';
+UPDATE student SET user_id = (SELECT user_id FROM user WHERE username = 'rashmi.jayasinghe') WHERE student_id = 'STU-0006';
+UPDATE student SET user_id = (SELECT user_id FROM user WHERE username = 'vithusan.kandasamy') WHERE student_id = 'STU-0007';
+UPDATE student SET user_id = (SELECT user_id FROM user WHERE username = 'thisara.rathnayake') WHERE student_id = 'STU-0008';
+UPDATE student SET user_id = (SELECT user_id FROM user WHERE username = 'senuja.dissanayake') WHERE student_id = 'STU-0009';
+UPDATE student SET user_id = (SELECT user_id FROM user WHERE username = 'yasith.ariyaratne') WHERE student_id = 'STU-0010';
+
+-- ============================================
+-- SAMPLE TEACHERS (Sri Lankan)
+-- ============================================
+
+INSERT IGNORE INTO teacher (NIC, first_name, last_name, dob, gender, email, phone, address, teacher_type_id, username, password, salary, hire_date, status_id) VALUES 
+('851234567V', 'Sunil', 'Wijesinghe', '1985-03-15', 'Male', 'sunil.wijesinghe@educore.lk', '0711111111', 'No. 10, Teachers Quarters, Anuradhapura', 1, 'sunil.wijesinghe', 'admin123', 75000.00, '2020-01-15', 1),
+('821234567V', 'Malini', 'Samarasinghe', '1987-07-22', 'Female', 'malini.samarasinghe@educore.lk', '0722222222', 'No. 11, Teachers Quarters, Anuradhapura', 1, 'malini.samarasinghe', 'admin123', 72000.00, '2019-06-10', 1),
+('791234567V', 'Kamal', 'Senaratne', '1984-11-08', 'Male', 'kamal.senaratne@educore.lk', '0733333333', 'No. 12, Teachers Quarters, Anuradhapura', 1, 'kamal.senaratne', 'admin123', 78000.00, '2018-03-20', 1),
+('861234567V', 'Deepika', 'Ranaweera', '1988-05-30', 'Female', 'deepika.ranaweera@educore.lk', '0744444444', 'No. 13, Teachers Quarters, Anuradhapura', 1, 'deepika.ranaweera', 'admin123', 71000.00, '2021-01-05', 1),
+('801234567V', 'Pradeep', 'Jayathilake', '1986-09-12', 'Male', 'pradeep.jayathilake@educore.lk', '0755555555', 'No. 14, Teachers Quarters, Anuradhapura', 1, 'pradeep.jayathilake', 'admin123', 76000.00, '2019-09-15', 1),
+('841234567V', 'Samanthi', 'Perera', '1989-02-18', 'Female', 'samanthi.perera@educore.lk', '0766666666', 'No. 15, Teachers Quarters, Anuradhapura', 1, 'samanthi.perera', 'admin123', 73000.00, '2020-07-01', 1),
+('771234567V', 'Nimal', 'Hettiarachchi', '1983-12-25', 'Male', 'nimal.hettiarachchi@educore.lk', '0777777777', 'No. 16, Teachers Quarters, Anuradhapura', 1, 'nimal.hettiarachchi', 'admin123', 80000.00, '2017-04-10', 1),
+('831234567V', 'Rasika', 'Karunaratne', '1985-08-05', 'Male', 'rasika.karunaratne@educore.lk', '0788888888', 'No. 17, Teachers Quarters, Anuradhapura', 1, 'rasika.karunaratne', 'admin123', 74000.00, '2019-02-28', 1),
+('871234567V', 'Nilushi', 'Silva', '1990-04-14', 'Female', 'nilushi.silva@educore.lk', '0799999999', 'No. 18, Teachers Quarters, Anuradhapura', 1, 'nilushi.silva', 'admin123', 70000.00, '2022-01-10', 1),
+('761234567V', 'Asela', 'Bandara', '1982-10-20', 'Male', 'asela.bandara@educore.lk', '0700000000', 'No. 19, Teachers Quarters, Anuradhapura', 1, 'asela.bandara', 'admin123', 82000.00, '2016-06-15', 1);
+
+-- Create user accounts for teachers (password: teacher123)
+INSERT IGNORE INTO user (username, password, email, user_type_id) VALUES 
+('sunil.wijesinghe', 'admin123', 'sunil.wijesinghe@educore.lk', 2),
+('malini.samarasinghe', 'admin123', 'malini.samarasinghe@educore.lk', 2),
+('kamal.senaratne', 'admin123', 'kamal.senaratne@educore.lk', 2),
+('deepika.ranaweera', 'admin123', 'deepika.ranaweera@educore.lk', 2),
+('pradeep.jayathilake', 'admin123', 'pradeep.jayathilake@educore.lk', 2),
+('samanthi.perera', 'admin123', 'samanthi.perera@educore.lk', 2),
+('nimal.hettiarachchi', 'admin123', 'nimal.hettiarachchi@educore.lk', 2),
+('rasika.karunaratne', 'admin123', 'rasika.karunaratne@educore.lk', 2),
+('nilushi.silva', 'admin123', 'nilushi.silva@educore.lk', 2),
+('asela.bandara', 'admin123', 'asela.bandara@educore.lk', 2);
+
+-- Update teacher records with user IDs
+UPDATE teacher SET user_id = (SELECT user_id FROM user WHERE username = 'sunil.wijesinghe') WHERE NIC = '851234567V';
+UPDATE teacher SET user_id = (SELECT user_id FROM user WHERE username = 'malini.samarasinghe') WHERE NIC = '821234567V';
+UPDATE teacher SET user_id = (SELECT user_id FROM user WHERE username = 'kamal.senaratne') WHERE NIC = '791234567V';
+UPDATE teacher SET user_id = (SELECT user_id FROM user WHERE username = 'deepika.ranaweera') WHERE NIC = '861234567V';
+UPDATE teacher SET user_id = (SELECT user_id FROM user WHERE username = 'pradeep.jayathilake') WHERE NIC = '801234567V';
+UPDATE teacher SET user_id = (SELECT user_id FROM user WHERE username = 'samanthi.perera') WHERE NIC = '841234567V';
+UPDATE teacher SET user_id = (SELECT user_id FROM user WHERE username = 'nimal.hettiarachchi') WHERE NIC = '771234567V';
+UPDATE teacher SET user_id = (SELECT user_id FROM user WHERE username = 'rasika.karunaratne') WHERE NIC = '831234567V';
+UPDATE teacher SET user_id = (SELECT user_id FROM user WHERE username = 'nilushi.silva') WHERE NIC = '871234567V';
+UPDATE teacher SET user_id = (SELECT user_id FROM user WHERE username = 'asela.bandara') WHERE NIC = '761234567V';
+
+-- ============================================
+-- SAMPLE SUBJECTS
+-- ============================================
+
+INSERT IGNORE INTO subject (subject_name, grade_id, description) VALUES 
+('Mathematics', 7, 'Mathematics for Grade 7'),
+('Science', 7, 'Science for Grade 7'),
+('English', 7, 'English Language for Grade 7'),
+('Sinhala', 7, 'Sinhala Language for Grade 7'),
+('Mathematics', 8, 'Mathematics for Grade 8'),
+('Science', 8, 'Science for Grade 8'),
+('English', 8, 'English Language for Grade 8'),
+('Sinhala', 8, 'Sinhala Language for Grade 8'),
+('Mathematics', 9, 'Mathematics for Grade 9'),
+('Science', 9, 'Science for Grade 9'),
+('English', 9, 'English Language for Grade 9'),
+('Sinhala', 9, 'Sinhala Language for Grade 9');
+
+-- ============================================
+-- SAMPLE TEACHER-SUBJECT ASSIGNMENTS
+-- ============================================
+
+INSERT IGNORE INTO teacher_subject (teacher_NIC, subject_id, grade_id, academic_year) 
+SELECT '851234567V', subject_id, 7, 2024 FROM subject WHERE subject_name = 'Mathematics' AND grade_id = 7 LIMIT 1;
+
+INSERT IGNORE INTO teacher_subject (teacher_NIC, subject_id, grade_id, academic_year) 
+SELECT '851234567V', subject_id, 8, 2024 FROM subject WHERE subject_name = 'Mathematics' AND grade_id = 8 LIMIT 1;
+
+INSERT IGNORE INTO teacher_subject (teacher_NIC, subject_id, grade_id, academic_year) 
+SELECT '821234567V', subject_id, 7, 2024 FROM subject WHERE subject_name = 'Science' AND grade_id = 7 LIMIT 1;
+
+INSERT IGNORE INTO teacher_subject (teacher_NIC, subject_id, grade_id, academic_year) 
+SELECT '821234567V', subject_id, 8, 2024 FROM subject WHERE subject_name = 'Science' AND grade_id = 8 LIMIT 1;
+
+INSERT IGNORE INTO teacher_subject (teacher_NIC, subject_id, grade_id, academic_year) 
+SELECT '791234567V', subject_id, 7, 2024 FROM subject WHERE subject_name = 'English' AND grade_id = 7 LIMIT 1;
+
+INSERT IGNORE INTO teacher_subject (teacher_NIC, subject_id, grade_id, academic_year) 
+SELECT '791234567V', subject_id, 8, 2024 FROM subject WHERE subject_name = 'English' AND grade_id = 8 LIMIT 1;
+
+INSERT IGNORE INTO teacher_subject (teacher_NIC, subject_id, grade_id, academic_year) 
+SELECT '861234567V', subject_id, 7, 2024 FROM subject WHERE subject_name = 'Sinhala' AND grade_id = 7 LIMIT 1;
+
+INSERT IGNORE INTO teacher_subject (teacher_NIC, subject_id, grade_id, academic_year) 
+SELECT '861234567V', subject_id, 8, 2024 FROM subject WHERE subject_name = 'Sinhala' AND grade_id = 8 LIMIT 1;
+
+INSERT IGNORE INTO teacher_subject (teacher_NIC, subject_id, grade_id, academic_year) 
+SELECT '801234567V', subject_id, 9, 2024 FROM subject WHERE subject_name = 'Mathematics' AND grade_id = 9 LIMIT 1;
+
+INSERT IGNORE INTO teacher_subject (teacher_NIC, subject_id, grade_id, academic_year) 
+SELECT '801234567V', subject_id, 9, 2024 FROM subject WHERE subject_name = 'Science' AND grade_id = 9 LIMIT 1;
+
+INSERT IGNORE INTO teacher_subject (teacher_NIC, subject_id, grade_id, academic_year) 
+SELECT '841234567V', subject_id, 9, 2024 FROM subject WHERE subject_name = 'English' AND grade_id = 9 LIMIT 1;
+
+INSERT IGNORE INTO teacher_subject (teacher_NIC, subject_id, grade_id, academic_year) 
+SELECT '841234567V', subject_id, 9, 2024 FROM subject WHERE subject_name = 'Sinhala' AND grade_id = 9 LIMIT 1;
+
+INSERT IGNORE INTO teacher_subject (teacher_NIC, subject_id, grade_id, academic_year) 
+SELECT '771234567V', subject_id, 7, 2024 FROM subject WHERE subject_name = 'Sinhala' AND grade_id = 7 LIMIT 1;
+
+INSERT IGNORE INTO teacher_subject (teacher_NIC, subject_id, grade_id, academic_year) 
+SELECT '771234567V', subject_id, 8, 2024 FROM subject WHERE subject_name = 'Mathematics' AND grade_id = 8 LIMIT 1;
+
+INSERT IGNORE INTO teacher_subject (teacher_NIC, subject_id, grade_id, academic_year) 
+SELECT '831234567V', subject_id, 7, 2024 FROM subject WHERE subject_name = 'English' AND grade_id = 7 LIMIT 1;
+
+INSERT IGNORE INTO teacher_subject (teacher_NIC, subject_id, grade_id, academic_year) 
+SELECT '831234567V', subject_id, 8, 2024 FROM subject WHERE subject_name = 'Sinhala' AND grade_id = 8 LIMIT 1;
+
+INSERT IGNORE INTO teacher_subject (teacher_NIC, subject_id, grade_id, academic_year) 
+SELECT '871234567V', subject_id, 9, 2024 FROM subject WHERE subject_name = 'Mathematics' AND grade_id = 9 LIMIT 1;
+
+INSERT IGNORE INTO teacher_subject (teacher_NIC, subject_id, grade_id, academic_year) 
+SELECT '871234567V', subject_id, 9, 2024 FROM subject WHERE subject_name = 'English' AND grade_id = 9 LIMIT 1;
+
+INSERT IGNORE INTO teacher_subject (teacher_NIC, subject_id, grade_id, academic_year) 
+SELECT '761234567V', subject_id, 9, 2024 FROM subject WHERE subject_name = 'Science' AND grade_id = 9 LIMIT 1;
+
+INSERT IGNORE INTO teacher_subject (teacher_NIC, subject_id, grade_id, academic_year) 
+SELECT '761234567V', subject_id, 9, 2024 FROM subject WHERE subject_name = 'Sinhala' AND grade_id = 9 LIMIT 1;
+
+-- ============================================
+-- SAMPLE TEACHER-CLASS ASSIGNMENTS
+-- ============================================
+
+INSERT IGNORE INTO teacher_class (teacher_NIC, grade_id, is_class_teacher, academic_year) VALUES 
+('851234567V', 7, TRUE, 2024),
+('821234567V', 8, TRUE, 2024),
+('791234567V', 9, TRUE, 2024),
+('861234567V', 7, FALSE, 2024),
+('801234567V', 8, FALSE, 2024),
+('841234567V', 9, FALSE, 2024),
+('771234567V', 7, FALSE, 2024),
+('831234567V', 8, FALSE, 2024),
+('871234567V', 9, FALSE, 2024),
+('761234567V', 7, FALSE, 2024);
+
+-- ============================================
+-- SAMPLE EXAMS
+-- ============================================
+
+INSERT IGNORE INTO exam (exam_name, exam_type_id, subject_id, grade_id, exam_date, max_marks, duration_minutes, description) 
+SELECT 'Mathematics 1st Term', 1, subject_id, 7, '2024-03-15', 100, 120, 'First term mathematics examination' 
+FROM subject WHERE subject_name = 'Mathematics' AND grade_id = 7 LIMIT 1;
+
+INSERT IGNORE INTO exam (exam_name, exam_type_id, subject_id, grade_id, exam_date, max_marks, duration_minutes, description) 
+SELECT 'Science 1st Term', 1, subject_id, 7, '2024-03-18', 100, 90, 'First term science examination' 
+FROM subject WHERE subject_name = 'Science' AND grade_id = 7 LIMIT 1;
+
+INSERT IGNORE INTO exam (exam_name, exam_type_id, subject_id, grade_id, exam_date, max_marks, duration_minutes, description) 
+SELECT 'English 1st Term', 1, subject_id, 7, '2024-03-20', 100, 90, 'First term English examination' 
+FROM subject WHERE subject_name = 'English' AND grade_id = 7 LIMIT 1;
+
+INSERT IGNORE INTO exam (exam_name, exam_type_id, subject_id, grade_id, exam_date, max_marks, duration_minutes, description) 
+SELECT 'Sinhala 1st Term', 1, subject_id, 7, '2024-03-22', 100, 90, 'First term Sinhala examination' 
+FROM subject WHERE subject_name = 'Sinhala' AND grade_id = 7 LIMIT 1;
+
+INSERT IGNORE INTO exam (exam_name, exam_type_id, subject_id, grade_id, exam_date, max_marks, duration_minutes, description) 
+SELECT 'Mathematics 1st Term', 1, subject_id, 8, '2024-03-16', 100, 120, 'First term mathematics examination' 
+FROM subject WHERE subject_name = 'Mathematics' AND grade_id = 8 LIMIT 1;
+
+INSERT IGNORE INTO exam (exam_name, exam_type_id, subject_id, grade_id, exam_date, max_marks, duration_minutes, description) 
+SELECT 'Science 1st Term', 1, subject_id, 8, '2024-03-19', 100, 90, 'First term science examination' 
+FROM subject WHERE subject_name = 'Science' AND grade_id = 8 LIMIT 1;
+
+-- ============================================
+-- SAMPLE FEES
+-- ============================================
+
+INSERT IGNORE INTO fee (student_id, fee_type_id, amount, due_date, status) VALUES 
+('STU-0001', 1, 1000.00, '2024-02-01', 'Pending'),
+('STU-0001', 2, 500.00, '2024-02-01', 'Pending'),
+('STU-0002', 1, 1000.00, '2024-02-01', 'Pending'),
+('STU-0002', 2, 500.00, '2024-02-01', 'Pending'),
+('STU-0003', 1, 1000.00, '2024-02-01', 'Pending'),
+('STU-0003', 2, 500.00, '2024-02-01', 'Pending'),
+('STU-0004', 1, 1000.00, '2024-02-01', 'Pending'),
+('STU-0004', 2, 500.00, '2024-02-01', 'Pending'),
+('STU-0005', 1, 1000.00, '2024-02-01', 'Pending'),
+('STU-0005', 2, 500.00, '2024-02-01', 'Pending');
 
 -- Insert sample teacher
 INSERT IGNORE INTO teacher (NIC, first_name, last_name, dob, gender, email, phone, address, teacher_type_id, username, password, salary, hire_date, status_id, user_id) VALUES 
-('801234567V', 'Dr. Sarah', 'Smith', '1985-03-20', 'Female', 'sarah.smith@educore.com', '0771234569', '456 School Road, Anuradhapura', 1, 'teacher1', 'teacher123', 75000.00, '2020-01-15', 1, 2);
+('801234567V', 'Dr. Sarah', 'Smith', '1985-03-20', 'Female', 'sarah.smith@educore.com', '0771234569', '456 School Road, Anuradhapura', 1, 'teacher1', '$2a$12$7aWoXIZSUOvCAdHXC1.7MuVF8eZLeLsXrBoYhaKFPvtxZaAaTkLxO', 75000.00, '2020-01-15', 1, 2);
 
 -- Insert sample subject
 INSERT IGNORE INTO subject (subject_name, grade_id, description) VALUES 

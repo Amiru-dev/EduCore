@@ -1,40 +1,68 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" name="FinanceReport" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20">
-	<queryString>
-		SELECT ft.transaction_id, ft.transaction_type, ft.amount, ft.description, ft.transaction_date
-		FROM finance_transaction ft
-		ORDER BY ft.transaction_date DESC
-	</queryString>
-	<field name="transaction_id" class="java.lang.Integer"/>
-	<field name="transaction_type" class="java.lang.String"/>
+<jasperReport name="FinanceReport" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20">
+	<query>
+		<![CDATA[SELECT ft.finance_id, tt.type_name, ft.amount, ft.description, ft.transaction_date
+		FROM finance ft
+		JOIN transaction_type tt ON ft.transaction_type_id = tt.transaction_type_id
+		ORDER BY ft.transaction_date DESC]]>
+	</query>
+	<field name="finance_id" class="java.lang.Integer"/>
+	<field name="type_name" class="java.lang.String"/>
 	<field name="amount" class="java.lang.Double"/>
 	<field name="description" class="java.lang.String"/>
 	<field name="transaction_date" class="java.sql.Date"/>
-	<title>
-		<band height="50">
-			<staticText>
-				<reportElement x="0" y="0" width="535" height="30" textAlignment="Center"/>
-				<font size="16" isBold="true"/>
-				<text><![CDATA[Finance Report]]></text>
-			</staticText>
-		</band>
+	<title height="50">
+		<element kind="staticText" x="0" y="0" width="535" height="30" hTextAlign="Center" fontSize="16" bold="true">
+			<text><![CDATA[Finance Report]]></text>
+		</element>
 	</title>
-	<columnHeader>
-		<band height="25">
-			<staticText><reportElement x="0" y="0" width="80" height="20"/><text><![CDATA[Transaction ID]]></text></staticText>
-			<staticText><reportElement x="80" y="0" width="100" height="20"/><text><![CDATA[Type]]></text></staticText>
-			<staticText><reportElement x="180" y="0" width="80" height="20"/><text><![CDATA[Amount]]></text></staticText>
-			<staticText><reportElement x="260" y="0" width="150" height="20"/><text><![CDATA[Description]]></text></staticText>
-			<staticText><reportElement x="410" y="0" width="80" height="20"/><text><![CDATA[Date]]></text></staticText>
-		</band>
+	<pageHeader height="30">
+		<element kind="staticText" x="0" y="0" width="200" height="20">
+			<text><![CDATA[Central College Anuradhapura]]></text>
+		</element>
+	</pageHeader>
+	<columnHeader height="25">
+		<element kind="staticText" x="0" y="0" width="80" height="20">
+			<text><![CDATA[Finance ID]]></text>
+		</element>
+		<element kind="staticText" x="80" y="0" width="100" height="20">
+			<text><![CDATA[Type]]></text>
+		</element>
+		<element kind="staticText" x="180" y="0" width="80" height="20">
+			<text><![CDATA[Amount]]></text>
+		</element>
+		<element kind="staticText" x="260" y="0" width="150" height="20">
+			<text><![CDATA[Description]]></text>
+		</element>
+		<element kind="staticText" x="410" y="0" width="80" height="20">
+			<text><![CDATA[Date]]></text>
+		</element>
 	</columnHeader>
 	<detail>
 		<band height="25">
-			<textField><reportElement x="0" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{transaction_id}]]></textFieldExpression></textField>
-			<textField><reportElement x="80" y="0" width="100" height="20"/><textFieldExpression><![CDATA[$F{transaction_type}]]></textFieldExpression></textField>
-			<textField pattern="Rs. #,##0.00"><reportElement x="180" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{amount}]]></textFieldExpression></textField>
-			<textField><reportElement x="260" y="0" width="150" height="20"/><textFieldExpression><![CDATA[$F{description}]]></textFieldExpression></textField>
-			<textField pattern="yyyy-MM-dd"><reportElement x="410" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{transaction_date}]]></textFieldExpression></textField>
+			<element kind="textField" x="0" y="0" width="80" height="20">
+				<expression><![CDATA[$F{finance_id}]]></expression>
+			</element>
+			<element kind="textField" x="80" y="0" width="100" height="20">
+				<expression><![CDATA[$F{type_name}]]></expression>
+			</element>
+			<element kind="staticText" x="180" y="0" width="25" height="20">
+				<text><![CDATA[Rs.]]></text>
+			</element>
+			<element kind="textField" x="205" y="0" width="55" height="20" pattern="#,##0.00">
+				<expression><![CDATA[$F{amount}]]></expression>
+			</element>
+			<element kind="textField" x="260" y="0" width="150" height="20">
+				<expression><![CDATA[$F{description}]]></expression>
+			</element>
+			<element kind="textField" x="410" y="0" width="80" height="20" pattern="yyyy-MM-dd">
+				<expression><![CDATA[$F{transaction_date}]]></expression>
+			</element>
 		</band>
 	</detail>
+	<pageFooter height="30">
+		<element kind="textField" x="0" y="10" width="535" height="20" hTextAlign="Center">
+			<expression><![CDATA["Page " + $V{PAGE_NUMBER} + " of " + $V{PAGE_COUNT}]]></expression>
+		</element>
+	</pageFooter>
 </jasperReport>

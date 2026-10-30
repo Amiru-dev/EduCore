@@ -1,6 +1,8 @@
 package lk.educore.schoolms.gui;
 
 import lk.educore.schoolms.model.MySQL;
+import lk.educore.schoolms.model.Student;
+import lk.educore.schoolms.model.UserSession;
 import lk.educore.schoolms.validate.JOptionIcon;
 
 import javax.swing.*;
@@ -164,14 +166,22 @@ public class StudentView extends JDialog {
 
         try {
             ResultSet rs = MySQL.executeSearch(
-                    "SELECT g.grade_name, s.registration_date, s.is_active "
+                    "SELECT s.student_id, s.first_name, s.last_name, g.grade_name, s.registration_date, s.is_active "
                     + "FROM student s JOIN grade g ON s.grade_id = g.grade_id "
                     + "WHERE s.student_id = '" + studentId + "'");
 
             if (rs.next()) {
-                addCardRow(card, gbc, 0, "Grade", rs.getString("grade_name"));
-                addCardRow(card, gbc, 1, "Registration Date", rs.getString("registration_date"));
-                addCardRow(card, gbc, 2, "Status", rs.getBoolean("is_active") ? "Active" : "Inactive");
+                Student student = new Student();
+                student.setStudentId(rs.getString("student_id"));
+                student.setFirstName(rs.getString("first_name"));
+                student.setLastName(rs.getString("last_name"));
+                student.setGrade(rs.getString("grade_name"));
+                student.setRegistrationDate(rs.getString("registration_date"));
+                student.setStatus(rs.getBoolean("is_active") ? "Active" : "Inactive");
+
+                addCardRow(card, gbc, 0, "Grade", student.getGrade());
+                addCardRow(card, gbc, 1, "Registration Date", student.getRegistrationDate());
+                addCardRow(card, gbc, 2, "Status", student.getStatus());
             }
             rs.close();
         } catch (Exception e) {
@@ -334,6 +344,12 @@ public class StudentView extends JDialog {
         left.add(btnEdit);
         left.add(btnDelete);
 
+        // Hide Edit and Delete buttons for teachers
+        if (UserSession.get() != null && UserSession.get().isTeacher()) {
+            btnEdit.setVisible(false);
+            btnDelete.setVisible(false);
+        }
+
         JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         right.setOpaque(false);
         btnEmail = styledButton("Email", new Color(126, 34, 206), Color.WHITE);
@@ -346,6 +362,12 @@ public class StudentView extends JDialog {
         right.add(btnAttendance);
         right.add(btnFees);
         right.add(btnResults);
+
+        // Hide Email and QR Code buttons for teachers
+        if (UserSession.get() != null && UserSession.get().isTeacher()) {
+            btnEmail.setVisible(false);
+            btnQRCode.setVisible(false);
+        }
 
         wrapper.add(left, BorderLayout.WEST);
         wrapper.add(right, BorderLayout.EAST);
@@ -446,10 +468,47 @@ public class StudentView extends JDialog {
     }
 
     private void deleteStudent() {
-        int confirm = JOptionIcon.showConfirmDialog(this, "Are you sure you want to delete this student?");
+        int confirm = JOptionIcon.showConfirmDialog(this,
+                "Are you sure you want to delete this student?\n"
+                + "This will also remove the student's user account.\n"
+                + "The guardian record will only be removed if no other students share the same guardian.");
         if (confirm == JOptionPane.YES_OPTION) {
             try {
+                // 1. Fetch linked user_id and guardian_id before deleting the student row
+                ResultSet rs = MySQL.executeSearch(
+                        "SELECT user_id, guardian_id FROM student WHERE student_id = '" + studentId + "'");
+                int userId = -1;
+                int guardianId = -1;
+                if (rs.next()) {
+                    userId = rs.getInt("user_id");
+                    if (rs.wasNull()) userId = -1;
+                    guardianId = rs.getInt("guardian_id");
+                    if (rs.wasNull()) guardianId = -1;
+                }
+                rs.close();
+
+                // 2. Delete student first (drops FK references to guardian and user)
                 MySQL.executeIUD("DELETE FROM student WHERE student_id = '" + studentId + "'");
+
+                // 3. Only delete guardian if no other student still references it
+                if (guardianId > 0) {
+                    ResultSet guardianCheck = MySQL.executeSearch(
+                            "SELECT COUNT(*) AS cnt FROM student WHERE guardian_id = " + guardianId);
+                    int othersWithSameGuardian = 0;
+                    if (guardianCheck.next()) {
+                        othersWithSameGuardian = guardianCheck.getInt("cnt");
+                    }
+                    guardianCheck.close();
+                    if (othersWithSameGuardian == 0) {
+                        MySQL.executeIUD("DELETE FROM guardian WHERE guardian_id = " + guardianId);
+                    }
+                }
+
+                // 4. Delete linked user account
+                if (userId > 0) {
+                    MySQL.executeIUD("DELETE FROM user WHERE user_id = " + userId);
+                }
+
                 JOptionIcon.showSuccessDialog(this, "Student deleted successfully.");
                 dispose();
             } catch (Exception e) {
@@ -462,9 +521,12 @@ public class StudentView extends JDialog {
         try {
             ResultSet rs = MySQL.executeSearch("SELECT email, first_name, last_name FROM student WHERE student_id = '" + studentId + "'");
             if (rs.next()) {
-                String email = rs.getString("email");
-                String name = rs.getString("first_name") + " " + rs.getString("last_name");
-                new StudentMailDialog((Frame) SwingUtilities.getWindowAncestor(this), email, name).setVisible(true);
+                Student student = new Student();
+                student.setStudentId(studentId);
+                student.setFirstName(rs.getString("first_name"));
+                student.setLastName(rs.getString("last_name"));
+                student.setEmail(rs.getString("email"));
+                new StudentMailDialog((Frame) SwingUtilities.getWindowAncestor(this), student.getEmail(), student.getFullName()).setVisible(true);
             }
             rs.close();
         } catch (Exception e) {
@@ -481,9 +543,12 @@ public class StudentView extends JDialog {
         try {
             ResultSet rs = MySQL.executeSearch("SELECT first_name, last_name FROM student WHERE student_id = '" + studentId + "'");
             if (rs.next()) {
-                String name = rs.getString("first_name") + " " + rs.getString("last_name");
-                lk.educore.schoolms.model.QRCodeGenerator.generateStudentQR(studentId, name);
-                JOptionIcon.showSuccessDialog(this, "QR code generated successfully for " + name);
+                Student student = new Student();
+                student.setStudentId(studentId);
+                student.setFirstName(rs.getString("first_name"));
+                student.setLastName(rs.getString("last_name"));
+                lk.educore.schoolms.model.QRCodeGenerator.generateStudentQR(student.getStudentId(), student.getFullName());
+                JOptionIcon.showSuccessDialog(this, "QR code generated successfully for " + student.getFullName());
             }
             rs.close();
         } catch (Exception e) {
@@ -508,6 +573,7 @@ public class StudentView extends JDialog {
     }
 
     private void viewResults() {
-        JOptionIcon.showInfoDialog(this, "View Results - Coming Soon");
+        Window parent = SwingUtilities.getWindowAncestor(this);
+        new StudentResultsDialog((Frame) parent, studentId).setVisible(true);
     }
 }

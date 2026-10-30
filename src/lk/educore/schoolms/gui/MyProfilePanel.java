@@ -2,12 +2,14 @@ package lk.educore.schoolms.gui;
 
 import lk.educore.schoolms.model.MySQL;
 import lk.educore.schoolms.model.UserSession;
+import lk.educore.schoolms.util.PasswordUtil;
 import lk.educore.schoolms.validate.JOptionIcon;
 
 import javax.swing.*;
 import java.awt.*;
 import java.sql.ResultSet;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * My Profile Panel (Teacher Self-Service)
@@ -15,6 +17,8 @@ import java.util.logging.Level;
  * including personal details, employment info, and assigned classes/subjects.
  */
 public class MyProfilePanel extends JPanel {
+
+    private static Logger logger = Logger.getLogger(MyProfilePanel.class.getName());
 
     public MyProfilePanel() {
         initComponents();
@@ -57,6 +61,25 @@ public class MyProfilePanel extends JPanel {
         sectionTitle.setFont(new Font("Segoe UI", Font.BOLD, 16));
         sectionTitle.setForeground(new Color(37, 99, 235));
         panel.add(sectionTitle, BorderLayout.NORTH);
+
+        // Add Change Password button in a panel at the top
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.setBackground(Color.WHITE);
+        JButton btnChangePassword = new JButton("Change Password");
+        btnChangePassword.setBackground(new Color(22, 163, 74));
+        btnChangePassword.setForeground(Color.WHITE);
+        btnChangePassword.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        btnChangePassword.setFocusPainted(false);
+        btnChangePassword.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnChangePassword.addActionListener(e -> openChangePasswordDialog());
+        applyButtonHoverEffect(btnChangePassword, new Color(22, 163, 74), new Color(18, 140, 60));
+        buttonPanel.add(btnChangePassword);
+
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setBackground(Color.WHITE);
+        topPanel.add(sectionTitle, BorderLayout.WEST);
+        topPanel.add(buttonPanel, BorderLayout.EAST);
+        panel.add(topPanel, BorderLayout.NORTH);
 
         JPanel detailsPanel = new JPanel(new GridBagLayout());
         detailsPanel.setBackground(Color.WHITE);
@@ -187,7 +210,7 @@ public class MyProfilePanel extends JPanel {
                 while (rs.next()) {
                     String entry = rs.getString("grade_name") + " " + rs.getString("section");
                     if (rs.getBoolean("is_class_teacher")) {
-                        entry += "  ★ Class Teacher";
+                        entry += "  - Class Teacher";
                     }
                     classListModel.addElement(entry);
                 }
@@ -207,7 +230,7 @@ public class MyProfilePanel extends JPanel {
                     + "ORDER BY g.grade_name, sub.subject_name");
                 while (rs2.next()) {
                     subjectListModel.addElement(
-                        rs2.getString("subject_name") + " — " +
+                        rs2.getString("subject_name") + " - " +
                         rs2.getString("grade_name") + " " + rs2.getString("section"));
                 }
                 rs2.close();
@@ -222,5 +245,154 @@ public class MyProfilePanel extends JPanel {
         }
 
         return panel;
+    }
+
+    private void openChangePasswordDialog() {
+        UserSession session = UserSession.get();
+        if (session == null || session.getUsername() == null) {
+            JOptionIcon.showWarningDialog(this, "User session not found!");
+            return;
+        }
+
+        String username = session.getUsername();
+        String teacherNIC = session.getTeacherNIC();
+
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Change Password", true);
+        dialog.setSize(450, 300);
+        dialog.setLocationRelativeTo(this);
+        dialog.setLayout(new BorderLayout());
+
+        JPanel p = new JPanel(new GridBagLayout());
+        p.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        JLabel lblTitle = new JLabel("Change your password:");
+        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        p.add(lblTitle, gbc);
+
+        JLabel lblCurrent = new JLabel("Current Password:");
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.gridwidth = 1;
+        p.add(lblCurrent, gbc);
+
+        JPasswordField txtCurrent = new JPasswordField(20);
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        p.add(txtCurrent, gbc);
+
+        JLabel lblNew = new JLabel("New Password:");
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        p.add(lblNew, gbc);
+
+        JPasswordField txtNew = new JPasswordField(20);
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        p.add(txtNew, gbc);
+
+        JLabel lblConfirm = new JLabel("Confirm New Password:");
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        p.add(lblConfirm, gbc);
+
+        JPasswordField txtConfirm = new JPasswordField(20);
+        gbc.gridx = 1;
+        gbc.gridy = 3;
+        p.add(txtConfirm, gbc);
+
+        dialog.add(p, BorderLayout.CENTER);
+
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 5));
+        JButton btnSave = new JButton("Change Password");
+        btnSave.setBackground(new Color(39, 174, 96));
+        btnSave.setForeground(Color.WHITE);
+        btnSave.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        btnSave.addActionListener(ev -> {
+            String currentPassword = new String(txtCurrent.getPassword());
+            String newPassword = new String(txtNew.getPassword());
+            String confirmPassword = new String(txtConfirm.getPassword());
+
+            if (currentPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()) {
+                JOptionIcon.showWarningDialog(dialog, "All fields are required!");
+                return;
+            }
+
+            if (!newPassword.equals(confirmPassword)) {
+                JOptionIcon.showWarningDialog(dialog, "New passwords do not match!");
+                return;
+            }
+
+            if (newPassword.length() < 6) {
+                JOptionIcon.showWarningDialog(dialog, "Password must be at least 6 characters!");
+                return;
+            }
+
+            try {
+                // Verify current password
+                ResultSet rs = MySQL.executeSearch(
+                    "SELECT password FROM user WHERE username = '" + username + "'");
+                if (rs.next()) {
+                    String storedPassword = rs.getString("password");
+                    
+                    // Use checkPassword instead of hashPassword for verification
+                    if (!PasswordUtil.checkPassword(currentPassword, storedPassword)) {
+                        JOptionIcon.showWarningDialog(dialog, "Current password is incorrect!");
+                        rs.close();
+                        return;
+                    }
+                }
+                rs.close();
+
+                // Update password in user table
+                String hashedNew = PasswordUtil.hashPassword(newPassword);
+                MySQL.executeIUD("UPDATE user SET password='" + hashedNew + "' WHERE username = '" + username + "'");
+
+                // Also update password in teacher table for consistency
+                if (teacherNIC != null) {
+                    MySQL.executeIUD("UPDATE teacher SET password='" + hashedNew + "' WHERE NIC = '" + teacherNIC + "'");
+                }
+
+                logger.log(Level.INFO, "Teacher " + username + " (NIC: " + teacherNIC + ") changed their password successfully.");
+
+                JOptionIcon.showSuccessDialog(dialog, "Password changed successfully!");
+                dialog.dispose();
+            } catch (Exception ex) {
+                JOptionIcon.showErrorDialog(dialog, "Failed to change password: " + ex.getMessage());
+            }
+        });
+
+        JButton btnCancel = new JButton("Cancel");
+        btnCancel.addActionListener(ev -> dialog.dispose());
+
+        buttons.add(btnCancel);
+        buttons.add(btnSave);
+        dialog.add(buttons, BorderLayout.SOUTH);
+        dialog.setVisible(true);
+    }
+
+    private void applyButtonHoverEffect(JButton button, Color normalColor, Color hoverColor) {
+        button.setBackground(normalColor);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                button.setBackground(hoverColor);
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                button.setBackground(normalColor);
+            }
+        });
     }
 }

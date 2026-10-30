@@ -1,21 +1,29 @@
 package lk.educore.schoolms.gui;
 
+import lk.educore.schoolms.exceptions.ValidationException;
 import lk.educore.schoolms.model.MySQL;
+import lk.educore.schoolms.model.Teacher;
+import lk.educore.schoolms.util.PasswordUtil;
+import lk.educore.schoolms.email.SendEmail;
 import lk.educore.schoolms.validate.JOptionIcon;
 
 import javax.swing.*;
 import java.awt.*;
 import java.sql.ResultSet;
+import java.sql.Statement;
+import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 
 public class TeacherDialog extends JDialog {
 
-    private JTextField txtNIC, txtFirstName, txtLastName, txtEmail, txtPhone, txtAddress, txtUsername, txtPassword, txtSalary;
+    private JTextField txtNIC, txtFirstName, txtLastName, txtEmail, txtPhone, txtAddress, txtUsername, txtSalary;
     private com.toedter.calendar.JDateChooser dcDob, dcHireDate;
     private JComboBox<String> cmbGender, cmbType, cmbStatus;
     private JButton btnSave, btnCancel;
     private String teacherNIC;
     private boolean isEdit;
+    private String existingPasswordHash;
+    private Integer existingUserId;
 
     public TeacherDialog(Window parent, String nic) {
         super(parent, nic == null ? "Add Teacher" : "Edit Teacher", ModalityType.APPLICATION_MODAL);
@@ -45,7 +53,6 @@ public class TeacherDialog extends JDialog {
         txtAddress = new JTextField();
         cmbType = new JComboBox<>();
         txtUsername = new JTextField();
-        txtPassword = new JTextField();
         txtSalary = new JTextField();
         dcHireDate = new com.toedter.calendar.JDateChooser();
         dcHireDate.setDateFormatString("yyyy-MM-dd");
@@ -87,8 +94,6 @@ public class TeacherDialog extends JDialog {
         panel.add(cmbType);
         panel.add(new JLabel("Username:"));
         panel.add(txtUsername);
-        panel.add(new JLabel("Password:"));
-        panel.add(txtPassword);
         panel.add(new JLabel("Salary:"));
         panel.add(txtSalary);
         panel.add(new JLabel("Hire Date:"));
@@ -116,18 +121,35 @@ public class TeacherDialog extends JDialog {
         try {
             ResultSet rs = MySQL.executeSearch("SELECT * FROM teacher WHERE NIC = '" + teacherNIC + "'");
             if (rs.next()) {
-                txtNIC.setText(rs.getString("NIC"));
-                txtFirstName.setText(rs.getString("first_name"));
-                txtLastName.setText(rs.getString("last_name"));
+                Teacher teacher = new Teacher();
+                teacher.setNic(rs.getString("NIC"));
+                teacher.setFirstName(rs.getString("first_name"));
+                teacher.setLastName(rs.getString("last_name"));
                 java.sql.Date dobDate = rs.getDate("dob");
-                if (dobDate != null) dcDob.setDate(dobDate);
-                cmbGender.setSelectedItem(rs.getString("gender"));
-                txtEmail.setText(rs.getString("email"));
-                txtPhone.setText(rs.getString("phone"));
-                txtAddress.setText(rs.getString("address"));
+                if (dobDate != null) {
+                    teacher.setDateOfBirth(dobDate.toString());
+                    dcDob.setDate(dobDate);
+                }
+                teacher.setGender(rs.getString("gender"));
+                teacher.setEmail(rs.getString("email"));
+                teacher.setPhone(rs.getString("phone"));
+                teacher.setAddress(rs.getString("address"));
+                teacher.setBasicSalary(rs.getDouble("salary"));
+
+                txtNIC.setText(teacher.getPersonId());
+                txtFirstName.setText(teacher.getFirstName());
+                txtLastName.setText(teacher.getLastName());
+                cmbGender.setSelectedItem(teacher.getGender());
+                txtEmail.setText(teacher.getEmail());
+                txtPhone.setText(teacher.getPhone());
+                txtAddress.setText(teacher.getAddress());
+                txtSalary.setText(String.valueOf(teacher.getBasicSalary()));
                 txtUsername.setText(rs.getString("username"));
-                txtPassword.setText(rs.getString("password"));
-                txtSalary.setText(rs.getString("salary"));
+                existingPasswordHash = rs.getString("password");
+                int uId = rs.getInt("user_id");
+                if (!rs.wasNull()) {
+                    existingUserId = uId;
+                }
                 java.sql.Date hireDate = rs.getDate("hire_date");
                 if (hireDate != null) dcHireDate.setDate(hireDate);
 
@@ -166,7 +188,6 @@ public class TeacherDialog extends JDialog {
             String address = txtAddress.getText().trim();
             String type = cmbType.getSelectedItem().toString().split(" - ")[0];
             String user = txtUsername.getText().trim();
-            String pass = txtPassword.getText().trim();
             String sal = txtSalary.getText().trim();
             String hire = dcHireDate.getDate() != null ? sdf.format(dcHireDate.getDate()) : "";
             String stat = cmbStatus.getSelectedItem().toString().split(" - ")[0];
@@ -176,23 +197,126 @@ public class TeacherDialog extends JDialog {
                 return;
             }
 
+            // Email is required for new teachers to send password
+            if (!isEdit && email.isEmpty()) {
+                JOptionIcon.showWarningDialog(this, "Email is required for new teachers to send account credentials.");
+                return;
+            }
+
+            double salaryVal = 0.0;
+            try {
+                salaryVal = Double.parseDouble(sal);
+            } catch (NumberFormatException nfe) {
+                JOptionIcon.showWarningDialog(this, "Salary must be a valid number.");
+                return;
+            }
+
+            // Build Teacher domain object (hierarchy: Teacher extends Person)
+            Teacher teacher = new Teacher();
+            teacher.setNic(nic);
+            teacher.setFirstName(fName);
+            teacher.setLastName(lName);
+            teacher.setDateOfBirth(dob);
+            teacher.setGender(gender);
+            teacher.setEmail(email);
+            teacher.setPhone(phone);
+            teacher.setAddress(address);
+            teacher.setTeacherType(cmbType.getSelectedItem().toString().split(" - ")[1]);
+            teacher.setBasicSalary(salaryVal);
+            teacher.setStatus(cmbStatus.getSelectedItem().toString().split(" - ")[1]);
+
+            // Call polymorphic validation method
+            try {
+                teacher.validate();
+            } catch (ValidationException ve) {
+                JOptionIcon.showWarningDialog(this, ve.getMessage());
+                return;
+            }
+
+            String passwordToStore;
+            String temporaryPassword = null;
+            
             if (isEdit) {
-                String query = "UPDATE teacher SET first_name='" + fName + "', last_name='" + lName + "', dob='" + dob + "', gender='" + gender
-                        + "', email='" + email + "', phone='" + phone + "', address='" + address + "', teacher_type_id=" + type
-                        + ", username='" + user + "', password='" + pass + "', salary=" + sal + ", hire_date='" + hire
-                        + "', status_id=" + stat + " WHERE NIC='" + teacherNIC + "'";
+                // Keep existing password when editing
+                passwordToStore = existingPasswordHash;
+            } else {
+                // Auto-generate random password for new teachers
+                temporaryPassword = generateRandomPassword();
+                passwordToStore = PasswordUtil.hashPassword(temporaryPassword);
+            }
+
+            // Sync user account for teacher
+            Integer linkedUserId = existingUserId;
+            if (!user.isEmpty()) {
+                if (linkedUserId != null && linkedUserId > 0) {
+                    MySQL.executeIUD("UPDATE user SET username='" + user + "', password='" + passwordToStore + "', email='" + teacher.getEmail() + "' WHERE user_id=" + linkedUserId);
+                } else {
+                    ResultSet checkUser = MySQL.executeSearch("SELECT user_id FROM user WHERE username = '" + user + "'");
+                    if (checkUser.next()) {
+                        linkedUserId = checkUser.getInt("user_id");
+                        MySQL.executeIUD("UPDATE user SET password='" + passwordToStore + "', email='" + teacher.getEmail() + "', user_type_id=2 WHERE user_id=" + linkedUserId);
+                    } else {
+                        String insertUserQuery = "INSERT INTO user (username, password, email, user_type_id, is_active) VALUES ('" + user + "', '" + passwordToStore + "', '" + teacher.getEmail() + "', 2, 1)";
+                        Statement uStmt = MySQL.getConnection().createStatement();
+                        uStmt.executeUpdate(insertUserQuery, Statement.RETURN_GENERATED_KEYS);
+                        ResultSet gKeys = uStmt.getGeneratedKeys();
+                        if (gKeys.next()) {
+                            linkedUserId = gKeys.getInt(1);
+                        }
+                        gKeys.close();
+                        uStmt.close();
+                    }
+                    checkUser.close();
+                }
+            }
+
+            if (isEdit) {
+                String query = "UPDATE teacher SET first_name='" + teacher.getFirstName() + "', last_name='" + teacher.getLastName() + "', dob='" + teacher.getDateOfBirth() + "', gender='" + teacher.getGender()
+                        + "', email='" + teacher.getEmail() + "', phone='" + teacher.getPhone() + "', address='" + teacher.getAddress() + "', teacher_type_id=" + type
+                        + ", username='" + user + "', password='" + passwordToStore + "', salary=" + teacher.getBasicSalary() + ", hire_date='" + hire
+                        + "', status_id=" + stat + ", user_id=" + (linkedUserId != null ? linkedUserId : "NULL")
+                        + " WHERE NIC='" + teacher.getPersonId() + "'";
                 MySQL.executeIUD(query);
                 JOptionIcon.showSuccessDialog(this, "Teacher updated successfully!");
             } else {
-                String query = "INSERT INTO teacher (NIC, first_name, last_name, dob, gender, email, phone, address, teacher_type_id, username, password, salary, hire_date, status_id) "
-                        + "VALUES ('" + nic + "', '" + fName + "', '" + lName + "', '" + dob + "', '" + gender + "', '" + email + "', '" + phone
-                        + "', '" + address + "', " + type + ", '" + user + "', '" + pass + "', " + sal + ", '" + hire + "', " + stat + ")";
+                String query = "INSERT INTO teacher (NIC, first_name, last_name, dob, gender, email, phone, address, teacher_type_id, username, password, salary, hire_date, status_id, user_id) "
+                        + "VALUES ('" + teacher.getPersonId() + "', '" + teacher.getFirstName() + "', '" + teacher.getLastName() + "', '" + teacher.getDateOfBirth() + "', '" + teacher.getGender() + "', '" + teacher.getEmail() + "', '" + teacher.getPhone()
+                        + "', '" + teacher.getAddress() + "', " + type + ", '" + user + "', '" + passwordToStore + "', " + teacher.getBasicSalary() + ", '" + hire + "', " + stat + ", " + (linkedUserId != null ? linkedUserId : "NULL") + ")";
                 MySQL.executeIUD(query);
                 JOptionIcon.showSuccessDialog(this, "Teacher added successfully!");
+                
+                // Send email with credentials to new teacher
+                if (temporaryPassword != null && !email.isEmpty()) {
+                    try {
+                        String message = "Dear " + teacher.getFullName() + ",\n\n" +
+                            "Welcome to Central College Anuradhapura!\n\n" +
+                            "Your teacher account has been created successfully.\n\n" +
+                            "Teacher NIC: " + teacher.getPersonId() + "\n" +
+                            "Username: " + user + "\n" +
+                            "Temporary Password: " + temporaryPassword + "\n\n" +
+                            "Please change your password after your first login.\n\n" +
+                            "Best regards,\n" +
+                            "Central College Anuradhapura";
+                        
+                        SendEmail.sendEmail(email, "Teacher Registration Confirmation", message);
+                    } catch (Exception emailEx) {
+                        JOptionIcon.showWarningDialog(this, "Teacher added successfully but email failed: " + emailEx.getMessage());
+                    }
+                }
             }
             dispose();
         } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error saving teacher: " + e.getMessage());
         }
+    }
+
+    private String generateRandomPassword() {
+        SecureRandom random = new SecureRandom();
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%";
+        StringBuilder password = new StringBuilder();
+        for (int i = 0; i < 10; i++) {
+            password.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return password.toString();
     }
 }

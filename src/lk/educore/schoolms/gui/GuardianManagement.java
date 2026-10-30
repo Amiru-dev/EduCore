@@ -4,6 +4,7 @@ import lk.educore.schoolms.model.MySQL;
 import lk.educore.schoolms.validate.JOptionIcon;
 import lk.educore.schoolms.validate.DataValidator;
 import lk.educore.schoolms.exceptions.ValidationException;
+import lk.educore.schoolms.util.ReportGenerator;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -13,6 +14,8 @@ import java.awt.event.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 
 /**
@@ -24,7 +27,7 @@ public class GuardianManagement extends JPanel {
     private JTable guardianTable;
     private DefaultTableModel tableModel;
     private JTextField txtSearch;
-    private JButton btnAddGuardian, btnEditGuardian, btnDeleteGuardian, btnRefresh;
+    private JButton btnAddGuardian, btnEditGuardian, btnDeleteGuardian, btnRefresh, btnReport;
 
     public GuardianManagement() {
         initComponents();
@@ -43,7 +46,8 @@ public class GuardianManagement extends JPanel {
         headerPanel.add(titleLabel, BorderLayout.WEST);
 
         // Search and button panel
-        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 5));
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 10));
+        rightPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
         
         txtSearch = new JTextField(20);
         txtSearch.addKeyListener(new KeyAdapter() {
@@ -54,16 +58,27 @@ public class GuardianManagement extends JPanel {
         });
         
         btnAddGuardian = new JButton("Add Guardian");
+        btnAddGuardian.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btnAddGuardian.addActionListener(e -> addGuardian());
+        applyPrimaryButtonEffect(btnAddGuardian);
 
         btnEditGuardian = new JButton("Edit Guardian");
+        btnEditGuardian.setEnabled(false);
         btnEditGuardian.addActionListener(e -> editGuardian());
+        applySecondaryButtonEffect(btnEditGuardian);
 
         btnDeleteGuardian = new JButton("Delete Guardian");
+        btnDeleteGuardian.setEnabled(false);
         btnDeleteGuardian.addActionListener(e -> deleteGuardian());
+        applyDestructiveButtonEffect(btnDeleteGuardian);
 
         btnRefresh = new JButton("Refresh");
         btnRefresh.addActionListener(e -> loadGuardianData());
+        applySecondaryButtonEffect(btnRefresh);
+
+        btnReport = new JButton("Generate Report");
+        btnReport.addActionListener(e -> generateGuardianReport());
+        applySecondaryButtonEffect(btnReport);
 
         rightPanel.add(new JLabel("Search:"));
         rightPanel.add(txtSearch);
@@ -71,6 +86,7 @@ public class GuardianManagement extends JPanel {
         rightPanel.add(btnEditGuardian);
         rightPanel.add(btnDeleteGuardian);
         rightPanel.add(btnRefresh);
+        rightPanel.add(btnReport);
         
         headerPanel.add(rightPanel, BorderLayout.EAST);
         add(headerPanel, BorderLayout.NORTH);
@@ -87,8 +103,18 @@ public class GuardianManagement extends JPanel {
 
         guardianTable = new JTable(tableModel);
         guardianTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        guardianTable.setRowHeight(25);
-        guardianTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
+        guardianTable.setRowHeight(30);
+        guardianTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
+        guardianTable.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        
+        // Add selection listener to enable/disable buttons
+        guardianTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                boolean hasSelection = guardianTable.getSelectedRow() != -1;
+                btnEditGuardian.setEnabled(hasSelection);
+                btnDeleteGuardian.setEnabled(hasSelection);
+            }
+        });
 
         JScrollPane scrollPane = new JScrollPane(guardianTable);
         add(scrollPane, BorderLayout.CENTER);
@@ -282,6 +308,18 @@ public class GuardianManagement extends JPanel {
                     DataValidator.isValidEmail(email);
                 }
 
+                // Check if guardian with same NIC already exists
+                if (!nic.isEmpty()) {
+                    ResultSet checkNic = MySQL.executeSearch("SELECT guardian_id, first_name, last_name FROM guardian WHERE nic = '" + nic.replace("'", "''") + "'");
+                    if (checkNic.next()) {
+                        String existingName = checkNic.getString("first_name") + " " + checkNic.getString("last_name");
+                        checkNic.close();
+                        JOptionIcon.showWarningDialog(dialog, "A guardian with NIC '" + nic + "' already exists:\n" + existingName + "\n\nPlease edit the existing guardian instead of adding a duplicate.");
+                        return;
+                    }
+                    checkNic.close();
+                }
+
                 String nicVal = nic.isEmpty() ? "NULL" : "'" + nic.replace("'", "''") + "'";
                 String emailVal = email.isEmpty() ? "NULL" : "'" + email.replace("'", "''") + "'";
                 String occupationVal = occupation.isEmpty() ? "NULL" : "'" + occupation.replace("'", "''") + "'";
@@ -384,5 +422,98 @@ public class GuardianManagement extends JPanel {
                 JOptionIcon.showErrorDialog(this, "Error deleting guardian: " + ex.getMessage());
             }
         }
+    }
+
+    private void applyPrimaryButtonEffect(JButton button) {
+        button.setBackground(new Color(37, 99, 235));
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(29, 78, 216));
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(37, 99, 235));
+                }
+            }
+        });
+    }
+
+    private void applySecondaryButtonEffect(JButton button) {
+        button.setBackground(Color.WHITE);
+        button.setForeground(new Color(71, 85, 105));
+        button.setFocusPainted(false);
+        button.setBorderPainted(true);
+        button.setBorder(BorderFactory.createLineBorder(new Color(203, 213, 225), 1));
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+            BorderFactory.createEmptyBorder(8, 16, 8, 16)
+        ));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(248, 250, 252));
+                    button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(148, 163, 184), 1),
+                        BorderFactory.createEmptyBorder(8, 16, 8, 16)
+                    ));
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(Color.WHITE);
+                    button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+                        BorderFactory.createEmptyBorder(8, 16, 8, 16)
+                    ));
+                }
+            }
+        });
+    }
+
+    private void applyDestructiveButtonEffect(JButton button) {
+        button.setBackground(new Color(220, 38, 38));
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(185, 28, 28));
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(220, 38, 38));
+                }
+            }
+        });
+    }
+
+    private void generateGuardianReport() {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("REPORT_TITLE", "All Guardians Report");
+        ReportGenerator.generateReport("GuardianReport", parameters, "Guardian Report");
     }
 }

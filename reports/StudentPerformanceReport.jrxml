@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" name="StudentPerformanceReport" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20">
+<jasperReport name="StudentPerformanceReport" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20">
 	<parameter name="student_id" class="java.lang.String"/>
-	<queryString>
-		SELECT r.student_id, s.first_name, s.last_name, e.exam_name, sub.subject_name, r.marks_obtained, r.grade_letter, e.max_marks
+	<query>
+		<![CDATA[SELECT r.student_id, s.first_name, s.last_name, e.exam_name, sub.subject_name, r.marks_obtained, r.grade_letter, e.max_marks
 		FROM result r
 		JOIN student s ON r.student_id = s.student_id
 		JOIN exam e ON r.exam_id = e.exam_id
 		JOIN subject sub ON e.subject_id = sub.subject_id
 		WHERE r.student_id = $P{student_id}
-		ORDER BY e.exam_date DESC
-	</queryString>
+		ORDER BY e.exam_date DESC]]>
+	</query>
 	<field name="student_id" class="java.lang.String"/>
 	<field name="first_name" class="java.lang.String"/>
 	<field name="last_name" class="java.lang.String"/>
@@ -18,47 +18,67 @@
 	<field name="marks_obtained" class="java.lang.Double"/>
 	<field name="grade_letter" class="java.lang.String"/>
 	<field name="max_marks" class="java.lang.Double"/>
-	<title>
-		<band height="60">
-			<staticText>
-				<reportElement x="0" y="0" width="535" height="30" textAlignment="Center"/>
-				<font size="16" isBold="true"/>
-				<text><![CDATA[Student Performance Report]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="0" y="30" width="100" height="20"/>
-				<text><![CDATA[Student ID:]]></text>
-			</staticText>
-			<textField>
-				<reportElement x="100" y="30" width="150" height="20"/>
-				<textFieldExpression><![CDATA[$F{student_id}]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement x="250" y="30" width="80" height="20"/>
-				<text><![CDATA[Name:]]></text>
-			</staticText>
-			<textField>
-				<reportElement x="330" y="30" width="200" height="20"/>
-				<textFieldExpression><![CDATA[$F{first_name} + " " + $F{last_name}]]></textFieldExpression>
-			</textField>
-		</band>
+	<title height="60">
+		<element kind="staticText" x="0" y="0" width="535" height="30" hTextAlign="Center" fontSize="16" bold="true">
+			<text><![CDATA[Student Performance Report]]></text>
+		</element>
+		<element kind="staticText" x="0" y="34" width="100" height="20">
+			<text><![CDATA[Student ID:]]></text>
+		</element>
+		<element kind="textField" x="100" y="34" width="150" height="20">
+			<expression><![CDATA[$F{student_id}]]></expression>
+		</element>
+		<element kind="staticText" x="250" y="34" width="80" height="20">
+			<text><![CDATA[Name:]]></text>
+		</element>
+		<element kind="textField" x="330" y="34" width="200" height="20">
+			<expression><![CDATA[$F{first_name} + " " + $F{last_name}]]></expression>
+		</element>
 	</title>
-	<columnHeader>
-		<band height="25">
-			<staticText><reportElement x="0" y="0" width="100" height="20"/><text><![CDATA[Exam Name]]></text></staticText>
-			<staticText><reportElement x="100" y="0" width="100" height="20"/><text><![CDATA[Subject]]></text></staticText>
-			<staticText><reportElement x="200" y="0" width="80" height="20"/><text><![CDATA[Marks]]></text></staticText>
-			<staticText><reportElement x="280" y="0" width="80" height="20"/><text><![CDATA[Max Marks]]></text></staticText>
-			<staticText><reportElement x="360" y="0" width="50" height="20"/><text><![CDATA[Grade]]></text></staticText>
-		</band>
+	<pageHeader height="30">
+		<element kind="staticText" x="0" y="0" width="200" height="20">
+			<text><![CDATA[Central College Anuradhapura]]></text>
+		</element>
+	</pageHeader>
+	<columnHeader height="25">
+		<element kind="staticText" x="0" y="0" width="100" height="20">
+			<text><![CDATA[Exam Name]]></text>
+		</element>
+		<element kind="staticText" x="100" y="0" width="100" height="20">
+			<text><![CDATA[Subject]]></text>
+		</element>
+		<element kind="staticText" x="200" y="0" width="80" height="20">
+			<text><![CDATA[Marks]]></text>
+		</element>
+		<element kind="staticText" x="280" y="0" width="80" height="20">
+			<text><![CDATA[Max Marks]]></text>
+		</element>
+		<element kind="staticText" x="360" y="0" width="50" height="20">
+			<text><![CDATA[Grade]]></text>
+		</element>
 	</columnHeader>
 	<detail>
 		<band height="25">
-			<textField><reportElement x="0" y="0" width="100" height="20"/><textFieldExpression><![CDATA[$F{exam_name}]]></textFieldExpression></textField>
-			<textField><reportElement x="100" y="0" width="100" height="20"/><textFieldExpression><![CDATA[$F{subject_name}]]></textFieldExpression></textField>
-			<textField><reportElement x="200" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{marks_obtained}]]></textFieldExpression></textField>
-			<textField><reportElement x="280" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{max_marks}]]></textFieldExpression></textField>
-			<textField><reportElement x="360" y="0" width="50" height="20"/><textFieldExpression><![CDATA[$F{grade_letter}]]></textFieldExpression></textField>
+			<element kind="textField" x="0" y="0" width="100" height="20">
+				<expression><![CDATA[$F{exam_name}]]></expression>
+			</element>
+			<element kind="textField" x="100" y="0" width="100" height="20">
+				<expression><![CDATA[$F{subject_name}]]></expression>
+			</element>
+			<element kind="textField" x="200" y="0" width="80" height="20">
+				<expression><![CDATA[$F{marks_obtained}]]></expression>
+			</element>
+			<element kind="textField" x="280" y="0" width="80" height="20">
+				<expression><![CDATA[$F{max_marks}]]></expression>
+			</element>
+			<element kind="textField" x="360" y="0" width="50" height="20">
+				<expression><![CDATA[$F{grade_letter}]]></expression>
+			</element>
 		</band>
 	</detail>
+	<pageFooter height="30">
+		<element kind="textField" x="0" y="10" width="535" height="20" hTextAlign="Center">
+			<expression><![CDATA["Page " + $V{PAGE_NUMBER} + " of " + $V{PAGE_COUNT}]]></expression>
+		</element>
+	</pageFooter>
 </jasperReport>

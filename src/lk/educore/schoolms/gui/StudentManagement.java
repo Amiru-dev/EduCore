@@ -1,7 +1,9 @@
 package lk.educore.schoolms.gui;
 
 import lk.educore.schoolms.model.MySQL;
+import lk.educore.schoolms.model.Student;
 import lk.educore.schoolms.model.UserSession;
+import lk.educore.schoolms.util.ReportGenerator;
 import lk.educore.schoolms.validate.JOptionIcon;
 
 import javax.swing.*;
@@ -9,6 +11,8 @@ import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Student Management Panel Main CRUD interface for student management with tabs
@@ -20,7 +24,7 @@ public class StudentManagement extends JPanel {
     private DefaultTableModel tableModel;
     private JTextField txtSearch;
     private JComboBox<String> cmbSearchBy;
-    private JButton btnAdd, btnEdit, btnDelete, btnView, btnRefresh, btnAttendance, btnQRCode;
+    private JButton btnAdd, btnEdit, btnDelete, btnView, btnRefresh, btnAttendance, btnQRCode, btnReport;
     private JTabbedPane tabbedPane;
 
     public StudentManagement() {
@@ -58,8 +62,12 @@ public class StudentManagement extends JPanel {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
 
-        // Title
-        JLabel titleLabel = new JLabel("Student Management");
+        // Title - Change to "My Classes" for teachers
+        String titleText = "Student Management";
+        if (UserSession.get() != null && UserSession.get().isTeacher()) {
+            titleText = "My Classes";
+        }
+        JLabel titleLabel = new JLabel(titleText);
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
         panel.add(titleLabel, BorderLayout.WEST);
 
@@ -92,28 +100,45 @@ public class StudentManagement extends JPanel {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
 
         // Button panel
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 10));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
 
         btnAdd = new JButton("Add Student");
+        btnAdd.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btnAdd.addActionListener(e -> addStudent());
+        applyPrimaryButtonEffect(btnAdd);
 
         btnEdit = new JButton("Edit");
+        btnEdit.setEnabled(false);
         btnEdit.addActionListener(e -> editStudent());
+        applySecondaryButtonEffect(btnEdit);
 
         btnDelete = new JButton("Delete");
+        btnDelete.setEnabled(false);
         btnDelete.addActionListener(e -> deleteStudent());
+        applyDestructiveButtonEffect(btnDelete);
 
         btnView = new JButton("View Details");
+        btnView.setEnabled(false);
         btnView.addActionListener(e -> viewStudentDetails());
+        applySecondaryButtonEffect(btnView);
 
         btnRefresh = new JButton("Refresh");
         btnRefresh.addActionListener(e -> loadStudentData());
+        applySecondaryButtonEffect(btnRefresh);
 
         btnAttendance = new JButton("Mark Attendance");
         btnAttendance.addActionListener(e -> markAttendance());
+        applySecondaryButtonEffect(btnAttendance);
 
         btnQRCode = new JButton("Generate QR");
+        btnQRCode.setEnabled(false);
         btnQRCode.addActionListener(e -> generateQRCode());
+        applySecondaryButtonEffect(btnQRCode);
+
+        btnReport = new JButton("Generate Report");
+        btnReport.addActionListener(e -> generateStudentReport());
+        applySecondaryButtonEffect(btnReport);
 
         buttonPanel.add(btnAdd);
         buttonPanel.add(btnEdit);
@@ -122,11 +147,13 @@ public class StudentManagement extends JPanel {
         buttonPanel.add(btnRefresh);
         buttonPanel.add(btnAttendance);
         buttonPanel.add(btnQRCode);
+        buttonPanel.add(btnReport);
 
         if (UserSession.get() != null && UserSession.get().isTeacher()) {
             btnAdd.setVisible(false);
             btnEdit.setVisible(false);
             btnDelete.setVisible(false);
+            btnQRCode.setVisible(false);
         }
 
         panel.add(buttonPanel, BorderLayout.NORTH);
@@ -143,8 +170,20 @@ public class StudentManagement extends JPanel {
 
         studentTable = new JTable(tableModel);
         studentTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        studentTable.setRowHeight(25);
-        studentTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
+        studentTable.setRowHeight(30);
+        studentTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
+        studentTable.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        
+        // Add selection listener to enable/disable buttons
+        studentTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                boolean hasSelection = studentTable.getSelectedRow() != -1;
+                btnEdit.setEnabled(hasSelection);
+                btnDelete.setEnabled(hasSelection);
+                btnView.setEnabled(hasSelection);
+                btnQRCode.setEnabled(hasSelection);
+            }
+        });
 
         // Add mouse listener for double-click
         studentTable.addMouseListener(new MouseAdapter() {
@@ -317,15 +356,25 @@ public class StudentManagement extends JPanel {
             ResultSet rs = MySQL.executeSearch(query);
 
             while (rs.next()) {
-                String studentId = rs.getString("student_id");
-                String name = rs.getString("first_name") + " " + rs.getString("last_name");
-                String grade = rs.getString("grade_name");
-                String nic = rs.getString("nic");
-                String phone = rs.getString("phone");
-                String email = rs.getString("email");
-                String status = rs.getBoolean("is_active") ? "Active" : "Inactive";
+                Student student = new Student();
+                student.setStudentId(rs.getString("student_id"));
+                student.setFirstName(rs.getString("first_name"));
+                student.setLastName(rs.getString("last_name"));
+                student.setGrade(rs.getString("grade_name"));
+                student.setNic(rs.getString("nic"));
+                student.setPhone(rs.getString("phone"));
+                student.setEmail(rs.getString("email"));
+                student.setStatus(rs.getBoolean("is_active") ? "Active" : "Inactive");
 
-                tableModel.addRow(new Object[]{studentId, name, grade, nic, phone, email, status});
+                tableModel.addRow(new Object[]{
+                    student.getPersonId(),
+                    student.getFullName(),
+                    student.getGrade(),
+                    student.getNic(),
+                    student.getPhone(),
+                    student.getEmail(),
+                    student.getStatus()
+                });
             }
 
             rs.close();
@@ -403,15 +452,25 @@ public class StudentManagement extends JPanel {
             ResultSet rs = MySQL.executeSearch(query);
 
             while (rs.next()) {
-                String studentId = rs.getString("student_id");
-                String name = rs.getString("first_name") + " " + rs.getString("last_name");
-                String grade = rs.getString("grade_name");
-                String nic = rs.getString("nic");
-                String phone = rs.getString("phone");
-                String email = rs.getString("email");
-                String status = rs.getBoolean("is_active") ? "Active" : "Inactive";
+                Student student = new Student();
+                student.setStudentId(rs.getString("student_id"));
+                student.setFirstName(rs.getString("first_name"));
+                student.setLastName(rs.getString("last_name"));
+                student.setGrade(rs.getString("grade_name"));
+                student.setNic(rs.getString("nic"));
+                student.setPhone(rs.getString("phone"));
+                student.setEmail(rs.getString("email"));
+                student.setStatus(rs.getBoolean("is_active") ? "Active" : "Inactive");
 
-                tableModel.addRow(new Object[]{studentId, name, grade, nic, phone, email, status});
+                tableModel.addRow(new Object[]{
+                    student.getPersonId(),
+                    student.getFullName(),
+                    student.getGrade(),
+                    student.getNic(),
+                    student.getPhone(),
+                    student.getEmail(),
+                    student.getStatus()
+                });
             }
 
             rs.close();
@@ -451,12 +510,48 @@ public class StudentManagement extends JPanel {
         String studentName = tableModel.getValueAt(selectedRow, 1).toString();
 
         int confirm = JOptionIcon.showConfirmDialog(this,
-                "Are you sure you want to delete student " + studentName + " (" + studentId + ")?");
+                "Are you sure you want to delete student " + studentName + " (" + studentId + ")?\n"
+                + "This will also remove the student's user account.\n"
+                + "The guardian record will only be removed if no other students share the same guardian.");
 
         if (confirm == JOptionPane.YES_OPTION) {
             try {
-                String query = "DELETE FROM student WHERE student_id = '" + studentId + "'";
-                MySQL.executeIUD(query);
+                // 1. Look up linked user_id and guardian_id before deleting the student row
+                ResultSet rs = MySQL.executeSearch(
+                        "SELECT user_id, guardian_id FROM student WHERE student_id = '" + studentId + "'");
+                int userId = -1;
+                int guardianId = -1;
+                if (rs.next()) {
+                    userId = rs.getInt("user_id");
+                    if (rs.wasNull()) userId = -1;
+                    guardianId = rs.getInt("guardian_id");
+                    if (rs.wasNull()) guardianId = -1;
+                }
+                rs.close();
+
+                // 2. Delete student first (removes this student's FK references)
+                MySQL.executeIUD("DELETE FROM student WHERE student_id = '" + studentId + "'");
+
+                // 3. Only delete the guardian if no other student still references it
+                //    (e.g. a parent with 2 children — shared guardian must be kept)
+                if (guardianId > 0) {
+                    ResultSet guardianCheck = MySQL.executeSearch(
+                            "SELECT COUNT(*) AS cnt FROM student WHERE guardian_id = " + guardianId);
+                    int otherStudentsWithSameGuardian = 0;
+                    if (guardianCheck.next()) {
+                        otherStudentsWithSameGuardian = guardianCheck.getInt("cnt");
+                    }
+                    guardianCheck.close();
+
+                    if (otherStudentsWithSameGuardian == 0) {
+                        MySQL.executeIUD("DELETE FROM guardian WHERE guardian_id = " + guardianId);
+                    }
+                }
+
+                // 4. Delete linked user account (each student has their own account)
+                if (userId > 0) {
+                    MySQL.executeIUD("DELETE FROM user WHERE user_id = " + userId);
+                }
 
                 loadStudentData();
                 JOptionIcon.showSuccessDialog(this, "Student deleted successfully.");
@@ -514,5 +609,123 @@ public class StudentManagement extends JPanel {
         } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error generating QR code: " + e.getMessage());
         }
+    }
+
+    private void generateStudentReport() {
+        Map<String, Object> parameters = new HashMap<>();
+
+        // Check if current user is a teacher
+        if (UserSession.get() != null && UserSession.get().isTeacher()) {
+            String teacherNIC = UserSession.get().getTeacherNIC();
+            parameters.put("teacher_NIC", teacherNIC);
+            parameters.put("REPORT_TITLE", "My Classes Report");
+        } else {
+            parameters.put("REPORT_TITLE", "All Students Report");
+        }
+
+        ReportGenerator.generateReport("StudentReport", parameters, "Student Report");
+    }
+
+    private void applyButtonHoverEffect(JButton button, Color normalColor, Color hoverColor) {
+        button.setBackground(normalColor);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                button.setBackground(hoverColor);
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                button.setBackground(normalColor);
+            }
+        });
+    }
+
+    private void applyPrimaryButtonEffect(JButton button) {
+        button.setBackground(new Color(37, 99, 235));
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                button.setBackground(new Color(29, 78, 216));
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                button.setBackground(new Color(37, 99, 235));
+            }
+        });
+    }
+
+    private void applySecondaryButtonEffect(JButton button) {
+        button.setBackground(Color.WHITE);
+        button.setForeground(new Color(71, 85, 105));
+        button.setFocusPainted(false);
+        button.setBorderPainted(true);
+        button.setBorder(BorderFactory.createLineBorder(new Color(203, 213, 225), 1));
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+            BorderFactory.createEmptyBorder(8, 16, 8, 16)
+        ));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(248, 250, 252));
+                    button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(148, 163, 184), 1),
+                        BorderFactory.createEmptyBorder(8, 16, 8, 16)
+                    ));
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(Color.WHITE);
+                    button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+                        BorderFactory.createEmptyBorder(8, 16, 8, 16)
+                    ));
+                }
+            }
+        });
+    }
+
+    private void applyDestructiveButtonEffect(JButton button) {
+        button.setBackground(new Color(220, 38, 38));
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(185, 28, 28));
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(220, 38, 38));
+                }
+            }
+        });
     }
 }

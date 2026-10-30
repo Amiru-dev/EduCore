@@ -2,6 +2,7 @@ package lk.educore.schoolms.gui;
 
 import lk.educore.schoolms.model.MySQL;
 import lk.educore.schoolms.validate.JOptionIcon;
+import lk.educore.schoolms.util.ReportGenerator;
 
 import javax.swing.*;
 import javax.swing.table.*;
@@ -11,10 +12,12 @@ import java.awt.event.*;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Teacher Management Panel
- * Main CRUD interface for teacher management with tabs for info, attendance, leave, salary, and charts
+ * Teacher Management Panel Main CRUD interface for teacher management with tabs
+ * for info, attendance, leave, salary, and charts
  */
 public class TeacherManagement extends JPanel {
 
@@ -22,8 +25,10 @@ public class TeacherManagement extends JPanel {
     private DefaultTableModel tableModel;
     private JTextField txtSearch;
     private JComboBox<String> cmbSearchBy;
-    private JButton btnAdd, btnEdit, btnDelete, btnView, btnRefresh, btnAttendance, btnLeave, btnSalary, btnQRCode;
+    private JButton btnAdd, btnEdit, btnDelete, btnView, btnRefresh, btnAttendance, btnSalary, btnQRCode, btnReport;
     private JTabbedPane tabbedPane;
+    private JTable leaveTable;
+    private DefaultTableModel leaveModel;
 
     public TeacherManagement() {
         initComponents();
@@ -40,23 +45,23 @@ public class TeacherManagement extends JPanel {
 
         // Tabbed pane
         tabbedPane = new JTabbedPane();
-        
+
         // Teacher Info Tab
         JPanel infoPanel = createInfoPanel();
         tabbedPane.addTab("Teacher Info", infoPanel);
-        
+
         // Attendance Tab
         JPanel attendancePanel = createAttendancePanel();
         tabbedPane.addTab("Attendance", attendancePanel);
-        
+
         // Leave Tab
         JPanel leavePanel = createLeavePanel();
         tabbedPane.addTab("Leave Management", leavePanel);
-        
+
         // Salary Tab
         JPanel salaryPanel = createSalaryPanel();
         tabbedPane.addTab("Salary", salaryPanel);
-        
+
         // Charts Tab
         JPanel chartsPanel = createChartsPanel();
         tabbedPane.addTab("Analytics", chartsPanel);
@@ -79,7 +84,7 @@ public class TeacherManagement extends JPanel {
 
         // Search panel
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        
+
         cmbSearchBy = new JComboBox<>(new String[]{"NIC", "Name", "Type", "Status"});
         txtSearch = new JTextField(20);
         txtSearch.addKeyListener(new KeyAdapter() {
@@ -88,15 +93,15 @@ public class TeacherManagement extends JPanel {
                 searchTeachers();
             }
         });
-        
+
         JButton btnSearch = new JButton("Search");
         btnSearch.addActionListener(e -> searchTeachers());
-        
+
         searchPanel.add(new JLabel("Search by:"));
         searchPanel.add(cmbSearchBy);
         searchPanel.add(txtSearch);
         searchPanel.add(btnSearch);
-        
+
         panel.add(searchPanel, BorderLayout.EAST);
 
         return panel;
@@ -106,34 +111,49 @@ public class TeacherManagement extends JPanel {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
 
         // Button panel
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
-        
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 10));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
+
         btnAdd = new JButton("Add Teacher");
+        btnAdd.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btnAdd.addActionListener(e -> addTeacher());
-        
+        applyPrimaryButtonEffect(btnAdd);
+
         btnEdit = new JButton("Edit");
+        btnEdit.setEnabled(false);
         btnEdit.addActionListener(e -> editTeacher());
-        
+        applySecondaryButtonEffect(btnEdit);
+
         btnDelete = new JButton("Disable");
+        btnDelete.setEnabled(false);
         btnDelete.addActionListener(e -> disableTeacher());
-        
+        applyDestructiveButtonEffect(btnDelete);
+
         btnView = new JButton("View Details");
+        btnView.setEnabled(false);
         btnView.addActionListener(e -> viewTeacherDetails());
-        
+        applySecondaryButtonEffect(btnView);
+
         btnRefresh = new JButton("Refresh");
         btnRefresh.addActionListener(e -> loadTeacherData());
-        
+        applySecondaryButtonEffect(btnRefresh);
+
         btnAttendance = new JButton("Mark Attendance");
         btnAttendance.addActionListener(e -> markAttendance());
-        
-        btnLeave = new JButton("Apply Leave");
-        btnLeave.addActionListener(e -> applyLeave());
-        
+        applySecondaryButtonEffect(btnAttendance);
+
         btnSalary = new JButton("Manage Salary");
         btnSalary.addActionListener(e -> manageSalary());
-        
+        applySecondaryButtonEffect(btnSalary);
+
         btnQRCode = new JButton("Generate QR");
+        btnQRCode.setEnabled(false);
         btnQRCode.addActionListener(e -> generateQRCode());
+        applySecondaryButtonEffect(btnQRCode);
+
+        btnReport = new JButton("Generate Report");
+        btnReport.addActionListener(e -> generateTeacherReport());
+        applySecondaryButtonEffect(btnReport);
 
         buttonPanel.add(btnAdd);
         buttonPanel.add(btnEdit);
@@ -141,15 +161,15 @@ public class TeacherManagement extends JPanel {
         buttonPanel.add(btnView);
         buttonPanel.add(btnRefresh);
         buttonPanel.add(btnAttendance);
-        buttonPanel.add(btnLeave);
         buttonPanel.add(btnSalary);
         buttonPanel.add(btnQRCode);
+        buttonPanel.add(btnReport);
 
         panel.add(buttonPanel, BorderLayout.NORTH);
 
         // Table
         tableModel = new DefaultTableModel(
-            new Object[]{"NIC", "Name", "Type", "Email", "Phone", "Salary", "Status"}, 0
+                new Object[]{"NIC", "Name", "Type", "Email", "Phone", "Salary", "Status"}, 0
         ) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -159,15 +179,38 @@ public class TeacherManagement extends JPanel {
 
         teacherTable = new JTable(tableModel);
         teacherTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        teacherTable.setRowHeight(25);
-        teacherTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
+        teacherTable.setRowHeight(30);
+        teacherTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
+        teacherTable.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         
-        // Add mouse listener for double-click
+        // Add selection listener to enable/disable buttons
+        teacherTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                boolean hasSelection = teacherTable.getSelectedRow() != -1;
+                btnEdit.setEnabled(hasSelection);
+                btnDelete.setEnabled(hasSelection);
+                btnView.setEnabled(hasSelection);
+                btnQRCode.setEnabled(hasSelection);
+            }
+        });
+
+        // Add mouse listener for double-click and right-click context menu
         teacherTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
                     viewTeacherDetails();
+                }
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    int row = teacherTable.rowAtPoint(e.getPoint());
+                    if (row >= 0) {
+                        teacherTable.setRowSelectionInterval(row, row);
+                        showContextMenu(e);
+                    }
                 }
             }
         });
@@ -180,7 +223,7 @@ public class TeacherManagement extends JPanel {
 
     private JPanel createAttendancePanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
-        
+
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton btnRefresh = new JButton("Refresh Attendance");
         topPanel.add(btnRefresh);
@@ -199,7 +242,7 @@ public class TeacherManagement extends JPanel {
         attendanceTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         attendanceTable.setRowHeight(25);
         attendanceTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
-        
+
         JScrollPane scrollPane = new JScrollPane(attendanceTable);
         panel.add(scrollPane, BorderLayout.CENTER);
 
@@ -215,11 +258,11 @@ public class TeacherManagement extends JPanel {
 
                 while (rs.next()) {
                     attendanceModel.addRow(new Object[]{
-                        rs.getString("attendance_id"), 
-                        rs.getString("teacher_NIC"), 
+                        rs.getString("attendance_id"),
+                        rs.getString("teacher_NIC"),
                         rs.getString("name"),
-                        rs.getString("attendance_date"), 
-                        rs.getString("check_in"), 
+                        rs.getString("attendance_date"),
+                        rs.getString("check_in"),
                         rs.getString("check_out")
                     });
                 }
@@ -231,15 +274,37 @@ public class TeacherManagement extends JPanel {
 
         btnRefresh.addActionListener(loadAction);
         SwingUtilities.invokeLater(() -> loadAction.actionPerformed(null));
-        
+
         return panel;
     }
 
     private JPanel createLeavePanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
+
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 10));
+        topPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
         
-        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton btnApprove = new JButton("Approve");
+        btnApprove.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btnApprove.setBackground(new Color(22, 163, 74));
+        btnApprove.setForeground(Color.WHITE);
+        btnApprove.setFocusPainted(false);
+        btnApprove.addActionListener(e -> approveLeave());
+        applyPrimaryButtonEffect(btnApprove, new Color(22, 163, 74), new Color(18, 140, 60));
+        topPanel.add(btnApprove);
+        
+        JButton btnReject = new JButton("Reject");
+        btnReject.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btnReject.setBackground(new Color(220, 38, 38));
+        btnReject.setForeground(Color.WHITE);
+        btnReject.setFocusPainted(false);
+        btnReject.addActionListener(e -> rejectLeave());
+        applyDestructiveButtonEffect(btnReject);
+        topPanel.add(btnReject);
+        
         JButton btnRefresh = new JButton("Refresh Leave");
+        btnRefresh.addActionListener(e -> loadLeaveData());
+        applySecondaryButtonEffect(btnRefresh);
         topPanel.add(btnRefresh);
         panel.add(topPanel, BorderLayout.NORTH);
 
@@ -251,52 +316,110 @@ public class TeacherManagement extends JPanel {
                 return false;
             }
         };
+        this.leaveModel = leaveModel;
 
         JTable leaveTable = new JTable(leaveModel);
         leaveTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         leaveTable.setRowHeight(25);
         leaveTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
-        
+        this.leaveTable = leaveTable;
+
         JScrollPane scrollPane = new JScrollPane(leaveTable);
         panel.add(scrollPane, BorderLayout.CENTER);
 
-        java.awt.event.ActionListener loadAction = e -> {
-            try {
-                leaveModel.setRowCount(0);
-                ResultSet rs = MySQL.executeSearch("SELECT l.leave_id, l.teacher_NIC, "
-                        + "CONCAT(t.first_name, ' ', t.last_name) as name, "
-                        + "lt.leave_type_name, l.start_date, l.end_date, l.status "
-                        + "FROM teacher_leave l "
-                        + "INNER JOIN teacher t ON l.teacher_NIC = t.NIC "
-                        + "INNER JOIN leave_type lt ON l.leave_type_id = lt.leave_type_id "
-                        + "ORDER BY l.leave_id DESC LIMIT 100");
+        // Load initial data
+        loadLeaveData();
 
-                while (rs.next()) {
-                    leaveModel.addRow(new Object[]{
-                        rs.getString("leave_id"), 
-                        rs.getString("teacher_NIC"), 
-                        rs.getString("name"),
-                        rs.getString("leave_type_name"), 
-                        rs.getString("start_date"), 
-                        rs.getString("end_date"),
-                        rs.getString("status")
-                    });
-                }
-                rs.close();
-            } catch (Exception ex) {
-                JOptionIcon.showErrorDialog(this, "Error loading leave data: " + ex.getMessage());
-            }
-        };
-
-        btnRefresh.addActionListener(loadAction);
-        SwingUtilities.invokeLater(() -> loadAction.actionPerformed(null));
-        
         return panel;
+    }
+
+    private void loadLeaveData() {
+        try {
+            leaveModel.setRowCount(0);
+            ResultSet rs = MySQL.executeSearch("SELECT l.leave_id, l.teacher_NIC, "
+                    + "CONCAT(t.first_name, ' ', t.last_name) as name, "
+                    + "lt.leave_type_name, l.start_date, l.end_date, l.status "
+                    + "FROM teacher_leave l "
+                    + "INNER JOIN teacher t ON l.teacher_NIC = t.NIC "
+                    + "INNER JOIN leave_type lt ON l.leave_type_id = lt.leave_type_id "
+                    + "ORDER BY l.leave_id DESC LIMIT 100");
+
+            while (rs.next()) {
+                leaveModel.addRow(new Object[]{
+                    rs.getString("leave_id"),
+                    rs.getString("teacher_NIC"),
+                    rs.getString("name"),
+                    rs.getString("leave_type_name"),
+                    rs.getString("start_date"),
+                    rs.getString("end_date"),
+                    rs.getString("status")
+                });
+            }
+            rs.close();
+        } catch (Exception ex) {
+            JOptionIcon.showErrorDialog(this, "Error loading leave data: " + ex.getMessage());
+        }
+    }
+
+    private void approveLeave() {
+        int selectedRow = leaveTable.getSelectedRow();
+        
+        if (selectedRow == -1) {
+            JOptionIcon.showWarningDialog(this, "Please select a leave request to approve.");
+            return;
+        }
+
+        String leaveId = leaveModel.getValueAt(selectedRow, 0).toString();
+        String status = leaveModel.getValueAt(selectedRow, 6).toString();
+
+        if (!"Pending".equals(status)) {
+            JOptionIcon.showWarningDialog(this, "Only pending leave requests can be approved.");
+            return;
+        }
+
+        int confirm = JOptionIcon.showConfirmDialog(this, "Are you sure you want to approve this leave request?");
+        if (confirm == JOptionPane.YES_OPTION) {
+            try {
+                MySQL.executeIUD("UPDATE teacher_leave SET status = 'Approved' WHERE leave_id = " + leaveId);
+                JOptionIcon.showSuccessDialog(this, "Leave request approved successfully.");
+                loadLeaveData();
+            } catch (Exception e) {
+                JOptionIcon.showErrorDialog(this, "Error approving leave: " + e.getMessage());
+            }
+        }
+    }
+
+    private void rejectLeave() {
+        int selectedRow = leaveTable.getSelectedRow();
+        
+        if (selectedRow == -1) {
+            JOptionIcon.showWarningDialog(this, "Please select a leave request to reject.");
+            return;
+        }
+
+        String leaveId = leaveModel.getValueAt(selectedRow, 0).toString();
+        String status = leaveModel.getValueAt(selectedRow, 6).toString();
+
+        if (!"Pending".equals(status)) {
+            JOptionIcon.showWarningDialog(this, "Only pending leave requests can be rejected.");
+            return;
+        }
+
+        int confirm = JOptionIcon.showConfirmDialog(this, "Are you sure you want to reject this leave request?");
+        if (confirm == JOptionPane.YES_OPTION) {
+            try {
+                MySQL.executeIUD("UPDATE teacher_leave SET status = 'Rejected' WHERE leave_id = " + leaveId);
+                JOptionIcon.showSuccessDialog(this, "Leave request rejected successfully.");
+                loadLeaveData();
+            } catch (Exception e) {
+                JOptionIcon.showErrorDialog(this, "Error rejecting leave: " + e.getMessage());
+            }
+        }
     }
 
     private JPanel createSalaryPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
-        
+
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton btnRefresh = new JButton("Refresh Salary");
         topPanel.add(btnRefresh);
@@ -315,7 +438,7 @@ public class TeacherManagement extends JPanel {
         salaryTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         salaryTable.setRowHeight(25);
         salaryTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
-        
+
         JScrollPane scrollPane = new JScrollPane(salaryTable);
         panel.add(scrollPane, BorderLayout.CENTER);
 
@@ -331,9 +454,9 @@ public class TeacherManagement extends JPanel {
 
                 while (rs.next()) {
                     salaryModel.addRow(new Object[]{
-                        rs.getString("NIC"), 
+                        rs.getString("NIC"),
                         rs.getString("name"),
-                        rs.getString("type_name"), 
+                        rs.getString("type_name"),
                         String.format("Rs. %,.2f", rs.getDouble("salary"))
                     });
                 }
@@ -345,33 +468,33 @@ public class TeacherManagement extends JPanel {
 
         btnRefresh.addActionListener(loadAction);
         SwingUtilities.invokeLater(() -> loadAction.actionPerformed(null));
-        
+
         return panel;
     }
 
     private JPanel createChartsPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        
+
         JPanel statsPanel = new JPanel(new GridLayout(2, 2, 20, 20));
-        
+
         JPanel cardTotal = createStatCard("Total Teachers", "Loading...");
         JPanel cardActive = createStatCard("Active Teachers", "Loading...");
         JPanel cardMale = createStatCard("Male Teachers", "Loading...");
         JPanel cardFemale = createStatCard("Female Teachers", "Loading...");
-        
+
         statsPanel.add(cardTotal);
         statsPanel.add(cardActive);
         statsPanel.add(cardMale);
         statsPanel.add(cardFemale);
-        
+
         panel.add(statsPanel, BorderLayout.CENTER);
-        
+
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton btnRefresh = new JButton("Refresh Analytics");
         bottomPanel.add(btnRefresh);
         panel.add(bottomPanel, BorderLayout.SOUTH);
-        
+
         java.awt.event.ActionListener loadAction = e -> {
             try {
                 ResultSet rs = MySQL.executeSearch("SELECT COUNT(*) as total, SUM(IF(status_id=1, 1, 0)) as active, SUM(IF(gender='Male', 1, 0)) as male, SUM(IF(gender='Female', 1, 0)) as female FROM teacher");
@@ -386,45 +509,45 @@ public class TeacherManagement extends JPanel {
                 ex.printStackTrace();
             }
         };
-        
+
         btnRefresh.addActionListener(loadAction);
         SwingUtilities.invokeLater(() -> loadAction.actionPerformed(null));
-        
+
         return panel;
     }
 
     private JPanel createStatCard(String title, String initialValue) {
         JPanel card = new JPanel(new BorderLayout(10, 10));
         card.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(220, 220, 220), 1, true),
-            BorderFactory.createEmptyBorder(20, 20, 20, 20)
+                BorderFactory.createLineBorder(new Color(220, 220, 220), 1, true),
+                BorderFactory.createEmptyBorder(20, 20, 20, 20)
         ));
         card.setBackground(Color.WHITE);
-        
+
         JLabel lblTitle = new JLabel(title, SwingConstants.CENTER);
         lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
         lblTitle.setForeground(new Color(100, 116, 139));
-        
+
         JLabel lblValue = new JLabel(initialValue, SwingConstants.CENTER);
         lblValue.setFont(new Font("Segoe UI", Font.BOLD, 48));
         lblValue.setForeground(new Color(37, 99, 235));
-        
+
         card.add(lblTitle, BorderLayout.NORTH);
         card.add(lblValue, BorderLayout.CENTER);
-        
+
         return card;
     }
 
     private void loadTeacherData() {
         try {
             tableModel.setRowCount(0);
-            
-            ResultSet rs = MySQL.executeSearch("SELECT t.NIC, t.first_name, t.last_name, tt.type_name, t.email, t.phone, t.salary, ts.status_name " +
-                          "FROM teacher t " +
-                          "JOIN teacher_type tt ON t.teacher_type_id = tt.teacher_type_id " +
-                          "JOIN teacher_status ts ON t.status_id = ts.status_id " +
-                          "ORDER BY t.first_name, t.last_name");
-            
+
+            ResultSet rs = MySQL.executeSearch("SELECT t.NIC, t.first_name, t.last_name, tt.type_name, t.email, t.phone, t.salary, ts.status_name "
+                    + "FROM teacher t "
+                    + "JOIN teacher_type tt ON t.teacher_type_id = tt.teacher_type_id "
+                    + "JOIN teacher_status ts ON t.status_id = ts.status_id "
+                    + "ORDER BY t.first_name, t.last_name");
+
             while (rs.next()) {
                 String nic = rs.getString("NIC");
                 String name = rs.getString("first_name") + " " + rs.getString("last_name");
@@ -433,12 +556,12 @@ public class TeacherManagement extends JPanel {
                 String phone = rs.getString("phone");
                 double salary = rs.getDouble("salary");
                 String status = rs.getString("status_name");
-                
+
                 tableModel.addRow(new Object[]{nic, name, type, email, phone, String.format("Rs. %,.2f", salary), status});
             }
-            
+
             rs.close();
-            
+
         } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error loading teacher data: " + e.getMessage());
         }
@@ -448,59 +571,59 @@ public class TeacherManagement extends JPanel {
         try {
             String searchTerm = txtSearch.getText().trim();
             String searchBy = (String) cmbSearchBy.getSelectedItem();
-            
+
             if (searchTerm.isEmpty()) {
                 loadTeacherData();
                 return;
             }
-            
+
             tableModel.setRowCount(0);
-            
+
             String query;
-            
+
             switch (searchBy) {
                 case "NIC":
-                    query = "SELECT t.NIC, t.first_name, t.last_name, tt.type_name, t.email, t.phone, t.salary, ts.status_name " +
-                            "FROM teacher t " +
-                            "JOIN teacher_type tt ON t.teacher_type_id = tt.teacher_type_id " +
-                            "JOIN teacher_status ts ON t.status_id = ts.status_id " +
-                            "WHERE t.NIC LIKE '%" + searchTerm + "%' " +
-                            "ORDER BY t.first_name, t.last_name";
+                    query = "SELECT t.NIC, t.first_name, t.last_name, tt.type_name, t.email, t.phone, t.salary, ts.status_name "
+                            + "FROM teacher t "
+                            + "JOIN teacher_type tt ON t.teacher_type_id = tt.teacher_type_id "
+                            + "JOIN teacher_status ts ON t.status_id = ts.status_id "
+                            + "WHERE t.NIC LIKE '%" + searchTerm + "%' "
+                            + "ORDER BY t.first_name, t.last_name";
                     break;
                 case "Name":
-                    query = "SELECT t.NIC, t.first_name, t.last_name, tt.type_name, t.email, t.phone, t.salary, ts.status_name " +
-                            "FROM teacher t " +
-                            "JOIN teacher_type tt ON t.teacher_type_id = tt.teacher_type_id " +
-                            "JOIN teacher_status ts ON t.status_id = ts.status_id " +
-                            "WHERE t.first_name LIKE '%" + searchTerm + "%' OR t.last_name LIKE '%" + searchTerm + "%' " +
-                            "ORDER BY t.first_name, t.last_name";
+                    query = "SELECT t.NIC, t.first_name, t.last_name, tt.type_name, t.email, t.phone, t.salary, ts.status_name "
+                            + "FROM teacher t "
+                            + "JOIN teacher_type tt ON t.teacher_type_id = tt.teacher_type_id "
+                            + "JOIN teacher_status ts ON t.status_id = ts.status_id "
+                            + "WHERE t.first_name LIKE '%" + searchTerm + "%' OR t.last_name LIKE '%" + searchTerm + "%' "
+                            + "ORDER BY t.first_name, t.last_name";
                     break;
                 case "Type":
-                    query = "SELECT t.NIC, t.first_name, t.last_name, tt.type_name, t.email, t.phone, t.salary, ts.status_name " +
-                            "FROM teacher t " +
-                            "JOIN teacher_type tt ON t.teacher_type_id = tt.teacher_type_id " +
-                            "JOIN teacher_status ts ON t.status_id = ts.status_id " +
-                            "WHERE tt.type_name LIKE '%" + searchTerm + "%' " +
-                            "ORDER BY t.first_name, t.last_name";
+                    query = "SELECT t.NIC, t.first_name, t.last_name, tt.type_name, t.email, t.phone, t.salary, ts.status_name "
+                            + "FROM teacher t "
+                            + "JOIN teacher_type tt ON t.teacher_type_id = tt.teacher_type_id "
+                            + "JOIN teacher_status ts ON t.status_id = ts.status_id "
+                            + "WHERE tt.type_name LIKE '%" + searchTerm + "%' "
+                            + "ORDER BY t.first_name, t.last_name";
                     break;
                 case "Status":
-                    query = "SELECT t.NIC, t.first_name, t.last_name, tt.type_name, t.email, t.phone, t.salary, ts.status_name " +
-                            "FROM teacher t " +
-                            "JOIN teacher_type tt ON t.teacher_type_id = tt.teacher_type_id " +
-                            "JOIN teacher_status ts ON t.status_id = ts.status_id " +
-                            "WHERE ts.status_name LIKE '%" + searchTerm + "%' " +
-                            "ORDER BY t.first_name, t.last_name";
+                    query = "SELECT t.NIC, t.first_name, t.last_name, tt.type_name, t.email, t.phone, t.salary, ts.status_name "
+                            + "FROM teacher t "
+                            + "JOIN teacher_type tt ON t.teacher_type_id = tt.teacher_type_id "
+                            + "JOIN teacher_status ts ON t.status_id = ts.status_id "
+                            + "WHERE ts.status_name LIKE '%" + searchTerm + "%' "
+                            + "ORDER BY t.first_name, t.last_name";
                     break;
                 default:
-                    query = "SELECT t.NIC, t.first_name, t.last_name, tt.type_name, t.email, t.phone, t.salary, ts.status_name " +
-                            "FROM teacher t " +
-                            "JOIN teacher_type tt ON t.teacher_type_id = tt.teacher_type_id " +
-                            "JOIN teacher_status ts ON t.status_id = ts.status_id " +
-                            "ORDER BY t.first_name, t.last_name";
+                    query = "SELECT t.NIC, t.first_name, t.last_name, tt.type_name, t.email, t.phone, t.salary, ts.status_name "
+                            + "FROM teacher t "
+                            + "JOIN teacher_type tt ON t.teacher_type_id = tt.teacher_type_id "
+                            + "JOIN teacher_status ts ON t.status_id = ts.status_id "
+                            + "ORDER BY t.first_name, t.last_name";
             }
-            
+
             ResultSet rs = MySQL.executeSearch(query);
-            
+
             while (rs.next()) {
                 String nic = rs.getString("NIC");
                 String name = rs.getString("first_name") + " " + rs.getString("last_name");
@@ -509,12 +632,12 @@ public class TeacherManagement extends JPanel {
                 String phone = rs.getString("phone");
                 double salary = rs.getDouble("salary");
                 String status = rs.getString("status_name");
-                
+
                 tableModel.addRow(new Object[]{nic, name, type, email, phone, String.format("Rs. %,.2f", salary), status});
             }
-            
+
             rs.close();
-            
+
         } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error searching teachers: " + e.getMessage());
         }
@@ -533,7 +656,7 @@ public class TeacherManagement extends JPanel {
             JOptionIcon.showWarningDialog(this, "Please select a teacher to edit.");
             return;
         }
-        
+
         String nic = tableModel.getValueAt(selectedRow, 0).toString();
         Window parent = SwingUtilities.getWindowAncestor(this);
         TeacherDialog dialog = new TeacherDialog(parent, nic);
@@ -547,23 +670,96 @@ public class TeacherManagement extends JPanel {
             JOptionIcon.showWarningDialog(this, "Please select a teacher to disable.");
             return;
         }
-        
+
         String nic = tableModel.getValueAt(selectedRow, 0).toString();
         String teacherName = tableModel.getValueAt(selectedRow, 1).toString();
-        
-        int confirm = JOptionIcon.showConfirmDialog(this, 
-            "Are you sure you want to disable teacher " + teacherName + " (" + nic + ")?");
-        
+        String status = tableModel.getValueAt(selectedRow, 6).toString();
+
+        // Check if teacher is already disabled
+        if ("Inactive".equals(status)) {
+            JOptionIcon.showWarningDialog(this, "Teacher " + teacherName + " is already disabled.");
+            return;
+        }
+
+        disableTeacher(nic, teacherName);
+    }
+
+    private void disableTeacher(String nic, String teacherName) {
+        int confirm = JOptionIcon.showConfirmDialog(this,
+                "Are you sure you want to disable teacher " + teacherName + " (" + nic + ")?");
+
         if (confirm == JOptionPane.YES_OPTION) {
             try {
                 String query = "UPDATE teacher SET status_id = 2 WHERE NIC = '" + nic + "'"; // 2 = Inactive
                 MySQL.executeIUD(query);
-                
-                JOptionIcon.showSuccessDialog(this, "Teacher disabled successfully.");
+
                 loadTeacherData();
-                
+                JOptionIcon.showSuccessDialog(this, "Teacher disabled successfully.");
+
             } catch (Exception e) {
                 JOptionIcon.showErrorDialog(this, "Error disabling teacher: " + e.getMessage());
+            }
+        }
+    }
+
+    private void showContextMenu(MouseEvent e) {
+        int selectedRow = teacherTable.getSelectedRow();
+        if (selectedRow == -1) {
+            return;
+        }
+
+        String status = tableModel.getValueAt(selectedRow, 6).toString();
+        String nic = tableModel.getValueAt(selectedRow, 0).toString();
+        String teacherName = tableModel.getValueAt(selectedRow, 1).toString();
+
+        JPopupMenu contextMenu = new JPopupMenu();
+
+        // Show "Enable" option only if teacher is disabled
+        if ("Inactive".equals(status)) {
+            JMenuItem enableItem = new JMenuItem("Enable Teacher");
+            enableItem.addActionListener(ev -> enableTeacher(nic, teacherName));
+            contextMenu.add(enableItem);
+        }
+
+        // Always show "Disable" option for active teachers
+        if ("Active".equals(status)) {
+            JMenuItem disableItem = new JMenuItem("Disable Teacher");
+            disableItem.addActionListener(ev -> disableTeacher(nic, teacherName));
+            contextMenu.add(disableItem);
+        }
+
+        contextMenu.show(e.getComponent(), e.getX(), e.getY());
+    }
+
+    private void enableTeacher(String nic, String teacherName) {
+        // Check if teacher is already enabled
+        try {
+            ResultSet rs = MySQL.executeSearch("SELECT status_id FROM teacher WHERE NIC = '" + nic + "'");
+            if (rs.next()) {
+                int statusId = rs.getInt("status_id");
+                rs.close();
+                if (statusId == 1) { // 1 = Active
+                    JOptionIcon.showWarningDialog(this, "Teacher " + teacherName + " is already enabled.");
+                    return;
+                }
+            }
+        } catch (Exception e) {
+            // Continue with the enable operation if check fails
+        }
+
+        int confirm = JOptionIcon.showConfirmDialog(this,
+                "Are you sure you want to enable teacher " + teacherName + " (" + nic + ")?");
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            try {
+                String query = "UPDATE teacher SET status_id = 1 WHERE NIC = '" + nic + "'"; // 1 = Active
+                MySQL.executeIUD(query);
+
+                loadTeacherData();
+                JOptionIcon.showSuccessDialog(this, "Teacher enabled successfully.");
+
+            } catch (Exception ex) {
+                JOptionIcon.showErrorDialog(this, "Error enabling teacher: " + ex.getMessage());
             }
         }
     }
@@ -574,7 +770,7 @@ public class TeacherManagement extends JPanel {
             JOptionIcon.showWarningDialog(this, "Please select a teacher to view.");
             return;
         }
-        
+
         String nic = tableModel.getValueAt(selectedRow, 0).toString();
         JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this), "Teacher Details", JDialog.ModalityType.APPLICATION_MODAL);
         dialog.add(new TeacherInformation(nic));
@@ -589,9 +785,9 @@ public class TeacherManagement extends JPanel {
             JOptionIcon.showWarningDialog(this, "Please select a teacher to mark attendance.");
             return;
         }
-        
+
         String nic = tableModel.getValueAt(selectedRow, 0).toString();
-        
+
         int confirm = JOptionIcon.showConfirmDialog(this, "Mark attendance for today (Check In/Out) for teacher " + nic + "?");
         if (confirm == JOptionPane.YES_OPTION) {
             try {
@@ -599,11 +795,11 @@ public class TeacherManagement extends JPanel {
                 java.text.SimpleDateFormat sdfTime = new java.text.SimpleDateFormat("HH:mm:ss");
                 java.text.SimpleDateFormat sdfDateTime = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 java.util.Date now = new java.util.Date();
-                
+
                 String date = sdfDate.format(now);
                 String time = sdfTime.format(now);
                 String datetime = sdfDateTime.format(now);
-                
+
                 ResultSet rs = MySQL.executeSearch("SELECT * FROM teacher_attendance WHERE teacher_NIC = '" + nic + "' AND attendance_date = '" + date + "'");
                 if (rs.next()) {
                     if (rs.getString("check_out") == null) {
@@ -623,80 +819,16 @@ public class TeacherManagement extends JPanel {
         }
     }
 
-    private void applyLeave() {
-        int selectedRow = teacherTable.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionIcon.showWarningDialog(this, "Please select a teacher to apply leave.");
-            return;
-        }
-        
-        String nic = tableModel.getValueAt(selectedRow, 0).toString();
-        
-        JDateChooser startDateChooser = new JDateChooser();
-        JDateChooser endDateChooser = new JDateChooser();
-        startDateChooser.setDateFormatString("yyyy-MM-dd");
-        endDateChooser.setDateFormatString("yyyy-MM-dd");
-        
-        JComboBox<String> cmbLeaveType = new JComboBox<>();
-        try {
-            ResultSet rs = MySQL.executeSearch("SELECT * FROM leave_type");
-            while (rs.next()) {
-                cmbLeaveType.addItem(rs.getString("leave_type_id") + " - " + rs.getString("leave_type_name"));
-            }
-            rs.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        
-        JPanel panel = new JPanel(new GridLayout(3, 2, 5, 5));
-        panel.add(new JLabel("Leave Type:"));
-        panel.add(cmbLeaveType);
-        panel.add(new JLabel("Start Date:"));
-        panel.add(startDateChooser);
-        panel.add(new JLabel("End Date:"));
-        panel.add(endDateChooser);
-        
-        int result = JOptionPane.showConfirmDialog(this, panel, "Apply Leave for " + nic, JOptionPane.OK_CANCEL_OPTION);
-        if (result == JOptionPane.OK_OPTION) {
-            try {
-                String typeStr = cmbLeaveType.getSelectedItem().toString();
-                String typeId = typeStr.split(" - ")[0];
-                
-                Date startDate = startDateChooser.getDate();
-                Date endDate = endDateChooser.getDate();
-                
-                if (startDate == null || endDate == null) {
-                    JOptionIcon.showWarningDialog(this, "Please select both start and end dates.");
-                    return;
-                }
-                
-                if (startDate.after(endDate)) {
-                    JOptionIcon.showWarningDialog(this, "Start date must be before end date.");
-                    return;
-                }
-                
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                String startDateStr = sdf.format(startDate);
-                String endDateStr = sdf.format(endDate);
-                
-                MySQL.executeIUD("INSERT INTO teacher_leave (teacher_NIC, leave_type_id, start_date, end_date, status) VALUES ('" + nic + "', " + typeId + ", '" + startDateStr + "', '" + endDateStr + "', 'Pending')");
-                JOptionIcon.showSuccessDialog(this, "Leave applied successfully.");
-            } catch (Exception e) {
-                JOptionIcon.showErrorDialog(this, "Error applying leave: " + e.getMessage());
-            }
-        }
-    }
-
     private void manageSalary() {
         int selectedRow = teacherTable.getSelectedRow();
         if (selectedRow == -1) {
             JOptionIcon.showWarningDialog(this, "Please select a teacher to manage salary.");
             return;
         }
-        
+
         String nic = tableModel.getValueAt(selectedRow, 0).toString();
         String currentSalary = tableModel.getValueAt(selectedRow, 5).toString().replace("Rs. ", "").replace(",", "");
-        
+
         String newSalary = JOptionPane.showInputDialog(this, "Enter new salary for teacher " + nic + ":", currentSalary);
         if (newSalary != null && !newSalary.trim().isEmpty()) {
             try {
@@ -738,6 +870,12 @@ public class TeacherManagement extends JPanel {
         }
     }
 
+    private void generateTeacherReport() {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("REPORT_TITLE", "All Teachers Report");
+        ReportGenerator.generateReport("TeacherReport", parameters, "Teacher Report");
+    }
+
     private JPanel createAssignmentPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -765,7 +903,9 @@ public class TeacherManagement extends JPanel {
                 new Object[]{"ID", "Grade", "Class Teacher?", "Year"}, 0
         ) {
             @Override
-            public boolean isCellEditable(int row, int col) { return false; }
+            public boolean isCellEditable(int row, int col) {
+                return false;
+            }
         };
         JTable classTable = new JTable(classModel);
         classTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -798,7 +938,9 @@ public class TeacherManagement extends JPanel {
                 new Object[]{"ID", "Grade", "Subject", "Year"}, 0
         ) {
             @Override
-            public boolean isCellEditable(int row, int col) { return false; }
+            public boolean isCellEditable(int row, int col) {
+                return false;
+            }
         };
         JTable subjectTable = new JTable(subjectModel);
         subjectTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -831,7 +973,9 @@ public class TeacherManagement extends JPanel {
         // Helper: get selected teacher NIC
         java.util.function.Supplier<String> getSelectedNIC = () -> {
             String sel = (String) cmbTeacher.getSelectedItem();
-            if (sel == null || !sel.contains(" - ")) return null;
+            if (sel == null || !sel.contains(" - ")) {
+                return null;
+            }
             return sel.split(" - ")[0].trim();
         };
 
@@ -840,7 +984,9 @@ public class TeacherManagement extends JPanel {
             String nic = getSelectedNIC.get();
             classModel.setRowCount(0);
             subjectModel.setRowCount(0);
-            if (nic == null) return;
+            if (nic == null) {
+                return;
+            }
 
             try {
                 // Load classes
@@ -948,8 +1094,9 @@ public class TeacherManagement extends JPanel {
                             + "VALUES ('" + nic + "', " + gradeId + ", " + (isClassTeacher ? 1 : 0) + ", " + year + ") "
                             + "ON DUPLICATE KEY UPDATE is_class_teacher = VALUES(is_class_teacher)"
                     );
-                    JOptionIcon.showSuccessDialog(this, "Class assigned successfully!");
                     reloadAssignments.run();
+                    JOptionIcon.showSuccessDialog(this, "Class assigned successfully!");
+
                 } else {
                     rs.close();
                 }
@@ -970,8 +1117,8 @@ public class TeacherManagement extends JPanel {
             if (confirm == JOptionPane.YES_OPTION) {
                 try {
                     MySQL.executeIUD("DELETE FROM teacher_class WHERE id = " + id);
-                    JOptionIcon.showSuccessDialog(this, "Assignment removed.");
                     reloadAssignments.run();
+                    JOptionIcon.showSuccessDialog(this, "Assignment removed.");
                 } catch (Exception ex) {
                     JOptionIcon.showErrorDialog(this, "Error removing class assignment: " + ex.getMessage());
                 }
@@ -992,12 +1139,16 @@ public class TeacherManagement extends JPanel {
             try {
                 int gradeId = -1;
                 ResultSet rsG = MySQL.executeSearch("SELECT grade_id FROM grade WHERE grade_name = '" + grade + "'");
-                if (rsG.next()) gradeId = rsG.getInt("grade_id");
+                if (rsG.next()) {
+                    gradeId = rsG.getInt("grade_id");
+                }
                 rsG.close();
 
                 int subjectId = -1;
                 ResultSet rsS = MySQL.executeSearch("SELECT subject_id FROM subject WHERE subject_name = '" + subject + "'");
-                if (rsS.next()) subjectId = rsS.getInt("subject_id");
+                if (rsS.next()) {
+                    subjectId = rsS.getInt("subject_id");
+                }
                 rsS.close();
 
                 if (gradeId != -1 && subjectId != -1) {
@@ -1006,8 +1157,8 @@ public class TeacherManagement extends JPanel {
                             + "VALUES ('" + nic + "', " + subjectId + ", " + gradeId + ", " + year + ") "
                             + "ON DUPLICATE KEY UPDATE academic_year = VALUES(academic_year)"
                     );
-                    JOptionIcon.showSuccessDialog(this, "Subject assigned successfully!");
                     reloadAssignments.run();
+                    JOptionIcon.showSuccessDialog(this, "Subject assigned successfully!");
                 }
             } catch (Exception ex) {
                 JOptionIcon.showErrorDialog(this, "Error assigning subject: " + ex.getMessage());
@@ -1026,8 +1177,9 @@ public class TeacherManagement extends JPanel {
             if (confirm == JOptionPane.YES_OPTION) {
                 try {
                     MySQL.executeIUD("DELETE FROM teacher_subject WHERE id = " + id);
-                    JOptionIcon.showSuccessDialog(this, "Assignment removed.");
                     reloadAssignments.run();
+                    JOptionIcon.showSuccessDialog(this, "Assignment removed.");
+                    
                 } catch (Exception ex) {
                     JOptionIcon.showErrorDialog(this, "Error removing subject assignment: " + ex.getMessage());
                 }
@@ -1042,5 +1194,137 @@ public class TeacherManagement extends JPanel {
         });
 
         return panel;
+    }
+
+    private void applyButtonHoverEffect(JButton button, Color normalColor, Color hoverColor) {
+        button.setBackground(normalColor);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                button.setBackground(hoverColor);
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                button.setBackground(normalColor);
+            }
+        });
+    }
+
+    private void applyPrimaryButtonEffect(JButton button) {
+        button.setBackground(new Color(37, 99, 235));
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(29, 78, 216));
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(37, 99, 235));
+                }
+            }
+        });
+    }
+
+    private void applyPrimaryButtonEffect(JButton button, Color normalColor, Color hoverColor) {
+        button.setBackground(normalColor);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(hoverColor);
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(normalColor);
+                }
+            }
+        });
+    }
+
+    private void applySecondaryButtonEffect(JButton button) {
+        button.setBackground(Color.WHITE);
+        button.setForeground(new Color(71, 85, 105));
+        button.setFocusPainted(false);
+        button.setBorderPainted(true);
+        button.setBorder(BorderFactory.createLineBorder(new Color(203, 213, 225), 1));
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+            BorderFactory.createEmptyBorder(8, 16, 8, 16)
+        ));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(248, 250, 252));
+                    button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(148, 163, 184), 1),
+                        BorderFactory.createEmptyBorder(8, 16, 8, 16)
+                    ));
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(Color.WHITE);
+                    button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+                        BorderFactory.createEmptyBorder(8, 16, 8, 16)
+                    ));
+                }
+            }
+        });
+    }
+
+    private void applyDestructiveButtonEffect(JButton button) {
+        button.setBackground(new Color(220, 38, 38));
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(185, 28, 28));
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(220, 38, 38));
+                }
+            }
+        });
     }
 }

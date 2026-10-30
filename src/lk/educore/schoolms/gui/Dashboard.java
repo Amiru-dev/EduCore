@@ -189,6 +189,7 @@ public class Dashboard extends JFrame {
         btnLogout.setForeground(Color.WHITE);
         btnLogout.setFocusPainted(false);
         btnLogout.addActionListener(e -> handleLogout());
+        applyButtonHoverEffect(btnLogout, new Color(231, 76, 60), new Color(192, 57, 43));
         logoutPanel.add(btnLogout);
 
         sidebar.add(logoutPanel, BorderLayout.SOUTH);
@@ -391,12 +392,23 @@ public class Dashboard extends JFrame {
         if (isAdmin) {
             editMenu.add(updateLogoMenu);
         }
-        
+
         menuBar.add(fileMenu);
         if (isAdmin) {
             menuBar.add(editMenu);
         }
-        
+
+        // Help Menu - Available to all users
+        JMenu helpMenu = new JMenu("Help");
+
+        JMenuItem userGuideMenu = new JMenuItem("User Guide");
+        userGuideMenu.addActionListener(e -> {
+            new HelpDialog(this, role).setVisible(true);
+        });
+
+        helpMenu.add(userGuideMenu);
+        menuBar.add(helpMenu);
+
         return menuBar;
     }
 
@@ -445,6 +457,26 @@ public class Dashboard extends JFrame {
         FlatMacLightLaf.setup();
         SwingUtilities.invokeLater(() -> {
             new Dashboard("admin", "Admin").setVisible(true);
+        });
+    }
+
+    private void applyButtonHoverEffect(JButton button, Color normalColor, Color hoverColor) {
+        button.setBackground(normalColor);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                button.setBackground(hoverColor);
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                button.setBackground(normalColor);
+            }
         });
     }
 }

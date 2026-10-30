@@ -1,6 +1,8 @@
 package lk.educore.schoolms.gui;
 
 import lk.educore.schoolms.model.MySQL;
+import lk.educore.schoolms.model.Student;
+import lk.educore.schoolms.util.PasswordUtil;
 import lk.educore.schoolms.email.SendQREmail;
 import lk.educore.schoolms.email.SendEmail;
 import lk.educore.schoolms.validate.JOptionIcon;
@@ -42,6 +44,12 @@ public class StudentRegistration extends JDialog {
     private JRadioButton rdoMale;
     private JRadioButton rdoFemale;
     private ButtonGroup genderGroup;
+    
+    // Guardian search components
+    private JTextField txtGuardianSearchNIC;
+    private JButton btnSearchGuardian;
+    private JCheckBox chkUseExistingGuardian;
+    private int selectedGuardianId = -1;
 
     public StudentRegistration(Frame parent) {
         super(parent, "Student Registration", true);
@@ -51,7 +59,7 @@ public class StudentRegistration extends JDialog {
     }
 
     private void initComponents() {
-        setSize(700, 600);
+        setSize(700, 650);
         setLayout(new BorderLayout(10, 10));
 
         // Main panel with scroll
@@ -204,9 +212,33 @@ public class StudentRegistration extends JDialog {
         guardianLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 5, 0));
         formPanel.add(guardianLabel, gbc);
 
-        // Guardian First Name
+        // Guardian Search Panel
         gbc.gridx = 0;
         gbc.gridy = 11;
+        gbc.gridwidth = 2;
+        gbc.weightx = 0.0;
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 5));
+        searchPanel.add(new JLabel("Search Guardian by NIC:"));
+        txtGuardianSearchNIC = new JTextField(15);
+        searchPanel.add(txtGuardianSearchNIC);
+        btnSearchGuardian = new JButton("Search");
+        btnSearchGuardian.addActionListener(e -> searchGuardianByNIC());
+        applySecondaryButtonEffect(btnSearchGuardian);
+        searchPanel.add(btnSearchGuardian);
+        formPanel.add(searchPanel, gbc);
+
+        // Use Existing Guardian Checkbox
+        gbc.gridx = 0;
+        gbc.gridy = 12;
+        gbc.gridwidth = 2;
+        gbc.weightx = 0.0;
+        chkUseExistingGuardian = new JCheckBox("Use Existing Guardian");
+        chkUseExistingGuardian.addActionListener(e -> toggleGuardianMode());
+        formPanel.add(chkUseExistingGuardian, gbc);
+
+        // Guardian First Name
+        gbc.gridx = 0;
+        gbc.gridy = 13;
         gbc.gridwidth = 1;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Guardian First Name:"), gbc);
@@ -218,7 +250,7 @@ public class StudentRegistration extends JDialog {
 
         // Guardian Last Name
         gbc.gridx = 0;
-        gbc.gridy = 12;
+        gbc.gridy = 14;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Guardian Last Name:"), gbc);
 
@@ -229,7 +261,7 @@ public class StudentRegistration extends JDialog {
 
         // Guardian NIC
         gbc.gridx = 0;
-        gbc.gridy = 13;
+        gbc.gridy = 15;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Guardian NIC:"), gbc);
 
@@ -240,7 +272,7 @@ public class StudentRegistration extends JDialog {
 
         // Guardian Relationship
         gbc.gridx = 0;
-        gbc.gridy = 14;
+        gbc.gridy = 16;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Relationship:"), gbc);
 
@@ -251,7 +283,7 @@ public class StudentRegistration extends JDialog {
 
         // Guardian Phone
         gbc.gridx = 0;
-        gbc.gridy = 15;
+        gbc.gridy = 17;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Guardian Phone:"), gbc);
 
@@ -262,7 +294,7 @@ public class StudentRegistration extends JDialog {
 
         // Guardian Email
         gbc.gridx = 0;
-        gbc.gridy = 16;
+        gbc.gridy = 18;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Guardian Email:"), gbc);
 
@@ -273,7 +305,7 @@ public class StudentRegistration extends JDialog {
 
         // Guardian Address
         gbc.gridx = 0;
-        gbc.gridy = 17;
+        gbc.gridy = 19;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Guardian Address:"), gbc);
 
@@ -284,7 +316,7 @@ public class StudentRegistration extends JDialog {
 
         // Guardian Occupation
         gbc.gridx = 0;
-        gbc.gridy = 18;
+        gbc.gridy = 20;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Guardian Occupation:"), gbc);
 
@@ -295,7 +327,7 @@ public class StudentRegistration extends JDialog {
 
         // Email and QR options
         gbc.gridx = 0;
-        gbc.gridy = 19;
+        gbc.gridy = 21;
         gbc.gridwidth = 2;
         gbc.weightx = 0.0;
         JPanel optionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -315,12 +347,16 @@ public class StudentRegistration extends JDialog {
 
         // Button panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
         
         JButton btnSave = new JButton("Register Student");
+        btnSave.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btnSave.addActionListener(e -> registerStudent());
+        applyPrimaryButtonEffect(btnSave);
         
         JButton btnCancel = new JButton("Cancel");
         btnCancel.addActionListener(e -> dispose());
+        applySecondaryButtonEffect(btnCancel);
 
         buttonPanel.add(btnSave);
         buttonPanel.add(btnCancel);
@@ -349,6 +385,79 @@ public class StudentRegistration extends JDialog {
             
         } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Error loading grades: " + e.getMessage());
+        }
+    }
+
+    private void searchGuardianByNIC() {
+        String nic = txtGuardianSearchNIC.getText().trim();
+        
+        if (nic.isEmpty()) {
+            JOptionIcon.showWarningDialog(this, "Please enter a NIC to search.");
+            return;
+        }
+        
+        try {
+            String query = "SELECT guardian_id, first_name, last_name, nic, relationship, phone, email, address, occupation " +
+                          "FROM guardian WHERE nic = '" + nic.replace("'", "''") + "'";
+            ResultSet rs = MySQL.executeSearch(query);
+            
+            if (rs.next()) {
+                selectedGuardianId = rs.getInt("guardian_id");
+                txtGuardianFirstName.setText(rs.getString("first_name"));
+                txtGuardianLastName.setText(rs.getString("last_name"));
+                txtGuardianNIC.setText(rs.getString("nic"));
+                cmbGuardianRelationship.setSelectedItem(rs.getString("relationship"));
+                txtGuardianPhone.setText(rs.getString("phone"));
+                txtGuardianEmail.setText(rs.getString("email"));
+                txtGuardianAddress.setText(rs.getString("address"));
+                txtGuardianOccupation.setText(rs.getString("occupation"));
+                
+                chkUseExistingGuardian.setSelected(true);
+                toggleGuardianMode();
+                
+                JOptionIcon.showSuccessDialog(this, "Guardian found: " + rs.getString("first_name") + " " + rs.getString("last_name"));
+            } else {
+                JOptionIcon.showWarningDialog(this, "No guardian found with NIC: " + nic + "\nYou can add a new guardian manually.");
+                selectedGuardianId = -1;
+                chkUseExistingGuardian.setSelected(false);
+                toggleGuardianMode();
+            }
+            
+            rs.close();
+            
+        } catch (Exception e) {
+            JOptionIcon.showErrorDialog(this, "Error searching guardian: " + e.getMessage());
+        }
+    }
+
+    private void toggleGuardianMode() {
+        boolean useExisting = chkUseExistingGuardian.isSelected();
+        
+        txtGuardianFirstName.setEditable(!useExisting);
+        txtGuardianLastName.setEditable(!useExisting);
+        txtGuardianNIC.setEditable(!useExisting);
+        cmbGuardianRelationship.setEnabled(!useExisting);
+        txtGuardianPhone.setEditable(!useExisting);
+        txtGuardianEmail.setEditable(!useExisting);
+        txtGuardianAddress.setEditable(!useExisting);
+        txtGuardianOccupation.setEditable(!useExisting);
+        
+        if (useExisting) {
+            txtGuardianFirstName.setBackground(new Color(240, 240, 240));
+            txtGuardianLastName.setBackground(new Color(240, 240, 240));
+            txtGuardianNIC.setBackground(new Color(240, 240, 240));
+            txtGuardianPhone.setBackground(new Color(240, 240, 240));
+            txtGuardianEmail.setBackground(new Color(240, 240, 240));
+            txtGuardianAddress.setBackground(new Color(240, 240, 240));
+            txtGuardianOccupation.setBackground(new Color(240, 240, 240));
+        } else {
+            txtGuardianFirstName.setBackground(Color.WHITE);
+            txtGuardianLastName.setBackground(Color.WHITE);
+            txtGuardianNIC.setBackground(Color.WHITE);
+            txtGuardianPhone.setBackground(Color.WHITE);
+            txtGuardianEmail.setBackground(Color.WHITE);
+            txtGuardianAddress.setBackground(Color.WHITE);
+            txtGuardianOccupation.setBackground(Color.WHITE);
         }
     }
 
@@ -408,52 +517,64 @@ public class StudentRegistration extends JDialog {
             String guardianOccupation = txtGuardianOccupation.getText().trim();
             String relationship = (String) cmbGuardianRelationship.getSelectedItem();
 
-            DataValidator.isRequired(firstName, "First Name");
-            DataValidator.isRequired(lastName, "Last Name");
-            DataValidator.isValidNIC(nic, "Student NIC");
-            DataValidator.isValidEmail(email, "Student Email");
-            DataValidator.isValidPhone(phone, "Student Phone");
-            DataValidator.isRequired(address, "Address");
-            DataValidator.isRequired(guardianFirstName, "Guardian First Name");
-            DataValidator.isRequired(guardianLastName, "Guardian Last Name");
-            DataValidator.isValidNIC(guardianNIC, "Guardian NIC");
-            DataValidator.isValidEmail(guardianEmail, "Guardian Email");
-            DataValidator.isValidPhone(guardianPhone, "Guardian Phone");
-            DataValidator.isRequired(guardianAddress, "Guardian Address");
-            DataValidator.isRequired(guardianOccupation, "Guardian Occupation");
-            
             java.util.Date dobDate = dateChooserDOB.getDate();
             if (dobDate == null) {
                 throw new ValidationException("Date of Birth is required");
             }
             String dob = new SimpleDateFormat("yyyy-MM-dd").format(dobDate);
-            
             String gender = rdoMale.isSelected() ? "Male" : "Female";
+
+            // Build Student domain object (inherits from Person)
+            Student student = new Student(studentId, firstName, lastName, email, phone, nic, dob, gender, grade, address);
+            // Polymorphic validation from Person and Student
+            student.validate();
+
+            // Determine guardian handling
+            int guardianId = -1;
+            boolean useExistingGuardian = chkUseExistingGuardian.isSelected();
+            
+            if (useExistingGuardian) {
+                // Using existing guardian - validate that one is selected
+                if (selectedGuardianId == -1) {
+                    throw new ValidationException("Please search and select an existing guardian, or uncheck 'Use Existing Guardian' to add a new one.");
+                }
+                guardianId = selectedGuardianId;
+            } else {
+                // Validate guardian inputs for new guardian
+                DataValidator.isRequired(guardianFirstName, "Guardian First Name");
+                DataValidator.isRequired(guardianLastName, "Guardian Last Name");
+                DataValidator.isValidNIC(guardianNIC, "Guardian NIC");
+                DataValidator.isValidEmail(guardianEmail, "Guardian Email");
+                DataValidator.isValidPhone(guardianPhone, "Guardian Phone");
+                DataValidator.isRequired(guardianAddress, "Guardian Address");
+                DataValidator.isRequired(guardianOccupation, "Guardian Occupation");
+            }
 
             Connection conn = MySQL.getConnection();
             conn.setAutoCommit(false);
 
             try {
-                // Insert guardian
-                String guardianQuery = "INSERT INTO guardian (first_name, last_name, nic, relationship, phone, email, address, occupation) VALUES ('"
-                        + guardianFirstName + "', '"
-                        + guardianLastName + "', '"
-                        + guardianNIC + "', '"
-                        + relationship + "', '"
-                        + guardianPhone + "', '"
-                        + guardianEmail + "', '"
-                        + guardianAddress + "', '"
-                        + guardianOccupation + "')";
-                Statement guardianStmt = conn.createStatement();
-                guardianStmt.executeUpdate(guardianQuery, Statement.RETURN_GENERATED_KEYS);
-                
-                ResultSet guardianRs = guardianStmt.getGeneratedKeys();
-                int guardianId = -1;
-                if (guardianRs.next()) {
-                    guardianId = guardianRs.getInt(1);
+                // Insert guardian if not using existing
+                if (!useExistingGuardian) {
+                    String guardianQuery = "INSERT INTO guardian (first_name, last_name, nic, relationship, phone, email, address, occupation) VALUES ('"
+                            + guardianFirstName + "', '"
+                            + guardianLastName + "', '"
+                            + guardianNIC + "', '"
+                            + relationship + "', '"
+                            + guardianPhone + "', '"
+                            + guardianEmail + "', '"
+                            + guardianAddress + "', '"
+                            + guardianOccupation + "')";
+                    Statement guardianStmt = conn.createStatement();
+                    guardianStmt.executeUpdate(guardianQuery, Statement.RETURN_GENERATED_KEYS);
+                    
+                    ResultSet guardianRs = guardianStmt.getGeneratedKeys();
+                    if (guardianRs.next()) {
+                        guardianId = guardianRs.getInt(1);
+                    }
+                    guardianRs.close();
+                    guardianStmt.close();
                 }
-                guardianRs.close();
-                guardianStmt.close();
 
                 // Get grade ID
                 String gradeName = grade;
@@ -481,8 +602,9 @@ public class StudentRegistration extends JDialog {
                 // Create user account
                 String username = email;
                 String temporaryPassword = generateRandomPassword();
+                String hashedPassword = PasswordUtil.hashPassword(temporaryPassword);
                 
-                String userQuery = "INSERT INTO user (username, password, email, user_type_id, is_active) VALUES ('" + username + "', '" + temporaryPassword + "', '" + email + "', 3, 1)";
+                String userQuery = "INSERT INTO user (username, password, email, user_type_id, is_active) VALUES ('" + username + "', '" + hashedPassword + "', '" + email + "', 3, 1)";
                 Statement userStmt = conn.createStatement();
                 userStmt.executeUpdate(userQuery, Statement.RETURN_GENERATED_KEYS);
                 
@@ -494,18 +616,24 @@ public class StudentRegistration extends JDialog {
                 userRs.close();
                 userStmt.close();
 
-                // Insert student
+                // Save student using the validated Student domain object
+                student.setGradeId(gradeId);
+                student.setGuardianId(guardianId);
+                student.setUserId(userId);
+
                 String studentQuery = "INSERT INTO student (student_id, first_name, last_name, dob, gender, nic, email, phone, address, grade_id, guardian_id, user_id, registration_date, is_active) VALUES ('" 
-                        + studentId + "', '" 
-                        + firstName + "', '" 
-                        + lastName + "', '" + dob + "', '" + gender + "', " 
-                        + (nic.isEmpty() ? "NULL" : "'" + nic + "'") + ", '" 
-                        + email + "', '" 
-                        + phone + "', '" 
-                        + address + "', " 
-                        + gradeId + ", " 
-                        + guardianId + ", " 
-                        + userId + ", CURDATE(), 1)";
+                        + student.getStudentId() + "', '" 
+                        + student.getFirstName() + "', '" 
+                        + student.getLastName() + "', '" 
+                        + student.getDateOfBirth() + "', '" 
+                        + student.getGender() + "', " 
+                        + (student.getNic() == null || student.getNic().isEmpty() ? "NULL" : "'" + student.getNic() + "'") + ", '" 
+                        + student.getEmail() + "', '" 
+                        + student.getPhone() + "', '" 
+                        + student.getAddress() + "', " 
+                        + student.getGradeId() + ", " 
+                        + student.getGuardianId() + ", " 
+                        + student.getUserId() + ", CURDATE(), 1)";
                 Statement studentStmt = conn.createStatement();
                 studentStmt.executeUpdate(studentQuery);
                 studentStmt.close();
@@ -517,33 +645,33 @@ public class StudentRegistration extends JDialog {
                     try {
                         if (chkGenerateQR.isSelected()) {
                             SendQREmail.sendRegistrationEmailWithQR(
-                                email,
-                                studentId,
-                                firstName + " " + lastName,
-                                grade,
+                                student.getEmail(),
+                                student.getStudentId(),
+                                student.getFullName(),
+                                student.getGrade(),
                                 username,
                                 temporaryPassword
                             );
                         } else {
-                            String message = "Dear " + firstName + " " + lastName + ",\n\n" +
+                            String message = "Dear " + student.getFullName() + ",\n\n" +
                                 "Welcome to Central College Anuradhapura!\n\n" +
                                 "Your student account has been created successfully.\n\n" +
-                                "Student ID: " + studentId + "\n" +
-                                "Grade: " + grade + "\n" +
+                                "Student ID: " + student.getStudentId() + "\n" +
+                                "Grade: " + student.getGrade() + "\n" +
                                 "Username: " + username + "\n" +
                                 "Temporary Password: " + temporaryPassword + "\n\n" +
                                 "Please change your password after your first login.\n\n" +
                                 "Best regards,\n" +
                                 "Central College Anuradhapura";
                             
-                            SendEmail.sendEmail(email, "Student Registration Confirmation", message);
+                            SendEmail.sendEmail(student.getEmail(), "Student Registration Confirmation", message);
                         }
                     } catch (Exception emailEx) {
                         JOptionIcon.showWarningDialog(this, "Student registered successfully but email failed: " + emailEx.getMessage());
                     }
                 }
 
-                JOptionIcon.showSuccessDialog(this, "Student registered successfully! Student ID: " + studentId);
+                JOptionIcon.showSuccessDialog(this, "Student registered successfully! Student ID: " + student.getStudentId());
                 dispose();
 
             } catch (SQLException e) {
@@ -561,5 +689,67 @@ public class StudentRegistration extends JDialog {
         } catch (Exception e) {
             JOptionIcon.showErrorDialog(this, "Unexpected error: " + e.getMessage());
         }
+    }
+
+    private void applyPrimaryButtonEffect(JButton button) {
+        button.setBackground(new Color(37, 99, 235));
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(29, 78, 216));
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(37, 99, 235));
+                }
+            }
+        });
+    }
+
+    private void applySecondaryButtonEffect(JButton button) {
+        button.setBackground(Color.WHITE);
+        button.setForeground(new Color(71, 85, 105));
+        button.setFocusPainted(false);
+        button.setBorderPainted(true);
+        button.setBorder(BorderFactory.createLineBorder(new Color(203, 213, 225), 1));
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+            BorderFactory.createEmptyBorder(8, 16, 8, 16)
+        ));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(248, 250, 252));
+                    button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(148, 163, 184), 1),
+                        BorderFactory.createEmptyBorder(8, 16, 8, 16)
+                    ));
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(Color.WHITE);
+                    button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+                        BorderFactory.createEmptyBorder(8, 16, 8, 16)
+                    ));
+                }
+            }
+        });
     }
 }

@@ -1,42 +1,66 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" name="EventReport" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20">
-	<queryString>
-		SELECT e.event_id, e.event_name, e.start_date, e.end_date, e.description, es.status_name
+<jasperReport name="EventReport" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="20" bottomMargin="20">
+	<query>
+		<![CDATA[SELECT e.event_id, e.event_name, e.start_date, e.end_date, e.description, es.status_name
 		FROM event e
 		JOIN event_status es ON e.event_status_id = es.event_status_id
-		ORDER BY e.start_date DESC
-	</queryString>
+		ORDER BY e.start_date DESC]]>
+	</query>
 	<field name="event_id" class="java.lang.Integer"/>
 	<field name="event_name" class="java.lang.String"/>
 	<field name="start_date" class="java.sql.Date"/>
 	<field name="end_date" class="java.sql.Date"/>
 	<field name="description" class="java.lang.String"/>
 	<field name="status_name" class="java.lang.String"/>
-	<title>
-		<band height="50">
-			<staticText>
-				<reportElement x="0" y="0" width="535" height="30" textAlignment="Center"/>
-				<font size="16" isBold="true"/>
-				<text><![CDATA[Event Report]]></text>
-			</staticText>
-		</band>
+	<title height="50">
+		<element kind="staticText" x="0" y="0" width="535" height="30" hTextAlign="Center" fontSize="16" bold="true">
+			<text><![CDATA[Event Report]]></text>
+		</element>
 	</title>
-	<columnHeader>
-		<band height="25">
-			<staticText><reportElement x="0" y="0" width="60" height="20"/><text><![CDATA[Event ID]]></text></staticText>
-			<staticText><reportElement x="60" y="0" width="150" height="20"/><text><![CDATA[Event Name]]></text></staticText>
-			<staticText><reportElement x="210" y="0" width="80" height="20"/><text><![CDATA[Start Date]]></text></staticText>
-			<staticText><reportElement x="290" y="0" width="80" height="20"/><text><![CDATA[End Date]]></text></staticText>
-			<staticText><reportElement x="370" y="0" width="80" height="20"/><text><![CDATA[Status]]></text></staticText>
-		</band>
+	<pageHeader height="30">
+		<element kind="staticText" x="0" y="0" width="200" height="20">
+			<text><![CDATA[Central College Anuradhapura]]></text>
+		</element>
+	</pageHeader>
+	<columnHeader height="25">
+		<element kind="staticText" x="0" y="0" width="60" height="20">
+			<text><![CDATA[Event ID]]></text>
+		</element>
+		<element kind="staticText" x="60" y="0" width="150" height="20">
+			<text><![CDATA[Event Name]]></text>
+		</element>
+		<element kind="staticText" x="210" y="0" width="80" height="20">
+			<text><![CDATA[Start Date]]></text>
+		</element>
+		<element kind="staticText" x="290" y="0" width="80" height="20">
+			<text><![CDATA[End Date]]></text>
+		</element>
+		<element kind="staticText" x="370" y="0" width="80" height="20">
+			<text><![CDATA[Status]]></text>
+		</element>
 	</columnHeader>
 	<detail>
 		<band height="25">
-			<textField><reportElement x="0" y="0" width="60" height="20"/><textFieldExpression><![CDATA[$F{event_id}]]></textFieldExpression></textField>
-			<textField><reportElement x="60" y="0" width="150" height="20"/><textFieldExpression><![CDATA[$F{event_name}]]></textFieldExpression></textField>
-			<textField pattern="yyyy-MM-dd"><reportElement x="210" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{start_date}]]></textFieldExpression></textField>
-			<textField pattern="yyyy-MM-dd"><reportElement x="290" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{end_date}]]></textFieldExpression></textField>
-			<textField><reportElement x="370" y="0" width="80" height="20"/><textFieldExpression><![CDATA[$F{status_name}]]></textFieldExpression></textField>
+			<element kind="textField" x="0" y="0" width="60" height="20">
+				<expression><![CDATA[$F{event_id}]]></expression>
+			</element>
+			<element kind="textField" x="60" y="0" width="150" height="20">
+				<expression><![CDATA[$F{event_name}]]></expression>
+			</element>
+			<element kind="textField" x="210" y="0" width="80" height="20" pattern="yyyy-MM-dd">
+				<expression><![CDATA[$F{start_date}]]></expression>
+			</element>
+			<element kind="textField" x="290" y="0" width="80" height="20" pattern="yyyy-MM-dd">
+				<expression><![CDATA[$F{end_date}]]></expression>
+			</element>
+			<element kind="textField" x="370" y="0" width="80" height="20">
+				<expression><![CDATA[$F{status_name}]]></expression>
+			</element>
 		</band>
 	</detail>
+	<pageFooter height="30">
+		<element kind="textField" x="0" y="10" width="535" height="20" hTextAlign="Center">
+			<expression><![CDATA["Page " + $V{PAGE_NUMBER} + " of " + $V{PAGE_COUNT}]]></expression>
+		</element>
+	</pageFooter>
 </jasperReport>

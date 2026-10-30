@@ -1,6 +1,7 @@
 package lk.educore.schoolms.gui;
 
 import lk.educore.schoolms.model.MySQL;
+import lk.educore.schoolms.model.Student;
 import lk.educore.schoolms.email.SendQREmail;
 import lk.educore.schoolms.email.SendEmail;
 import lk.educore.schoolms.validate.JOptionIcon;
@@ -354,25 +355,17 @@ public class StudentEditDialog extends JDialog {
             ResultSet rs = MySQL.executeSearch(query);
             
             if (rs.next()) {
-                txtFirstName.setText(rs.getString("first_name"));
-                txtLastName.setText(rs.getString("last_name"));
-                
-                String dobStr = rs.getString("dob");
-                if (dobStr != null && !dobStr.isEmpty()) {
-                    dateChooserDOB.setDate(new SimpleDateFormat("yyyy-MM-dd").parse(dobStr));
-                }
-                
-                String gender = rs.getString("gender");
-                if ("Female".equalsIgnoreCase(gender)) {
-                    rdoFemale.setSelected(true);
-                } else {
-                    rdoMale.setSelected(true);
-                }
-                
-                txtNIC.setText(rs.getString("nic") != null ? rs.getString("nic") : "");
-                txtEmail.setText(rs.getString("email"));
-                txtPhone.setText(rs.getString("phone"));
-                txtAddress.setText(rs.getString("address"));
+                Student student = new Student();
+                student.setStudentId(rs.getString("student_id"));
+                student.setFirstName(rs.getString("first_name"));
+                student.setLastName(rs.getString("last_name"));
+                student.setDateOfBirth(rs.getString("dob"));
+                student.setGender(rs.getString("gender"));
+                student.setNic(rs.getString("nic"));
+                student.setEmail(rs.getString("email"));
+                student.setPhone(rs.getString("phone"));
+                student.setAddress(rs.getString("address"));
+                student.setStatus(rs.getBoolean("is_active") ? "Active" : "Inactive");
                 
                 String gradeName = rs.getString("grade_name");
                 String section = rs.getString("section");
@@ -380,7 +373,26 @@ public class StudentEditDialog extends JDialog {
                 if (section != null && !section.isEmpty()) {
                     gradeCombo += " - " + section;
                 }
-                cmbGrade.setSelectedItem(gradeCombo);
+                student.setGrade(gradeCombo);
+
+                txtFirstName.setText(student.getFirstName());
+                txtLastName.setText(student.getLastName());
+                
+                if (student.getDateOfBirth() != null && !student.getDateOfBirth().isEmpty()) {
+                    dateChooserDOB.setDate(new SimpleDateFormat("yyyy-MM-dd").parse(student.getDateOfBirth()));
+                }
+                
+                if ("Female".equalsIgnoreCase(student.getGender())) {
+                    rdoFemale.setSelected(true);
+                } else {
+                    rdoMale.setSelected(true);
+                }
+                
+                txtNIC.setText(student.getNic() != null ? student.getNic() : "");
+                txtEmail.setText(student.getEmail());
+                txtPhone.setText(student.getPhone());
+                txtAddress.setText(student.getAddress());
+                cmbGrade.setSelectedItem(student.getGrade());
                 
                 this.guardianId = rs.getInt("guardian_id");
                 
@@ -420,23 +432,25 @@ public class StudentEditDialog extends JDialog {
             String guardianOccupation = txtGuardianOccupation.getText().trim();
             String relationship = (String) cmbGuardianRelationship.getSelectedItem();
 
-            DataValidator.isRequired(firstName, "First Name");
-            DataValidator.isRequired(lastName, "Last Name");
-            if (!nic.isEmpty()) DataValidator.isValidNIC(nic);
-            DataValidator.isValidEmail(email);
-            DataValidator.isValidPhone(phone);
-            DataValidator.isRequired(address, "Address");
-            DataValidator.isRequired(guardianFirstName, "Guardian First Name");
-            DataValidator.isRequired(guardianLastName, "Guardian Last Name");
-            DataValidator.isRequired(guardianPhone, "Guardian Phone");
-            
             java.util.Date dobDate = dateChooserDOB.getDate();
             if (dobDate == null) {
                 throw new ValidationException("Date of Birth is required");
             }
             String dob = new SimpleDateFormat("yyyy-MM-dd").format(dobDate);
-            
             String gender = rdoMale.isSelected() ? "Male" : "Female";
+
+            // 1. Build Student domain object
+            Student student = new Student(studentId, firstName, lastName, email, phone, nic, dob, gender, grade, address);
+
+            // 2. Validate Student object (uses polymorphic Person & Student validation)
+            student.validate();
+
+            // Validate guardian inputs
+            DataValidator.isRequired(guardianFirstName, "Guardian First Name");
+            DataValidator.isRequired(guardianLastName, "Guardian Last Name");
+            DataValidator.isRequired(guardianPhone, "Guardian Phone");
+            if (!guardianNIC.isEmpty()) DataValidator.isValidNIC(guardianNIC);
+            if (!guardianEmail.isEmpty()) DataValidator.isValidEmail(guardianEmail);
 
             Connection conn = MySQL.getConnection();
             conn.setAutoCommit(false);
@@ -479,24 +493,26 @@ public class StudentEditDialog extends JDialog {
                 }
                 gradeRs.close();
 
-                // Update student
-                String studentQuery = "UPDATE student SET first_name = '" + firstName + "', " +
-                        "last_name = '" + lastName + "', " +
-                        "dob = '" + dob + "', " +
-                        "gender = '" + gender + "', " +
-                        "nic = " + (nic.isEmpty() ? "NULL" : "'" + nic + "'") + ", " +
-                        "email = '" + email + "', " +
-                        "phone = '" + phone + "', " +
-                        "address = '" + address + "', " +
-                        "grade_id = " + gradeId + " " +
-                        "WHERE student_id = '" + studentId + "'";
+                // 3. Save Student object
+                student.setGradeId(gradeId);
+
+                String studentQuery = "UPDATE student SET first_name = '" + student.getFirstName() + "', " +
+                        "last_name = '" + student.getLastName() + "', " +
+                        "dob = '" + student.getDateOfBirth() + "', " +
+                        "gender = '" + student.getGender() + "', " +
+                        "nic = " + (student.getNic() == null || student.getNic().isEmpty() ? "NULL" : "'" + student.getNic() + "'") + ", " +
+                        "email = '" + student.getEmail() + "', " +
+                        "phone = '" + student.getPhone() + "', " +
+                        "address = '" + student.getAddress() + "', " +
+                        "grade_id = " + student.getGradeId() + " " +
+                        "WHERE student_id = '" + student.getStudentId() + "'";
                 Statement studentStmt = conn.createStatement();
                 studentStmt.executeUpdate(studentQuery);
                 studentStmt.close();
 
                 conn.commit();
 
-                JOptionIcon.showSuccessDialog(this, "Student updated successfully! Student ID: " + studentId);
+                JOptionIcon.showSuccessDialog(this, "Student updated successfully! Student ID: " + student.getStudentId());
                 dispose();
 
             } catch (SQLException e) {

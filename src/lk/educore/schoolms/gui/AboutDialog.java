@@ -26,10 +26,6 @@ public class AboutDialog extends JDialog {
         // Logo and title
         JPanel headerPanel = new JPanel(new BorderLayout(10, 10));
         
-        JLabel logoLabel = new JLabel("🏫");
-        logoLabel.setFont(new Font("Segoe UI", Font.PLAIN, 48));
-        headerPanel.add(logoLabel, BorderLayout.WEST);
-        
         JPanel titlePanel = new JPanel(new GridLayout(3, 1));
         JLabel titleLabel = new JLabel("EduCore");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));

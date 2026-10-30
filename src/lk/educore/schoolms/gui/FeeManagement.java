@@ -5,6 +5,7 @@ import lk.educore.schoolms.validate.JOptionIcon;
 import lk.educore.schoolms.charts.PieChart;
 import lk.educore.schoolms.email.SendEmail;
 import lk.educore.schoolms.exceptions.EmailException;
+import lk.educore.schoolms.util.ReportGenerator;
 
 import javax.swing.*;
 import javax.swing.table.*;
@@ -15,6 +16,8 @@ import java.sql.*;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Fee Management Panel Main interface for fee collection, payment tracking,
@@ -26,7 +29,7 @@ public class FeeManagement extends JPanel {
     private DefaultTableModel tableModel;
     private JTextField txtSearch;
     private JComboBox<String> cmbSearchBy;
-    private JButton btnAddFee, btnMarkPaid, btnViewReceipt, btnRefresh, btnAnalytics, btnSendReceipt;
+    private JButton btnAddFee, btnMarkPaid, btnViewReceipt, btnRefresh, btnAnalytics, btnSendReceipt, btnPaidFeesReport, btnPendingFeesReport;
     private JTabbedPane tabbedPane;
 
     // Analytics components for refreshing
@@ -103,25 +106,44 @@ public class FeeManagement extends JPanel {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
 
         // Button panel
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 10));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
 
         btnAddFee = new JButton("Add Fee");
+        btnAddFee.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btnAddFee.addActionListener(e -> addFee());
+        applyPrimaryButtonEffect(btnAddFee);
 
         btnMarkPaid = new JButton("Mark as Paid");
+        btnMarkPaid.setEnabled(false);
         btnMarkPaid.addActionListener(e -> markAsPaid());
+        applySecondaryButtonEffect(btnMarkPaid);
 
         btnViewReceipt = new JButton("View Receipt");
+        btnViewReceipt.setEnabled(false);
         btnViewReceipt.addActionListener(e -> viewReceipt());
+        applySecondaryButtonEffect(btnViewReceipt);
 
         btnSendReceipt = new JButton("Email Receipt");
+        btnSendReceipt.setEnabled(false);
         btnSendReceipt.addActionListener(e -> sendReceipt());
+        applySecondaryButtonEffect(btnSendReceipt);
 
         btnRefresh = new JButton("Refresh");
         btnRefresh.addActionListener(e -> loadFeeData());
+        applySecondaryButtonEffect(btnRefresh);
 
         btnAnalytics = new JButton("View Analytics");
         btnAnalytics.addActionListener(e -> viewAnalytics());
+        applySecondaryButtonEffect(btnAnalytics);
+
+        btnPaidFeesReport = new JButton("Paid Fees");
+        btnPaidFeesReport.addActionListener(e -> generatePaidFeesReport());
+        applySecondaryButtonEffect(btnPaidFeesReport);
+
+        btnPendingFeesReport = new JButton("Pending Fees");
+        btnPendingFeesReport.addActionListener(e -> generatePendingFeesReport());
+        applySecondaryButtonEffect(btnPendingFeesReport);
 
         buttonPanel.add(btnAddFee);
         buttonPanel.add(btnMarkPaid);
@@ -129,6 +151,8 @@ public class FeeManagement extends JPanel {
         buttonPanel.add(btnSendReceipt);
         buttonPanel.add(btnRefresh);
         buttonPanel.add(btnAnalytics);
+        buttonPanel.add(btnPaidFeesReport);
+        buttonPanel.add(btnPendingFeesReport);
 
         panel.add(buttonPanel, BorderLayout.NORTH);
 
@@ -144,8 +168,19 @@ public class FeeManagement extends JPanel {
 
         feeTable = new JTable(tableModel);
         feeTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        feeTable.setRowHeight(25);
-        feeTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
+        feeTable.setRowHeight(30);
+        feeTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
+        feeTable.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        
+        // Add selection listener to enable/disable buttons
+        feeTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                boolean hasSelection = feeTable.getSelectedRow() != -1;
+                btnMarkPaid.setEnabled(hasSelection);
+                btnViewReceipt.setEnabled(hasSelection);
+                btnSendReceipt.setEnabled(hasSelection);
+            }
+        });
 
         // Add mouse listener for double-click
         feeTable.addMouseListener(new MouseAdapter() {
@@ -737,5 +772,79 @@ public class FeeManagement extends JPanel {
             loadAnalytics(lblTotalCollected, lblTotalPending, lblTotalOverdue,
                     lblCollectionRate, breakdownModel);
         }
+    }
+
+    private void applyPrimaryButtonEffect(JButton button) {
+        button.setBackground(new Color(37, 99, 235));
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(29, 78, 216));
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(37, 99, 235));
+                }
+            }
+        });
+    }
+
+    private void applySecondaryButtonEffect(JButton button) {
+        button.setBackground(Color.WHITE);
+        button.setForeground(new Color(71, 85, 105));
+        button.setFocusPainted(false);
+        button.setBorderPainted(true);
+        button.setBorder(BorderFactory.createLineBorder(new Color(203, 213, 225), 1));
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+            BorderFactory.createEmptyBorder(8, 16, 8, 16)
+        ));
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(new Color(248, 250, 252));
+                    button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(148, 163, 184), 1),
+                        BorderFactory.createEmptyBorder(8, 16, 8, 16)
+                    ));
+                }
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (button.isEnabled()) {
+                    button.setBackground(Color.WHITE);
+                    button.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(203, 213, 225), 1),
+                        BorderFactory.createEmptyBorder(8, 16, 8, 16)
+                    ));
+                }
+            }
+        });
+    }
+
+    private void generatePaidFeesReport() {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("REPORT_TITLE", "Paid Fees Report");
+        ReportGenerator.generateReport("FeeCollectionReport", parameters, "Paid Fees Report");
+    }
+
+    private void generatePendingFeesReport() {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("REPORT_TITLE", "Pending Fees Report");
+        ReportGenerator.generateReport("PendingFeesReport", parameters, "Pending Fees Report");
     }
 }

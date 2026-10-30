@@ -10,12 +10,12 @@ import javax.mail.internet.*;
  */
 public class SendEmail {
 
-    // Email configuration 
+    // Email configuration
     private static final String EMAIL_HOST = "smtp.gmail.com";
     private static final String EMAIL_PORT = "465";
-    private static final String EMAIL_USERNAME = "asuspro162@gmail.com";
+    private static final String EMAIL_USERNAME = "educore.cca@gmail.com";
     private static final String EMAIL_PASSWORD = "ieovbnmqbrdtjjrp";
-    private static final String FROM_EMAIL = "asuspro162@gmail.com";
+    private static final String FROM_EMAIL = "educore.cca@gmail.com";
 
     /**
      * Send simple text email
